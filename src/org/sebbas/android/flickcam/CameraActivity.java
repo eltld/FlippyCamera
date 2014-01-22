@@ -43,14 +43,14 @@ import android.widget.Toast;
 
 public class CameraActivity extends Activity {
 
-    private static final String TAG = "FlickCam";
+	private static final String TAG = "FlickCam";
     private static final String CAMERA_THREAD = "Camera Thread";
-	private static final int PHOTO_HEIGHT_THRESHOLD = 1280;
+    private static final int PHOTO_HEIGHT_THRESHOLD = 1280;
 	private static final String VIDEO_PATH_NAME = "/Pictures/test.3gp";
 	private static final int MAX_VIDEO_DURATION = 60000;
 	private static final int MAX_FILE_SIZE = 500000;
 
-    private Camera mCamera;
+	private Camera mCamera;
     private CameraPreview mCameraPreview;
 
     // Default shutter sound
@@ -120,7 +120,11 @@ public class CameraActivity extends Activity {
     protected void onResume() {
         super.onResume();
         Log.w(TAG, "ON RESUME");
-        startCameraThread();
+        //startCameraThread();
+        
+        initializeCamera();
+        startPreview();
+        startRecorder();
     }
     
     private void startCameraThread() {
@@ -212,11 +216,11 @@ public class CameraActivity extends Activity {
 	private void setCameraParameters() {
 		System.out.println("setCameraParameters called");
     	// Set custom picture size. Makes camera preview run smoother
-    	float defaultCameraRatio = (float) mParameters.getPictureSize().width / (float) mParameters.getPictureSize().height;
-    	Size preferedPicturesSize = getPreferredPictureSize(defaultCameraRatio);
-    	System.out.println(mParameters.getPictureSize().width +"/"+ mParameters.getPictureSize().height);
+    	//float defaultCameraRatio = (float) mParameters.getPictureSize().width / (float) mParameters.getPictureSize().height;
+    	//Size preferedPicturesSize = getPreferredPictureSize(defaultCameraRatio);
+    	//System.out.println(mParameters.getPictureSize().width +"/"+ mParameters.getPictureSize().height);
     	//mParameters.setPictureSize(preferedPicturesSize.width, preferedPicturesSize.height);
-    	mParameters.setPictureSize(640, 480);
+    	//mParameters.setPictureSize(640, 480);
     	
     	// Adds continuous auto focus (only if API is high enough) to the parameters.
     	if (supportsSDK(14)) {
@@ -599,6 +603,7 @@ public class CameraActivity extends Activity {
     	
     	try {
 			mMediaRecorder.prepare();
+			Log.d(TAG, "Started recording");
 		} catch (IllegalStateException e) {
 			releaseMediaRecorder();
 			Log.d(TAG, "Failed to prepare media recorder- IllegalStateException");
