@@ -74,27 +74,20 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (Exception e) {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }
+        ((CameraActivity) mContext).prepareMediaRecorder();
+        ((CameraActivity) mContext).startRecorder();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // empty. Taken care of in surfaceChanged.
-        try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.startPreview();
-            Log.d(TAG, "Preview Started Successfully");
-        } catch (Exception e) {
-            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
-        }
-        Log.d(TAG, "Surface was Created");
-        ((CameraActivity) mContext).prepareMediaRecorder();
-        ((CameraActivity) mContext).startRecorder();
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         // empty. Take care of releasing the Camera preview in the activity.
         Log.d(TAG, "Surface was Destroyed");
+        //((CameraActivity) mContext).releaseMediaRecorder();
     }
     
     @Override

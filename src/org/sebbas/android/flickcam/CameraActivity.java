@@ -129,7 +129,7 @@ public class CameraActivity extends Activity {
     }
     
     @Override
-	protected void onStart() {
+    protected void onStart() {
         super.onStart();
         Log.w(TAG, "ON START");
         initializeCamera();
@@ -458,13 +458,15 @@ public class CameraActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera switched");
+                releaseMediaRecorder();
                 deinitializeCamera();
                 if (mCurrentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
                     mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
                 } else {
                     mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
                 }
-                startCameraThread();
+                initializeCamera();
+                startPreview();
             }
         };
         return mSwitchCameraListener;
@@ -629,7 +631,7 @@ public class CameraActivity extends Activity {
         }
     }
     
-    private void releaseMediaRecorder() {
+    public void releaseMediaRecorder() {
         if (mMediaRecorder != null) {
             mMediaRecorder.reset();
             mMediaRecorder.release();
@@ -689,29 +691,6 @@ public class CameraActivity extends Activity {
             } catch (InterruptedException ie){
                 Log.w(TAG, "Wait was interrutpted");
             }
-        }
-    }
-    
-    private class CameraSetup extends AsyncTask<Void, Void, Void> {
-    	
-        @Override
-        protected Void doInBackground(Void... arg0) {
-            
-            
-            return null;
-        }
-        
-        
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-        }
-        
-        
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            
         }
     }
 }
