@@ -15,8 +15,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private final SurfaceHolder mHolder;
     private final Camera mCamera;
     private final Context mContext;
-	
-	private float mPosX;
+    
+    private float mPosX;
     private float mPosY;
 
     private float mLastTouchX;
@@ -25,7 +25,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     
     private ScaleGestureDetector mScaleDetector;
     private float mScaleFactor = 1.f;
-    
+        
     @SuppressWarnings("deprecation")
     public CameraPreview(Context context, Camera camera) {
         super(context);
@@ -79,7 +79,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         // empty. Taken care of in surfaceChanged.
+        try {
+            mCamera.setPreviewDisplay(mHolder);
+            mCamera.startPreview();
+            Log.d(TAG, "Preview Started Successfully");
+        } catch (Exception e) {
+            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+        }
         Log.d(TAG, "Surface was Created");
+        ((CameraActivity) mContext).prepareMediaRecorder();
+        ((CameraActivity) mContext).startRecorder();
     }
 
     @Override
@@ -87,8 +96,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // empty. Take care of releasing the Camera preview in the activity.
         Log.d(TAG, "Surface was Destroyed");
     }
-	
-	@Override
+    
+    @Override
     public boolean onTouchEvent(MotionEvent ev) {
         // Let the ScaleGestureDetector inspect all events.
         mScaleDetector.onTouchEvent(ev);
@@ -154,8 +163,8 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         return true;
     }
-	
-	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    
+    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScaleFactor *= detector.getScaleFactor();
@@ -164,7 +173,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, 2.0f));    
             
             ((CameraActivity) mContext).performZoom(mScaleFactor);
-            invalidate();     	
+            invalidate();
             return true;
         }
     }
