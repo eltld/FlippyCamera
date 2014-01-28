@@ -3,7 +3,10 @@ package org.sebbas.android.flickcam;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -58,6 +61,7 @@ public class CameraActivity extends Activity {
     // Default shutter sound
     private final ShutterCallback mShutterCallback = new ShutterCallback() {
         public void onShutter() {
+            Log.d(TAG, "ON SHUTTER");
             AudioManager mgr = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             mgr.playSoundEffect(AudioManager.FLAG_PLAY_SOUND);
         }
@@ -91,7 +95,8 @@ public class CameraActivity extends Activity {
     // Camera attributes
     private int mZoomValue; // The current zoom level
     private boolean mSmoothZoomSupported = false;
-    private int mZoomMax;    private Parameters mParameters;
+    private int mZoomMax;
+    private Parameters mParameters;
     private boolean mVideoStabilizationSupported = false;
     private int mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private boolean mFlashEnabled = false;
@@ -131,6 +136,7 @@ public class CameraActivity extends Activity {
     protected void onStart() {
         super.onStart();
         Log.w(TAG, "ON START");
+        muteSounds();
 	}
 
     private void startCameraThread() {
@@ -146,6 +152,7 @@ public class CameraActivity extends Activity {
     
     private void initializeCamera() {
         if (hasCamera(this) && getCameraInstance() != null) {
+            
             initCameraProperties();
             setCameraParameters(); // Add parameter for picture size (makes preview smoother), continuous autofocus, pinch to zoom feature
             setCameraDisplayOrientation(this, mCurrentCameraId, mCamera);
@@ -176,6 +183,15 @@ public class CameraActivity extends Activity {
             return true;
         } 
         return false;
+    }
+    
+    // This mutes all the sounds. Otherwise the mediarecorder will cause a sound when its state changes
+    private void muteSounds() {
+        AudioManager audioMgr = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
+        int oldStreamVolume = audioMgr.getStreamVolume(AudioManager.STREAM_RING);
+        audioMgr.setStreamVolume(AudioManager.STREAM_RING, 0, 0);
+        // This line later has to be added to the recording method. it enables the sound again
+        //audioMgr.setStreamVolume(AudioManager.STREAM_RING, oldStreamVolume, 0);
     }
     
     private Camera getCameraInstance() {
@@ -459,16 +475,28 @@ public class CameraActivity extends Activity {
                 Log.d(TAG, "Camera switched");
                 releaseMediaRecorder();
                 deinitializeCamera();
-                if (mCurrentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK) {
-                    mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
-                } else {
-                    mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
-                }
+                switchCamera();
                 initializeCamera();
                 startPreview();
             }
         };
         return mSwitchCameraListener;
+    }
+    
+    private void switchCamera() {
+        if (isBackCamera()) {
+            mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_FRONT;
+        } else {
+            mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
+        }
+    }
+    
+    private boolean isBackCamera() {
+        return (mCurrentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK);
+    }
+    
+    private boolean isFrontCamera() {
+        return (mCurrentCameraId == Camera.CameraInfo.CAMERA_FACING_BACK);
     }
     
     private OnClickListener getSwitchFlashListener() {
@@ -607,13 +635,13 @@ public class CameraActivity extends Activity {
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        mMediaRecorder.setProfile(CamcorderProfile.get(mCurrentCameraId, CamcorderProfile.QUALITY_HIGH));
+        
         mMediaRecorder.setOutputFile(getFile().getAbsolutePath());
         mMediaRecorder.setMaxDuration(MAX_VIDEO_DURATION);
         mMediaRecorder.setMaxFileSize(MAX_FILE_SIZE);
         
         // TODO Get the correct values for setVideoSize()
-        mMediaRecorder.setVideoSize(640, 480);
         mMediaRecorder.setPreviewDisplay(mCameraPreview.getHolder().getSurface());
         
         try {
