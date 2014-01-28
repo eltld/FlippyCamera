@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.LayoutInflater;
@@ -121,19 +122,15 @@ public class CameraActivity extends Activity {
         super.onResume();
         Log.w(TAG, "ON RESUME");
         //startCameraThread();
-        
-        //initializeCamera();
-        //mCamera = getCameraInstance();
-        //startPreview();
-        //startRecorder();
+
+        initializeCamera();
+        startPreview();
     }
     
     @Override
     protected void onStart() {
         super.onStart();
         Log.w(TAG, "ON START");
-        initializeCamera();
-        startPreview();
 	}
 
     private void startCameraThread() {
@@ -366,7 +363,9 @@ public class CameraActivity extends Activity {
     }
 
     public void startRecorder() {
-        if (mIsRecording) {
+        Log.d(TAG, "Called start media recorder");
+        mMediaRecorder.start();
+        /*if (mIsRecording) {
             mMediaRecorder.stop();
             releaseMediaRecorder();
             finish();
@@ -374,7 +373,7 @@ public class CameraActivity extends Activity {
             Log.d(TAG, "Called start media recorder");
             mMediaRecorder.start();
             mIsRecording = true;
-        }
+        }*/
     }
     
     private void sleep() {
@@ -612,16 +611,14 @@ public class CameraActivity extends Activity {
         mMediaRecorder.setOutputFile(getFile().getAbsolutePath());
         mMediaRecorder.setMaxDuration(MAX_VIDEO_DURATION);
         mMediaRecorder.setMaxFileSize(MAX_FILE_SIZE);
-        //mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
         
-        //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        //mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+        // TODO Get the correct values for setVideoSize()
+        mMediaRecorder.setVideoSize(640, 480);
         mMediaRecorder.setPreviewDisplay(mCameraPreview.getHolder().getSurface());
-        
         
         try {
             mMediaRecorder.prepare();
-            Log.d(TAG, "Started recording");
+            Log.d(TAG, "Prepare media recorder successful");
         } catch (IllegalStateException e) {
             releaseMediaRecorder();
             Log.d(TAG, "Failed to prepare media recorder- IllegalStateException");
