@@ -32,6 +32,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -46,7 +48,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends FragmentActivity {
     
     private static final String TAG = "FlickCam";
     private static final String CAMERA_THREAD = "Camera Thread";
@@ -54,6 +56,8 @@ public class CameraActivity extends Activity {
     private static final String VIDEO_PATH_NAME = "/Pictures/test.3gp";
     private static final int MAX_VIDEO_DURATION = 60000;
     private static final int MAX_FILE_SIZE = 500000;
+    private static final String TAG_CAMERA_LOADER = "cameraloader";
+    private static final String TAG_SPLASH_SCREEN = "splashscreen";
     
     private Camera mCamera;
     private CameraPreview mCameraPreview;
@@ -108,11 +112,21 @@ public class CameraActivity extends Activity {
     private MediaRecorder mMediaRecorder;
     private boolean mIsRecording = false;
     
+    // Private instance variables for SplashScreen and Camera Loader
+    private SplashScreenFragment mSplashScreenFragment;
+    private CameraLoaderFragment mCameraLoaderFragment;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.w(TAG, "ON CREATE");
-        setContentView(R.layout.activity_camera);
+        //setContentView(R.layout.activity_camera);
+        final FragmentManager fm = getSupportFragmentManager();
+        mSplashScreenFragment = (SplashScreenFragment)fm.findFragmentByTag(TAG_SPLASH_SCREEN);
+        if (mSplashScreenFragment == null) {
+            mSplashScreenFragment = new SplashScreenFragment();
+            fm.beginTransaction().add(android.R.id.content, mSplashScreenFragment, TAG_SPLASH_SCREEN).commit();
+        }
     }
     
     @Override
@@ -128,8 +142,8 @@ public class CameraActivity extends Activity {
         Log.w(TAG, "ON RESUME");
         //startCameraThread();
 
-        initializeCamera();
-        startPreview();
+        //initializeCamera();
+        //startPreview();
     }
     
     @Override
@@ -152,7 +166,6 @@ public class CameraActivity extends Activity {
     
     private void initializeCamera() {
         if (hasCamera(this) && getCameraInstance() != null) {
-            
             initCameraProperties();
             setCameraParameters(); // Add parameter for picture size (makes preview smoother), continuous autofocus, pinch to zoom feature
             setCameraDisplayOrientation(this, mCurrentCameraId, mCamera);
@@ -235,19 +248,12 @@ public class CameraActivity extends Activity {
     @SuppressLint("NewApi")
     private void setCameraParameters() {
         System.out.println("setCameraParameters called");
-        // Set custom picture size. Makes camera preview run smoother
-        //float defaultCameraRatio = (float) mParameters.getPictureSize().width / (float) mParameters.getPictureSize().height;
-        //Size preferedPicturesSize = getPreferredPictureSize(defaultCameraRatio);
-        //System.out.println(mParameters.getPictureSize().width +"/"+ mParameters.getPictureSize().height);
-        //mParameters.setPictureSize(preferedPicturesSize.width, preferedPicturesSize.height);
-        //mParameters.setPictureSize(640, 480);
-        
         // Adds continuous auto focus (only if API is high enough) to the parameters.
         if (supportsSDK(14)) {
             mParameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
         } else {
             mParameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-            } 
+        } 
         
         // Enable auto white balance. This makes preview look smoother
         mParameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
@@ -263,14 +269,13 @@ public class CameraActivity extends Activity {
         
         // Set the current zoom value if we didnt use smooth zoom
         if (!mSmoothZoomSupported) {
-        mParameters.setZoom(mZoomValue);
+            mParameters.setZoom(mZoomValue);
         }
-        System.out.println(listToString(mParameters.getSupportedPreviewFpsRange()));
         Size preferedSize = mParameters.getPreferredPreviewSizeForVideo();
         mParameters.setPreviewSize(preferedSize.width, preferedSize.height);
         
         // Finally, add the parameters to the camera
-        mCamera.setParameters(mParameters);  
+        mCamera.setParameters(mParameters);
     }
     
     public void performZoom(float scaleFactor) {
@@ -636,12 +641,15 @@ public class CameraActivity extends Activity {
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         
         mMediaRecorder.setProfile(CamcorderProfile.get(mCurrentCameraId, CamcorderProfile.QUALITY_HIGH));
+        //mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        //mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
+        //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        
         
         mMediaRecorder.setOutputFile(getFile().getAbsolutePath());
         mMediaRecorder.setMaxDuration(MAX_VIDEO_DURATION);
         mMediaRecorder.setMaxFileSize(MAX_FILE_SIZE);
         
-        // TODO Get the correct values for setVideoSize()
         mMediaRecorder.setPreviewDisplay(mCameraPreview.getHolder().getSurface());
         
         try {

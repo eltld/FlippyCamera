@@ -35,18 +35,21 @@ public final class R {
         public static final int ic_launcher=0x7f02000b;
         public static final int ic_menu_cancel_holo_light=0x7f02000c;
         public static final int ic_menu_done_holo_light=0x7f02000d;
+        public static final int splash_screen_bg=0x7f02000e;
     }
     public static final class id {
-        public static final int action_settings=0x7f080005;
+        public static final int action_settings=0x7f080006;
         public static final int camera_preview=0x7f080000;
         public static final int screen_layout=0x7f080001;
         public static final int shutter_button=0x7f080002;
+        public static final int splash_icon=0x7f080005;
         public static final int switch_camera=0x7f080003;
         public static final int switch_flash=0x7f080004;
     }
     public static final class layout {
         public static final int activity_camera=0x7f030000;
         public static final int camera_control=0x7f030001;
+        public static final int splash_screen=0x7f030002;
     }
     public static final class menu {
         public static final int camera=0x7f070000;
