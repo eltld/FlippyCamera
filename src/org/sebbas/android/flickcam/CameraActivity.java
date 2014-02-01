@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.sebbas.android.flickcam.CameraLoaderFragment.ProgressListener;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
@@ -48,7 +50,7 @@ import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-public class CameraActivity extends FragmentActivity {
+public class CameraActivity extends FragmentActivity implements ProgressListener{
     
     private static final String TAG = "FlickCam";
     private static final String CAMERA_THREAD = "Camera Thread";
@@ -104,10 +106,7 @@ public class CameraActivity extends FragmentActivity {
     private boolean mVideoStabilizationSupported = false;
     private int mCurrentCameraId = Camera.CameraInfo.CAMERA_FACING_BACK;
     private boolean mFlashEnabled = false;
-    
-    // Members for the UI Handling
-    private CameraHandlerThread mCameraThread = null;
-    
+
     // Instance variables for the MediaRecorder
     private MediaRecorder mMediaRecorder;
     private boolean mIsRecording = false;
@@ -120,12 +119,24 @@ public class CameraActivity extends FragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.w(TAG, "ON CREATE");
-        //setContentView(R.layout.activity_camera);
+        
         final FragmentManager fm = getSupportFragmentManager();
         mSplashScreenFragment = (SplashScreenFragment)fm.findFragmentByTag(TAG_SPLASH_SCREEN);
         if (mSplashScreenFragment == null) {
             mSplashScreenFragment = new SplashScreenFragment();
             fm.beginTransaction().add(android.R.id.content, mSplashScreenFragment, TAG_SPLASH_SCREEN).commit();
+        }
+        
+        mCameraLoaderFragment = (CameraLoaderFragment) fm.findFragmentByTag(TAG_CAMERA_LOADER);
+        if (mCameraLoaderFragment == null) {
+            mCameraLoaderFragment = new CameraLoaderFragment();
+            mCameraLoaderFragment.setProgressListener(this);
+            mCameraLoaderFragment.startLoading();
+            fm.beginTransaction().add(mCameraLoaderFragment, TAG_CAMERA_LOADER).commit();
+        } else {
+            if (checkCompletionStatus()) {
+                return;
+            }
         }
     }
     
@@ -137,13 +148,17 @@ public class CameraActivity extends FragmentActivity {
     }
     
     @Override
+    protected void onStop() {
+        super.onStop();
+        if (mCameraLoaderFragment != null) {
+            mCameraLoaderFragment.removeProgressListener();
+        }
+    }
+    
+    @Override
     protected void onResume() {
         super.onResume();
         Log.w(TAG, "ON RESUME");
-        //startCameraThread();
-
-        //initializeCamera();
-        //startPreview();
     }
     
     @Override
@@ -151,18 +166,26 @@ public class CameraActivity extends FragmentActivity {
         super.onStart();
         Log.w(TAG, "ON START");
         muteSounds();
-	}
-
-    private void startCameraThread() {
-        if (mCameraThread == null) {
-            Log.d(TAG, "Started Camera Thread");
-            mCameraThread = new CameraHandlerThread(CAMERA_THREAD);
+        if (mCameraLoaderFragment != null) {
+            checkCompletionStatus();
         }
-        synchronized(mCameraThread) {
-            mCameraThread.openCamera();
+    }
+
+    @Override
+    public void onCompletion(boolean successSetup) {
+        Log.d(TAG, "ON COMPLETION");
+        if (successSetup) {
+            setContentView(R.layout.activity_camera);
+            initializeCamera();
             startPreview();
         }
     }
+
+    @Override
+    public void onProgressUpdate(int value) {
+        // Can be implemented in the future if progess indication in splash screen is desired
+    }
+
     
     private void initializeCamera() {
         if (hasCamera(this) && getCameraInstance() != null) {
@@ -291,21 +314,6 @@ public class CameraActivity extends FragmentActivity {
         }
     }
     
-    private Size getPreferredPictureSize(float defaultCameraRatio) {
-        Size res = null;
-        List<Size> sizes = mCamera.getParameters().getSupportedPictureSizes();
-                
-        //System.out.println("Sizes are: " + listToString(sizes));
-        for (Size s : sizes) {
-            float ratio = (float) s.width / (float) s.height;
-            if (ratio == defaultCameraRatio && s.height <= PHOTO_HEIGHT_THRESHOLD) {
-                res = s;
-                break;
-            }
-        }
-        return res;
-    }
-    
     /*public static String listToString(List<Size> sizes) {
         String result = "[";
         for (int i = 0; i < sizes.size(); i++) {
@@ -412,7 +420,6 @@ public class CameraActivity extends FragmentActivity {
         }
         mRelativeLayoutMask.removeAllViews();
         mCameraPreview = null;
-        mCameraThread = null;
         Log.d(TAG, "Preview Stopped");
     }
 
@@ -696,34 +703,22 @@ public class CameraActivity extends FragmentActivity {
         return file;
     }
     
-    private class CameraHandlerThread extends HandlerThread {
-        private Handler mHandler = null;
-        
-        public CameraHandlerThread(String name) {
-            super(name);
-            start();
-            mHandler = new Handler(getLooper());
-        }
-        
-        synchronized void notifyCameraOpened() {
-            notify();
-        }
-        
-        void openCamera() {
-            mHandler.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    initializeCamera();
-                    notifyCameraOpened();
-                }
-                
-            });
-            try {
-                wait();
-            } catch (InterruptedException ie){
-                Log.w(TAG, "Wait was interrutpted");
+    /**
+     * Checks if data is done loading, if it is, the result is handled
+     *
+     * @return true if data is done loading
+     */
+    private boolean checkCompletionStatus() {
+        if (mCameraLoaderFragment.hasLoaded()) {
+            onCompletion(mCameraLoaderFragment.getSetupStatus());
+            FragmentManager fm = getSupportFragmentManager();
+            mSplashScreenFragment = (SplashScreenFragment) fm.findFragmentByTag(TAG_SPLASH_SCREEN);
+            if (mSplashScreenFragment != null) {
+                fm.beginTransaction().remove(mSplashScreenFragment).commit();
             }
+            return true;
         }
+        mCameraLoaderFragment.setProgressListener(this);
+        return false;
     }
 }

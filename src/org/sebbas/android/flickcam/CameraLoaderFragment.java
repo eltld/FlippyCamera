@@ -1,6 +1,7 @@
 package org.sebbas.android.flickcam;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 
@@ -16,7 +17,7 @@ public class CameraLoaderFragment extends Fragment {
          *
          * @param result Double result of the task
          */
-        public void onCompletion(Double result);
+        public void onCompletion(boolean result);
 
         /**
          * Notifies of progress
@@ -27,8 +28,9 @@ public class CameraLoaderFragment extends Fragment {
     }
 
     private ProgressListener mProgressListener;
-    private Double mResult = Double.NaN;
+    private boolean mResult = false;
     private LoadingTask mTask;
+    private Object mCamera;
 
     @Override
     public void onAttach(Activity activity) {
@@ -38,72 +40,44 @@ public class CameraLoaderFragment extends Fragment {
         setRetainInstance(true);
     }
 
-    /**
-     * Returns the result or {@value Double#NaN}
-     *
-     * @return the result or {@value Double#NaN}
-     */
-    public Double getResult() {
+    public boolean getSetupStatus() {
         return mResult;
     }
 
-    /**
-     * Returns true if a result has already been calculated
-     *
-     * @return true if a result has already been calculated
-     * @see #getResult()
-     */
-    public boolean hasResult() {
-        return !Double.isNaN(mResult);
+    public boolean hasLoaded() {
+        return mResult;
     }
 
-    /**
-     * Removes the ProgressListener
-     *
-     * @see #setProgressListener(ProgressListener)
-     */
     public void removeProgressListener() {
         mProgressListener = null;
     }
 
-    /**
-     * Sets the ProgressListener to be notified of updates
-     *
-     * @param listener ProgressListener to notify
-     * @see #removeProgressListener()
-     */
     public void setProgressListener(ProgressListener listener) {
         mProgressListener = listener;
     }
 
-    /**
-     * Starts loading the data
-     */
     public void startLoading() {
         mTask = new LoadingTask();
         mTask.execute();
     }
-
-    private class LoadingTask extends AsyncTask<Void, Integer, Double> 
-{
+    
+    private class LoadingTask extends AsyncTask<Context, Integer, Boolean> {
 
         @Override
-        protected Double doInBackground(Void... params) {
-            double result = 0;
-            for (int i = 0; i < 100; i++) {
-                try {
-                    result += Math.sqrt(i);
-                    Thread.sleep(50);
-                    this.publishProgress(i);
-                } catch (InterruptedException e) {
-                    return null;
-                }
+        protected Boolean doInBackground(Context... context) {
+            // Background work ...
+            try {
+                Thread.sleep(2500);
+                mResult = true;
+            } catch (InterruptedException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
             }
-            return Double.valueOf(result);
+            return mResult;
         }
 
         @Override
-        protected void onPostExecute(Double result) {
+        protected void onPostExecute(Boolean result) {
             mResult = result;
             mTask = null;
             if (mProgressListener != null) {
