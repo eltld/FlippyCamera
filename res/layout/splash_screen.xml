@@ -13,6 +13,6 @@
         android:scaleX="1.5"
         android:scaleY="1.5"
         android:contentDescription="@string/app_name"
-        android:src="@drawable/flickcam_icon" />
+        android:src="@drawable/ic_action_camera" />
     
 </LinearLayout>
