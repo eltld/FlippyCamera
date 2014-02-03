@@ -27,7 +27,7 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
         super.onCreate(savedInstanceState);
         initialiseStartup();
     }
-
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -35,17 +35,25 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
         return true;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        //mCameraLoaderFragment.startLoading(this.getApplicationContext());
+    }
+
+    @Override
+    protected void onPause() {
+        // TODO Auto-generated method stub
+        super.onPause();
+    }
+
     private void initialisePaging(ArrayList<Fragment>fragmentList) {
-        /*List<Fragment> fragments = new Vector<Fragment>();
-        fragments.add(Fragment.instantiate(this, CameraFragment.class.getName()));
-        fragments.add(Fragment.instantiate(this, GalleryFragment.class.getName()));*/
-        
         mPagerAdapter = new PagerAdapter(super.getSupportFragmentManager(), fragmentList);
         ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
         pager.setAdapter(mPagerAdapter);
     }
     
-    private void initialiseStartup() {
+    public void initialiseStartup() {
         final FragmentManager fm = getSupportFragmentManager();
         
         mCameraLoaderFragment = (CameraLoaderFragment) fm.findFragmentByTag(TAG_CAMERA_LOADER);

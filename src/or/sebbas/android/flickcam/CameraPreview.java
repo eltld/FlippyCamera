@@ -67,7 +67,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         try {
             mCamera.stopPreview();
             
-            if(mListener != null) mListener.releaseMediaRecorder();
+            mListener.releaseMediaRecorder();
             
             Log.d(TAG, "Camera Stopped Successfully");
         } catch (Exception e) {
@@ -82,10 +82,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
             
-            if(mListener != null) {
-                mListener.prepareMediaRecorder();
-                mListener.startMediaRecorder();
-            }
+            mListener.prepareMediaRecorder();
+            mListener.startMediaRecorder();
+            
             
             Log.d(TAG, "Preview Started Successfully");
         } catch (Exception e) {

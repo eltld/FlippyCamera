@@ -32,23 +32,21 @@ public final class R {
         public static final int splash_screen_bg=0x7f020008;
     }
     public static final class id {
-        public static final int action_settings=0x7f080007;
-        public static final int camera_preview=0x7f080004;
-        public static final int gallery=0x7f080005;
-        public static final int screen_layout=0x7f080000;
+        public static final int action_settings=0x7f080006;
+        public static final int gallery=0x7f080004;
+        public static final int preview_layout=0x7f080000;
         public static final int shutter_button=0x7f080001;
-        public static final int splash_icon=0x7f080006;
+        public static final int splash_icon=0x7f080005;
         public static final int switch_camera=0x7f080002;
         public static final int switch_flash=0x7f080003;
         public static final int viewpager=0x01010000;
     }
     public static final class layout {
         public static final int activity_main_fragment=0x7f030000;
-        public static final int camera_control=0x7f030001;
-        public static final int camera_layout=0x7f030002;
-        public static final int gallery_layout=0x7f030003;
-        public static final int splash_screen=0x7f030004;
-        public static final int viewpager_layout=0x7f030005;
+        public static final int camera_layout=0x7f030001;
+        public static final int gallery_layout=0x7f030002;
+        public static final int splash_screen=0x7f030003;
+        public static final int viewpager_layout=0x7f030004;
     }
     public static final class menu {
         public static final int main=0x7f070000;

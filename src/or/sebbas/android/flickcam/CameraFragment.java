@@ -70,7 +70,18 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         
         return mRootView;
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
     
+    @Override
+    public void onPause() {
+        super.onPause();
+        releaseMediaRecorder();
+        deinitializeCamera();
+    }
     private void initParameters() {
         mContext = this.getActivity();
     }
@@ -94,9 +105,14 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (mCamera != null) {
             mCamera.stopPreview();
         }
-        mRelativeLayoutMask.removeAllViews();
+        removeCamerPreviewView();
         mCameraPreview = null;
         Log.d(TAG, "Preview Stopped");
+    }
+    
+    private void removeCamerPreviewView() {
+        RelativeLayout cameraPreview = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
+        cameraPreview.removeView(mCameraPreview);
     }
     
     private void releaseCamera() {
@@ -240,31 +256,22 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private void startPreview() {
         if (mCamera != null) {
             if (mCameraPreview == null) {
-                
-                FrameLayout preview = (FrameLayout) mRootView.findViewById(R.id.camera_preview);
-                mRelativeLayoutMask = new RelativeLayout(mContext);
-                RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
-                        new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-                
-                // Add RL to FL
-                preview.addView(mRelativeLayoutMask, lp);
-                
+                RelativeLayout preview = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
                 // Add the SurfaceView to the RL
-                mCameraPreview = new CameraPreview(mContext, mCameraPreviewListener, mCamera);
-                mRelativeLayoutMask.addView(mCameraPreview, lp);
+                mCameraPreview = new CameraPreview(mContext, this, mCamera);
+                preview.addView(mCameraPreview);
                 
-                mControlInflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View viewcontrol = mControlInflater.inflate(R.layout.camera_control, null);
-                mRelativeLayoutMask.addView(viewcontrol, lp);
-                
-                mShutterButton = (ImageButton) viewcontrol.findViewById(R.id.shutter_button);
+                mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
                 mShutterButton.setOnClickListener(getShutterListener());
+                mShutterButton.bringToFront();
                 
-                mSwitchCameraButton = (ImageButton) viewcontrol.findViewById(R.id.switch_camera);
+                mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
                 mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
+                mSwitchCameraButton.bringToFront();
                 
-                mSwitchFlashButton = (ImageButton) viewcontrol.findViewById(R.id.switch_flash);
+                mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
                 mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
+                mSwitchFlashButton.bringToFront();
                 
                 Log.d(TAG, "New Preview Started");
             } else {
