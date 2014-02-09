@@ -129,4 +129,10 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
     public void onProgressUpdate(int value) {
         // TODO Auto-generated method stub
     }
+
+	@Override
+	public void onCompletion() {
+		// TODO Auto-generated method stub
+		
+	}
 }

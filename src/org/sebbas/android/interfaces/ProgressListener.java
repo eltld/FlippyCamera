@@ -6,5 +6,6 @@ import android.support.v4.app.Fragment;
 
 public interface ProgressListener {
     public void onCompletion(ArrayList<Fragment> fragmentList);
+    public void onCompletion();
     public void onProgressUpdate(int value);
 }

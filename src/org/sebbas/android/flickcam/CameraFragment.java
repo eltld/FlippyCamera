@@ -14,9 +14,10 @@ import android.hardware.Camera.Parameters;
 import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -54,23 +55,27 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private OnClickListener mShutterListener;
     private MediaRecorder mMediaRecorder;
     private View mRootView;
-    private boolean mToken;
-    private RelativeLayout mPreview;
+    private CameraHandlerThread mThread = null;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.camera_layout, container, false);
         initParameters();
         
-        initializeCamera();
-        startPreview();
-        
         return mRootView;
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        initializeCamera();
+        startPreview();
+    }
+
+    
+    @Override
     public void onResume() {
         super.onResume();
-        
+        //initializeInThread();
     }
     
     @Override
@@ -80,6 +85,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         releaseMediaRecorder();
         deinitializeCamera();
     }
+    
     private void initParameters() {
         mContext = this.getActivity();
     }
@@ -110,8 +116,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     
     private void removeCameraPreviewView() {
         RelativeLayout cameraPreview = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
-        //cameraPreview.removeView(mCameraPreview);
-        cameraPreview.removeAllViews();
+        cameraPreview.removeView(mCameraPreview);
     }
     
     private void releaseCamera() {
@@ -256,10 +261,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (mCamera != null) {
             if (mCameraPreview == null) {
                 
-                RelativeLayout preview = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
+                RelativeLayout previewLayout = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
                 // Add the SurfaceView to the RL
                 mCameraPreview = new CameraPreview(mContext, this, mCamera);
-                preview.addView(mCameraPreview);
+                previewLayout.addView(mCameraPreview);
                 
                 mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
                 mShutterButton.setOnClickListener(getShutterListener());
@@ -281,8 +286,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     }
     
     private void getCameraPreview() {
-        mPreview = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
-        // Add the SurfaceView to the RL
         mCameraPreview = new CameraPreview(mContext, this, mCamera);
     }
     
@@ -368,7 +371,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         //mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H263);
         //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
         
-        
         mMediaRecorder.setOutputFile(getFile().getAbsolutePath());
         mMediaRecorder.setMaxDuration(MAX_VIDEO_DURATION);
         mMediaRecorder.setMaxFileSize(MAX_FILE_SIZE);
@@ -435,19 +437,67 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         return file;
     }
     
-    private class LoadingCameraPreview extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... context) {
-            initParameters();
-            initializeCamera();
-            getCameraPreview();
-            return null;
+    
+    private void initializeInThread() {
+        if (mThread == null) {
+            mThread = new CameraHandlerThread(this.mContext);
         }
 
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
+        synchronized (mThread) {
+            mThread.startInitialization();
+        }
+    }
+    
+    
+    private class CameraHandlerThread extends HandlerThread {
+        private static final String TAG = "camera_handler_thread";
+        
+        private Handler mHandler = null;
+        private Context mContext;
+
+        CameraHandlerThread(Context context) {
+            super("CameraHandlerThread");
+            start();
+            mHandler = new Handler(getLooper());
+            mContext = context;
+        }
+
+        synchronized void notifyInitializationComplete() {
+            notify();
+        }
+
+        void startInitialization() {
+            mHandler.post(new Runnable() {
+
+                @Override
+                public void run() {
+                    initializeCamera();
+                    getCameraPreview();
+                    System.out.println("mCameraPreview is : " + mCameraPreview);
+                    updateUI();
+                    notifyInitializationComplete();
+                }
+                
+            });
+            try {
+                wait();
+            }
+            catch (InterruptedException e) {
+                Log.w(TAG, "Wait was interrupted");
+            }
+        }
+        
+        private void updateUI() {
+            Handler mainHandler = new Handler(mContext.getMainLooper());
+            Runnable r = new Runnable() {
+
+                @Override
+                public void run() {
+                    Log.d(TAG, "RUNNING ON UI THREAD");
+                    startPreview();
+                }
+            };
+            mainHandler.post(r);
         }
     }
 }

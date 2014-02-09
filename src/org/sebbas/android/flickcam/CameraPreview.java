@@ -4,6 +4,7 @@ import org.sebbas.android.interfaces.CameraPreviewListener;
 
 import android.content.Context;
 import android.hardware.Camera;
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -49,15 +50,21 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        // If your preview can change or rotate, take care of those events here.
-        // Make sure to stop the preview before resizing or reformatting it.
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {        
+        MediaRecorderStarter ms = new MediaRecorderStarter();
+        ms.execute();
+        
+    }
+    
+    public void checkSurfaceExists() {
         if (mHolder.getSurface() == null) {
             // preview surface does not exist
             Log.d(TAG, "Preview Surface does not exist");
             return;
         }
-
+    }
+    
+    public void stopPreview() {
         // stop preview before making changes
         try {
             mCamera.stopPreview();
@@ -68,10 +75,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         } catch (Exception e) {
             Log.d(TAG, "Error Stopping Camera, it most likely is a non-existent preview");
         }
-
-        // set preview size and make any resize, rotate or
-        // reformatting changes here
-
+    }
+    
+    public void startPreview() {
         // start preview with new settings
         try {
             mCamera.setPreviewDisplay(mHolder);
@@ -177,5 +183,17 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             invalidate();
             return true;
         }
+    }
+    
+    private class MediaRecorderStarter extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            checkSurfaceExists();
+            stopPreview();
+            startPreview();
+            return null;
+        }
+        
     }
 }
