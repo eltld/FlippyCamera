@@ -5,12 +5,16 @@ import java.io.IOException;
 
 import org.sebbas.android.interfaces.CameraPreviewListener;
 
+import com.sebbas.android.flickcam.R;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -55,7 +59,14 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private OnClickListener mShutterListener;
     private MediaRecorder mMediaRecorder;
     private View mRootView;
-    private CameraHandlerThread mThread = null;
+    protected boolean mPictureTaken;
+    private ShutterCallback mShutterCallback;
+    private PictureCallback mRawCallback;
+    private PictureCallback mPostViewCallback;
+    private PictureCallback mJpegCallback;
+    private ImageButton mCancelButton;
+    private ImageButton mAcceptButton;
+    private byte[] mPictureData;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mRootView = inflater.inflate(R.layout.camera_layout, container, false);
@@ -75,7 +86,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     @Override
     public void onResume() {
         super.onResume();
-        //initializeInThread();
     }
     
     @Override
@@ -285,10 +295,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
-    private void getCameraPreview() {
-        mCameraPreview = new CameraPreview(mContext, this, mCamera);
-    }
-    
     private OnClickListener getShutterListener() {
         if (mShutterListener == null) {
             mShutterListener = new OnClickListener() {
@@ -296,15 +302,70 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG, "Shutter Button Clicked.");
-                    /*if (mPictureTaken) {
-                        //retakePicture();
+                    if (mPictureTaken) {
+                        retakePicture();
                     } else {
-                        //takePicture();
-                    }*/
+                        takePicture();
+                    }
                 }
             };
         }
         return mShutterListener;
+    }
+    
+    private void takePicture() {
+        mCamera.takePicture(getShutterCallback(), getRawCallback(), getPostViewCallback(), getJpegCallback());
+    }
+
+    private void retakePicture() {
+        resetShutter();
+        startPreview();
+    }
+    
+    /*
+     * This functionality has not been added to this project, so this always returns null.
+     */
+    private ShutterCallback getShutterCallback() {
+        return mShutterCallback;
+    }
+
+    private PictureCallback getRawCallback() {
+        return mRawCallback;
+    }
+
+    private PictureCallback getPostViewCallback() {
+        return mPostViewCallback;
+    }
+
+    private PictureCallback getJpegCallback() {
+        if (mJpegCallback == null) {
+            mJpegCallback = new PictureCallback() {
+
+                private byte[] mPictureData;
+
+                @Override
+                public void onPictureTaken(byte[] data, Camera camera) {
+                    mPictureData = data;
+                    setShutterRetake();
+                }
+            };
+        }
+        return mJpegCallback;
+    }
+    
+    private void setShutterRetake() {
+        mPictureTaken = true;
+        mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.btn_shutter_retake));
+        mAcceptButton.setVisibility(View.VISIBLE);
+        mCancelButton.setVisibility(View.VISIBLE);
+    }
+    
+    private void resetShutter() {
+        mPictureTaken = false;
+        mPictureData = null;
+        mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.btn_shutter));
+        mAcceptButton.setVisibility(View.GONE);
+        mCancelButton.setVisibility(View.GONE);
     }
     
     private OnClickListener getSwitchCameraListener() {
@@ -435,69 +496,5 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 }
         }
         return file;
-    }
-    
-    
-    private void initializeInThread() {
-        if (mThread == null) {
-            mThread = new CameraHandlerThread(this.mContext);
-        }
-
-        synchronized (mThread) {
-            mThread.startInitialization();
-        }
-    }
-    
-    
-    private class CameraHandlerThread extends HandlerThread {
-        private static final String TAG = "camera_handler_thread";
-        
-        private Handler mHandler = null;
-        private Context mContext;
-
-        CameraHandlerThread(Context context) {
-            super("CameraHandlerThread");
-            start();
-            mHandler = new Handler(getLooper());
-            mContext = context;
-        }
-
-        synchronized void notifyInitializationComplete() {
-            notify();
-        }
-
-        void startInitialization() {
-            mHandler.post(new Runnable() {
-
-                @Override
-                public void run() {
-                    initializeCamera();
-                    getCameraPreview();
-                    System.out.println("mCameraPreview is : " + mCameraPreview);
-                    updateUI();
-                    notifyInitializationComplete();
-                }
-                
-            });
-            try {
-                wait();
-            }
-            catch (InterruptedException e) {
-                Log.w(TAG, "Wait was interrupted");
-            }
-        }
-        
-        private void updateUI() {
-            Handler mainHandler = new Handler(mContext.getMainLooper());
-            Runnable r = new Runnable() {
-
-                @Override
-                public void run() {
-                    Log.d(TAG, "RUNNING ON UI THREAD");
-                    startPreview();
-                }
-            };
-            mainHandler.post(r);
-        }
     }
 }
