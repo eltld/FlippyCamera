@@ -1,10 +1,11 @@
-package org.sebbas.android.flickcam;
+package org.sebbas.android.views;
 
+import org.sebbas.android.flickcam.MediaRecorderSetup;
 import org.sebbas.android.interfaces.CameraPreviewListener;
 
 import android.content.Context;
 import android.hardware.Camera;
-import android.os.AsyncTask;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
@@ -13,12 +14,12 @@ import android.view.SurfaceView;
 
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     
-    private static final String TAG = "FlickCamera Preview";
+    private static final String TAG = "camera_preview";
     private static final int INVALID_POINTER_ID = -1;
 
-    private final SurfaceHolder mHolder;
-    private final Camera mCamera;
-    private final CameraPreviewListener mListener;
+    private SurfaceHolder mHolder;
+    private Camera mCamera;
+    private CameraPreviewListener mListener;
     
     private float mPosX;
     private float mPosY;
@@ -29,12 +30,18 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     
     private ScaleGestureDetector mScaleDetector;
     private float mScaleFactor = 1.f;
-        
+	private int mCurrentCameraId;
+    
+    public CameraPreview(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+    
     @SuppressWarnings("deprecation")
-    public CameraPreview(Context context, CameraPreviewListener listener, Camera camera) {
+    public CameraPreview(Context context, CameraPreviewListener listener, Camera camera, int cameraId) {
         super(context);
         mCamera = camera;
         mListener = listener;
+        mCurrentCameraId = cameraId;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
         
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -50,47 +57,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
 
     @Override
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {        
-        MediaRecorderStarter ms = new MediaRecorderStarter();
+    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
+        MediaRecorderSetup ms = new MediaRecorderSetup(mCamera, mCurrentCameraId, this);
         ms.execute();
         
-    }
-    
-    public void checkSurfaceExists() {
-        if (mHolder.getSurface() == null) {
-            // preview surface does not exist
-            Log.d(TAG, "Preview Surface does not exist");
-            return;
-        }
-    }
-    
-    public void stopPreview() {
-        // stop preview before making changes
-        try {
-            mCamera.stopPreview();
-            
-            mListener.releaseMediaRecorder();
-            
-            Log.d(TAG, "Camera Stopped Successfully");
-        } catch (Exception e) {
-            Log.d(TAG, "Error Stopping Camera, it most likely is a non-existent preview");
-        }
-    }
-    
-    public void startPreview() {
-        // start preview with new settings
-        try {
-            mCamera.setPreviewDisplay(mHolder);
-            mCamera.startPreview();
-            
-            mListener.prepareMediaRecorder();
-            mListener.startMediaRecorder();
-            
-            
-            Log.d(TAG, "Preview Started Successfully");
-        } catch (Exception e) {
-            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
-        }
     }
 
     @Override
@@ -185,7 +155,9 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
     }
     
-    private class MediaRecorderStarter extends AsyncTask<Void, Void, Void> {
+    
+    // THIS CODE WILL MOST PROBABLY BE PHASED OUT SOON !!
+    /*private class MediaRecorderStarter extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -196,4 +168,41 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
         
     }
+    
+    public void checkSurfaceExists() {
+        if (mHolder.getSurface() == null) {
+            // preview surface does not exist
+            Log.d(TAG, "Preview Surface does not exist");
+            return;
+        }
+    }
+    
+    private void stopPreview() {
+        // stop preview before making changes
+        try {
+            mCamera.stopPreview();
+            
+            mListener.releaseMediaRecorder();
+            
+            Log.d(TAG, "Camera Stopped Successfully");
+        } catch (Exception e) {
+            Log.d(TAG, "Error Stopping Camera, it most likely is a non-existent preview");
+        }
+    }
+    
+    private void startPreview() {
+        // start preview with new settings
+        try {
+            //mCamera.setPreviewDisplay(mHolder);
+            mCamera.startPreview();
+            
+            mListener.prepareMediaRecorder();
+            mListener.startMediaRecorder();
+            
+            
+            Log.d(TAG, "Preview Started Successfully");
+        } catch (Exception e) {
+            Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+        }
+    }*/
 }
