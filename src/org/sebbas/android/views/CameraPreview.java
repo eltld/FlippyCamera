@@ -1,6 +1,5 @@
 package org.sebbas.android.views;
 
-import org.sebbas.android.flickcam.MediaRecorderSetup;
 import org.sebbas.android.interfaces.CameraPreviewListener;
 
 import android.content.Context;
@@ -30,18 +29,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     
     private ScaleGestureDetector mScaleDetector;
     private float mScaleFactor = 1.f;
-	private int mCurrentCameraId;
     
     public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
     @SuppressWarnings("deprecation")
-    public CameraPreview(Context context, CameraPreviewListener listener, Camera camera, int cameraId) {
+    public CameraPreview(Context context, CameraPreviewListener listener, Camera camera) {
         super(context);
         mCamera = camera;
         mListener = listener;
-        mCurrentCameraId = cameraId;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
         
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -52,25 +49,19 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
     }
 
-    public String getTag() {
-        return TAG;
-    }
-
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        MediaRecorderSetup ms = new MediaRecorderSetup(mCamera, mCurrentCameraId, this);
-        ms.execute();
-        
+        Log.d(TAG, "Surface was Changed");
+        mListener.startRecorder();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        // empty. Taken care of in surfaceChanged.
+    	Log.d(TAG, "Surface was Created");
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
-        // empty. Take care of releasing the Camera preview in the activity.
         Log.d(TAG, "Surface was Destroyed");
     }
     

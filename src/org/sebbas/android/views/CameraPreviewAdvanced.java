@@ -1,7 +1,6 @@
 package org.sebbas.android.views;
 import java.io.IOException;
 
-import org.sebbas.android.flickcam.MediaRecorderSetup;
 import org.sebbas.android.interfaces.CameraPreviewListener;
 
 import android.annotation.SuppressLint;
@@ -20,17 +19,15 @@ public class CameraPreviewAdvanced extends TextureView implements
     private static final String TAG = "camera_preview_advanced";
     private CameraPreviewListener mListener;
     private Camera mCamera;
-    private int mCurrentCameraId;
 
     public CameraPreviewAdvanced(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
-    public CameraPreviewAdvanced(Context context, CameraPreviewListener listener, Camera camera, int cameraId) {
+    public CameraPreviewAdvanced(Context context, CameraPreviewListener listener, Camera camera) {
         super(context);
         mCamera = camera;
         mListener = listener;
-        mCurrentCameraId = cameraId;
         setSurfaceTextureListener(this);
     }
 
@@ -40,8 +37,7 @@ public class CameraPreviewAdvanced extends TextureView implements
         
         try {
             mCamera.setPreviewTexture(surface);
-            MediaRecorderSetup ms = new MediaRecorderSetup(mCamera, mCurrentCameraId);
-            ms.execute();
+            mListener.startRecorder();
         } catch (IOException e) {
             // Something bad happened
             e.printStackTrace();

@@ -87,7 +87,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
 
     
     @SuppressLint("NewApi")
-	@Override
+    @Override
     public void onResume() {
         Log.d(TAG, "ONRESUME");
         super.onResume();
@@ -103,7 +103,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         Log.d(TAG, "ONPAUSE");
         super.onPause();
         
-        //releaseMediaRecorder();
+        releaseMediaRecorder();
         deinitializeCamera();
         
     }
@@ -115,7 +115,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     }
 
     @SuppressLint("NewApi")
-	@Override
+    @Override
     public void onStop() {
         Log.d(TAG, "ONSTOP");
         super.onStop();
@@ -304,10 +304,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 mPreviewLayout = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
                 // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
                 if(supportsSDK(14)) {
-                    mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera, mCurrentCameraId);
+                    mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
                     mPreviewLayout.addView(mCameraPreviewAdvanced);
                 } else {
-                    mCameraPreview = new CameraPreview(mContext, this, mCamera, mCurrentCameraId);
+                    mCameraPreview = new CameraPreview(mContext, this, mCamera);
                     mPreviewLayout.addView(mCameraPreview);
                 }
                 
@@ -419,20 +419,12 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             public void onClick(View v) {
                 Log.d(TAG, "Camera switched");
                 removeCameraPreviewView();
-                //releaseMediaRecorder();
+                releaseMediaRecorder();
                 deinitializeCamera();
                 
                 switchCamera();
                 CameraInitializer ci = new CameraInitializer();
                 ci.execute();
-                /*if(supportsSDK(14)) {
-                    MediaRecorderSetup ms = new MediaRecorderSetup(mCamera, mCurrentCameraId);
-                    ms.execute();
-                } else {
-                    MediaRecorderSetup ms = new MediaRecorderSetup(mCamera, mCurrentCameraId, mCameraPreview);
-                    ms.execute();
-                }*/
-                
             }
         };
         return mSwitchCameraListener;
@@ -476,9 +468,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         return mSwitchFlashListener;
     }
     
-    // THIS CODE WILL MOST PROBABLY BE PHASED OUT SOON !!
-    /*
-    @Override
     public void prepareMediaRecorder() {
         Log.d(TAG, "Called prepare media recorder");
         System.out.println(mCamera + " / " + mCameraPreviewAdvanced);
@@ -518,7 +507,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
-    @Override
     public void releaseMediaRecorder() {
         if (mMediaRecorder != null) {
             mMediaRecorder.reset();
@@ -528,7 +516,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
-    @Override
     public void startMediaRecorder() {
         Log.d(TAG, "Called start media recorder");
         mMediaRecorder.start();
@@ -540,7 +527,13 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             Log.d(TAG, "Called start media recorder");
             mMediaRecorder.start();
             mIsRecording = true;
-        }
+        }*/
+    }
+    
+    @Override
+    public void startRecorder() {
+        MediarRecorderInitializer mri = new MediarRecorderInitializer();
+        mri.execute();
     }
     
     private File getFile() {
@@ -564,10 +557,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 }
         }
         return file;
-    }*/
+    }
     
-    //TODO
-    private class CameraInitializer extends AsyncTask<Void,Void,Void> {
+    // This initializes the camera and starts a preview. This is used to switch the camera (back/front) faster
+    private class CameraInitializer extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -580,5 +573,17 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             super.onPostExecute(result);
             startPreview();
         }
+    }
+    
+    // This sets up and starts the media recorder
+    private class MediarRecorderInitializer extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            prepareMediaRecorder();
+            startMediaRecorder();
+            return null;
+        }
+        
     }
 }
