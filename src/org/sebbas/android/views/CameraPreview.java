@@ -1,6 +1,7 @@
 package org.sebbas.android.views;
 
 import org.sebbas.android.interfaces.CameraPreviewListener;
+import org.sebbas.android.listener.ScaleListener;
 
 import android.content.Context;
 import android.hardware.Camera;
@@ -39,7 +40,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         super(context);
         mCamera = camera;
         mListener = listener;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener());
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this));
         
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -66,26 +67,27 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
     
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
+    public boolean onTouchEvent(MotionEvent event) {
         // Let the ScaleGestureDetector inspect all events.
-        mScaleDetector.onTouchEvent(ev);
+        mScaleDetector.onTouchEvent(event);
 
-        final int action = ev.getAction();
+        // THIS CODE IS NOT NEEDED -> REMOVED SOON
+        /*final int action = event.getAction();
         switch (action & MotionEvent.ACTION_MASK) {
         case MotionEvent.ACTION_DOWN: {
-            final float x = ev.getX();
-            final float y = ev.getY();
+            final float x = event.getX();
+            final float y = event.getY();
 
             mLastTouchX = x;
             mLastTouchY = y;
-            mActivePointerId = ev.getPointerId(0);
+            mActivePointerId = event.getPointerId(0);
             break;
         }
 
         case MotionEvent.ACTION_MOVE: {
-            final int pointerIndex = ev.findPointerIndex(mActivePointerId);
-            final float x = ev.getX(pointerIndex);
-            final float y = ev.getY(pointerIndex);
+            final int pointerIndex = event.findPointerIndex(mActivePointerId);
+            final float x = event.getX(pointerIndex);
+            final float y = event.getY(pointerIndex);
 
             // Only move if the ScaleGestureDetector isn't processing a gesture.
             if (!mScaleDetector.isInProgress()) {
@@ -115,24 +117,24 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         }
 
         case MotionEvent.ACTION_POINTER_UP: {
-            final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) 
+            final int pointerIndex = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) 
                     >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-            final int pointerId = ev.getPointerId(pointerIndex);
+            final int pointerId = event.getPointerId(pointerIndex);
             if (pointerId == mActivePointerId) {
                 // This was our active pointer going up. Choose a new
                 // active pointer and adjust accordingly.
                 final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-                mLastTouchX = ev.getX(newPointerIndex);
-                mLastTouchY = ev.getY(newPointerIndex);
-                mActivePointerId = ev.getPointerId(newPointerIndex);
+                mLastTouchX = event.getX(newPointerIndex);
+                mLastTouchY = event.getY(newPointerIndex);
+                mActivePointerId = event.getPointerId(newPointerIndex);
             }
             break;
         }
-        }
+        }*/
         return true;
     }
     
-    private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+    /*private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
         public boolean onScale(ScaleGestureDetector detector) {
             mScaleFactor *= detector.getScaleFactor();
