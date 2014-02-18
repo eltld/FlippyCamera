@@ -27,9 +27,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:padding="20dp"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginRight="10dp"
         android:contentDescription="@string/switch_camera"
-        android:background="@android:color/transparent"
+        android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_switch_camera" />
     
     <ImageButton
@@ -38,9 +40,11 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="20dp"
+        android:padding="5dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="10dp"
         android:contentDescription="@string/switch_flash"
-        android:background="@android:color/transparent"
+        android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off" />
     </RelativeLayout>
     
