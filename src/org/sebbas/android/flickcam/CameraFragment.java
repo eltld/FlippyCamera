@@ -1,8 +1,12 @@
 package org.sebbas.android.flickcam;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import org.sebbas.android.interfaces.CameraPreviewListener;
 import org.sebbas.android.views.CameraPreview;
@@ -32,6 +36,7 @@ import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.ImageButton;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 public class CameraFragment extends Fragment implements CameraPreviewListener {
 
@@ -60,7 +65,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private OnClickListener mShutterListener;
     private MediaRecorder mMediaRecorder;
     private View mRootView;
-    protected boolean mPictureTaken;
+    protected boolean mPictureTaken = false;
     private ShutterCallback mShutterCallback;
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
@@ -69,11 +74,11 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ImageButton mAcceptButton;
     private byte[] mPictureData;
     private RelativeLayout mPreviewLayout;
+    private OnClickListener mAcceptListener;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ONCREATEVIEW");
-        mRootView = inflater.inflate(R.layout.camera_layout, container, false);
-        initParameters();
+        initParameters(inflater, container);
         return mRootView;
     }
 
@@ -128,8 +133,15 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
 
-    private void initParameters() {
+    private void initParameters(LayoutInflater inflater, ViewGroup container) {
         mContext = this.getActivity();
+        mRootView = inflater.inflate(R.layout.camera_layout, container, false);
+        mPreviewLayout = (RelativeLayout) mRootView.findViewById(R.id.preview_layout);
+        mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
+        mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
+        mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
+        mAcceptButton = (ImageButton) mRootView.findViewById(R.id.accept_image);
+        mCancelButton = (ImageButton) mRootView.findViewById(R.id.discard_image);
     }
     
     private void initializeCamera() {
@@ -301,7 +313,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (mCamera != null) {
             //if (mCameraPreview == null) {
 
-                mPreviewLayout = (RelativeLayout)mRootView.findViewById(R.id.preview_layout);
                 // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
                 if(supportsSDK(14)) {
                     mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
@@ -311,17 +322,15 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                     mPreviewLayout.addView(mCameraPreview);
                 }
                 
-                mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
+                
                 mShutterButton.setOnClickListener(getShutterListener());
                 mShutterButton.bringToFront();
                 mShutterButton.invalidate();
                 
-                mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
                 mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
                 mSwitchCameraButton.bringToFront();
                 mSwitchCameraButton.invalidate();
                 
-                mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
                 mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
                 mSwitchFlashButton.bringToFront();
                 mSwitchFlashButton.invalidate();
@@ -366,6 +375,66 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         startPreview();
     }
     
+    private OnClickListener getAcceptListener() {
+        if (mAcceptListener == null) {
+            mAcceptListener = new OnClickListener() {
+
+                @Override
+                public void onClick(View view) {
+                    Toast toast = Toast.makeText(getActivity(), "Saving Image...", Toast.LENGTH_LONG);
+                    toast.show();
+
+                    Log.d(TAG, "Accept Button Clicked.");
+                    if (writeBytesToFile(mPictureData, getDefaultSavePath() + getDefaultFilename())) {
+                        toast = Toast.makeText(mContext, "Image Saved Successfully.", Toast.LENGTH_LONG);
+                    }
+                    else {
+                        toast = Toast.makeText(mContext, "Failed to Save Image. See Log for Details.", Toast.LENGTH_LONG);
+                    }
+                    toast.show();
+                }
+            };
+        }
+        return mAcceptListener;
+    }
+    
+    private boolean writeBytesToFile(byte[] data, String filename) {
+        if (data == null) {
+            Log.d(TAG, "Data Was Empty, Not Writing to File");
+            return false;
+        }
+        Log.d(TAG, "Filename is" + filename);
+        try {
+            FileOutputStream output = new FileOutputStream(filename);
+            output.write(data);
+            output.close();
+
+            Log.d(TAG, "Image Saved Successfully");
+            return true;
+        } catch (IOException e) {
+            Log.d(TAG, "Saving Image Failed!");
+            return false;
+        }
+    }
+    
+    private String getDefaultSavePath() {
+        createSavingDirectory();
+        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + mContext.getPackageName() + "/";
+    }
+    
+    private String getDefaultFilename() {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
+        return "IMG_" + timeStamp + ".jpeg";
+    }
+    
+    private void createSavingDirectory() {
+        File sdcard = Environment.getExternalStorageDirectory();
+        File dir = new File(sdcard.getAbsoluteFile() + "/Android/data/" + mContext.getPackageName() + "/");
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
+        }
+    }
+    
     /*
      * This functionality has not been added to this project, so this always returns null.
      */
@@ -385,8 +454,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (mJpegCallback == null) {
             mJpegCallback = new PictureCallback() {
 
-                private byte[] mPictureData;
-
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     mPictureData = data;
@@ -400,8 +467,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private void setShutterRetake() {
         mPictureTaken = true;
         mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.btn_shutter_retake));
-        //mAcceptButton.setVisibility(View.VISIBLE);
-        //mCancelButton.setVisibility(View.VISIBLE);
+        mAcceptButton.setVisibility(View.VISIBLE);
+        mCancelButton.setVisibility(View.VISIBLE);
+        mSwitchCameraButton.setVisibility(View.GONE);
+        mSwitchFlashButton.setVisibility(View.GONE);
     }
     
     private void resetShutter() {
@@ -410,6 +479,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.btn_shutter));
         mAcceptButton.setVisibility(View.GONE);
         mCancelButton.setVisibility(View.GONE);
+        mSwitchCameraButton.setVisibility(View.VISIBLE);
+        mSwitchFlashButton.setVisibility(View.VISIBLE);
     }
     
     private OnClickListener getSwitchCameraListener() {

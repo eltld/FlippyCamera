@@ -71,5 +71,4 @@ public class CameraPreviewAdvanced extends TextureView implements
         mScaleDetector.onTouchEvent(event);
         return true;
     }
-    
 }

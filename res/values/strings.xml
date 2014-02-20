@@ -7,5 +7,7 @@
     <string name="shutter_button">Shutter Button</string>
     <string name="switch_camera">Switch Camera</string>
     <string name="switch_flash">Switch Flash</string>
+    <string name="accept_image">Accept Image</string>
+    <string name="discard_image">Discard Image</string>
 
 </resources>
