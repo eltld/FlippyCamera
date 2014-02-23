@@ -23,6 +23,8 @@ import android.widget.RelativeLayout;
 
 public class GalleryFragment extends Fragment {
 
+    public static final String TAG = "gallery_fragment";
+    
     private Utils mUtils;
     private ArrayList<String> mImagePaths = new ArrayList<String>();
     private GridViewImageAdapter mAdapter;

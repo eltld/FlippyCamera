@@ -55,7 +55,7 @@ public class CameraLoaderFragment extends Fragment {
             try {
                 fragmentList.add(Fragment.instantiate(context[0], CameraFragment.class.getName()));
                 fragmentList.add(Fragment.instantiate(context[0], GalleryFragment.class.getName()));
-                Thread.sleep(1000); // Only to show the startup fragment a little longer
+                Thread.sleep(100); // Only to show the startup fragment a little longer
             } catch (Exception e) {
                 Log.e(TAG, "Failed to instantiate fragments");
                 e.printStackTrace();

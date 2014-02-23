@@ -5,18 +5,23 @@ import java.util.List;
 import java.util.Vector;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
+import org.sebbas.android.interfaces.CameraFragmentListener;
 import org.sebbas.android.interfaces.ProgressListener;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 
-public class MainFragment extends FragmentActivity implements ProgressListener {
+public class MainFragment extends FragmentActivity implements ProgressListener, CameraFragmentListener {
 
     private static final String TAG_SPLASH_SCREEN = "splash_screen";
     private static final String TAG_CAMERA_LOADER = "camera_loader";
@@ -36,7 +41,7 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "ON CREATE");
         
-        initialiseStartup();
+        initialiseStartup2();
     }
     
     @Override
@@ -80,6 +85,7 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
         
         mSplashScreenFragment = new SplashScreenFragment();
         mFragmentManager.beginTransaction().add(android.R.id.content, mSplashScreenFragment, TAG_SPLASH_SCREEN).commit();
+        
         /*mFragmentManager = getSupportFragmentManager();
         
         mCameraLoaderFragment = (CameraLoaderFragment) mFragmentManager.findFragmentByTag(TAG_CAMERA_LOADER);
@@ -99,6 +105,20 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
             mSplashScreenFragment = new SplashScreenFragment();
             mFragmentManager.beginTransaction().add(android.R.id.content, mSplashScreenFragment, TAG_SPLASH_SCREEN).commit();
         }*/
+    }
+    
+    private void initialiseStartup2() {
+        mFragmentManager = getSupportFragmentManager();
+        
+        ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
+        fragmentList.add(Fragment.instantiate(getApplicationContext(), CameraFragment.class.getName()));
+        fragmentList.add(Fragment.instantiate(getApplicationContext(), GalleryFragment.class.getName()));
+        
+        mSplashScreenFragment = new SplashScreenFragment();
+        mFragmentManager.beginTransaction().add(android.R.id.content, mSplashScreenFragment, SplashScreenFragment.TAG).commit();
+        setContentView(R.layout.viewpager_layout);
+        
+        initialisePaging(fragmentList);
     }
     
     private boolean checkCompletionStatus() {
@@ -130,9 +150,28 @@ public class MainFragment extends FragmentActivity implements ProgressListener {
         // TODO Auto-generated method stub
     }
 
-	@Override
-	public void onCompletion() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void onCompletion() {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    private class FragmentLoader extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            return null;
+        }
+        
+    }
+
+    @Override
+    public void startupComplete() {
+        Log.d(TAG, "startupComplete");
+        FragmentManager fm = getSupportFragmentManager();
+        mSplashScreenFragment = (SplashScreenFragment) fm.findFragmentByTag(SplashScreenFragment.TAG);
+        if (mSplashScreenFragment != null) {
+            fm.beginTransaction().remove(mSplashScreenFragment).commit();
+        }
+    }
 }
