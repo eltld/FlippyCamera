@@ -63,6 +63,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ImageButton mShutterButton;
     private ImageButton mSwitchCameraButton;
     private ImageButton mSwitchFlashButton;
+    private ImageButton mGalleryButton;
+    private ImageButton mEffectButton;
     private OnClickListener mSwitchFlashListener;
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mShutterListener;
@@ -79,7 +81,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private FrameLayout mPreviewLayout;
     private OnClickListener mAcceptListener;
     RelativeLayout mShutterButtonContainer;
-    private RelativeLayout mControlLayout;
+    private FrameLayout mControlLayout;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ONCREATEVIEW");
@@ -143,22 +145,23 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
 
     private void initParameters(LayoutInflater inflater, ViewGroup container) {
         mContext = this.getActivity();
-        mRootView = inflater.inflate(R.layout.camera_layout, container, false);
+        
+        // If the device has on screen buttons/ a navigation bar, then we use a layout with an extra bottom margin
+        if (hasSoftButtons(mContext)) {
+            mRootView = inflater.inflate(R.layout.camera_layout_with_navigationbar, container, false);
+        } else {
+            mRootView = inflater.inflate(R.layout.camera_layout_without_navigationbar, container, false);
+        }
         mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.camera_preview_layout);
-        mControlLayout = (RelativeLayout) mRootView.findViewById(R.id.control_mask);
-        mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
+        mControlLayout = (FrameLayout) mRootView.findViewById(R.id.control_mask);
         
-        /*
-        View v = LayoutInflater.from(mContext).inflate(R.layout.imagebutton_shutterbutton, null);
-        mShutterButtonContainer = (RelativeLayout) v.findViewById(R.id.button_container);
-        mShutterButton = (ImageButton) mShutterButtonContainer.findViewById(R.id.shutter_button);*/
-        
-        //mShutterButtonContainer = (RelativeLayout) mRootView.findViewById(R.id.button_container);
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
-        
+        mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
         mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
         mAcceptButton = (ImageButton) mRootView.findViewById(R.id.accept_image);
         mCancelButton = (ImageButton) mRootView.findViewById(R.id.discard_image);
+        mGalleryButton = (ImageButton) mRootView.findViewById(R.id.goto_gallery);
+        mEffectButton = (ImageButton) mRootView.findViewById(R.id.apply_effect);
     }
     
     @SuppressLint("NewApi")
@@ -240,9 +243,9 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     // Check to see if the device supports the indicated SDK
     private static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return false;
+            return true;
         } 
-        return true;
+        return false;
     }
     
     @SuppressLint("NewApi")
@@ -335,74 +338,31 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     @SuppressLint("NewApi")
     private void startPreview() {
         if (mCamera != null) {
-            //if (mCameraPreview == null) {
-
-                
-                // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
-                if (supportsSDK(14)) {
-                    mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
-                    mPreviewLayout.addView(mCameraPreviewAdvanced);
-                } else {
-                    mCameraPreview = new CameraPreview(mContext, this, mCamera);
-                    mPreviewLayout.addView(mCameraPreview);
-                }
-                mControlLayout.bringToFront();
-                //mPreviewLayout.addView(mShutterButtonContainer);
-                //positionShutterButtonContainer();
-                
-                //mShutterButtonContainer.bringToFront();
-                //mShutterButtonContainer.invalidate();
-                
-                mShutterButton.setOnClickListener(getShutterListener());
-                mShutterButton.bringToFront();
-                mShutterButton.invalidate();
-                
-                mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
-                mSwitchCameraButton.bringToFront();
-                mSwitchCameraButton.invalidate();
-                
-                mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
-                mSwitchFlashButton.bringToFront();
-                mSwitchFlashButton.invalidate();
-                if(supportsSDK(14)) {
-                    mCameraPreviewAdvanced.invalidate();
-                } else {
-                    mCameraPreview.invalidate();
-                }
-                Log.d(TAG, "New Preview Started");
-            /*} else {
-                mCamera.startPreview();
-            }*/
+            
+            // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
+            if (supportsSDK(14)) {
+                mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
+                mPreviewLayout.addView(mCameraPreviewAdvanced);
+            } else {
+                mCameraPreview = new CameraPreview(mContext, this, mCamera);
+                mPreviewLayout.addView(mCameraPreview);
+            }
+            
+            mShutterButton.setOnClickListener(getShutterListener());
+            mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
+            mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
+            
+            mControlLayout.bringToFront();
+            mControlLayout.invalidate();
+            Log.d(TAG, "New Preview Started");
         }
-    }
-    
-    @SuppressLint("NewApi")
-    private void positionShutterButtonContainer() {
-        // TODO THis is wrong
-       if (hasSoftButtons() && !supportsSDK(11)) {
-           System.out.println("Entered");
-           
-           mShutterButtonContainer.setPadding(0, 0, 0, getStatusBarHeight()*2);
-           mShutterButtonContainer.bringToFront();
-       }
-    }
-    
-    public int getStatusBarHeight() {
-        int result = 0;
-        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
-
-        if (resourceId > 0) {
-            result = getResources().getDimensionPixelSize(resourceId);
-        }
-        return result;
     }
     
     // Check if the device has soft buttons
     @SuppressLint("NewApi")
-    private boolean hasSoftButtons() {
-        // TODO THis is wrong 
-        if (!supportsSDK(14)) {
-            return !ViewConfiguration.get(mContext).hasPermanentMenuKey();
+    private static boolean hasSoftButtons(Context context) {
+        if (supportsSDK(14)) {
+            return !ViewConfiguration.get(context).hasPermanentMenuKey();
         }
         return false;
     }

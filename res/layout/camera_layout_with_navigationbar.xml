@@ -2,21 +2,23 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/camera_preview_layout">
-     
-<RelativeLayout 
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/control_mask"
-    android:orientation="vertical"
-    android:paddingBottom="48dp">
+    android:id="@+id/camera_preview_layout"
+    android:orientation="vertical">
     
+    <!-- Here we will programmatically add the camera preview -->
+    
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="10dp"
+        android:id="@+id/control_mask">
+        
     <ImageButton
         android:id="@+id/switch_flash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:padding="5dp"
+        android:layout_gravity="top|left"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off" />
@@ -25,8 +27,8 @@
         android:id="@+id/switch_camera"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:padding="5dp"
+        android:layout_gravity="top|right"
         android:contentDescription="@string/switch_camera"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_switch_camera" />
@@ -35,8 +37,8 @@
         android:id="@+id/accept_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:padding="5dp"
+        android:layout_gravity="top|right"
         android:contentDescription="@string/accept_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
@@ -46,19 +48,20 @@
         android:id="@+id/discard_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:padding="5dp"
+        android:layout_gravity="top|left"
         android:contentDescription="@string/discard_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
         android:src="@drawable/ic_action_discard" />
     
     <ImageButton
-        android:id="@+id/switch_flash3"
+        android:id="@+id/apply_effect"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentBottom="true"
+        android:padding="5dp"
+        android:layout_gravity="bottom|left"
+        android:layout_marginBottom="48dp"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off" 
@@ -66,24 +69,31 @@
         
     <ImageButton 
         android:id="@+id/shutter_button"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentBottom="true"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:padding="5dp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="48dp"
         android:contentDescription="@string/shutter_button"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/btn_shutter" />
     
     <ImageButton
-        android:id="@+id/switch_flash2"
+        android:id="@+id/goto_gallery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="true"
+        android:padding="5dp"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="48dp"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
-        android:src="@drawable/ic_action_flash_off" />
-
+        android:src="@drawable/ic_action_picture" />
     
-</RelativeLayout>
+    <View
+        android:id="@+id/navigationbar_filler_view"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_gravity="bottom"/>
+    
+    </FrameLayout>
 </FrameLayout>
