@@ -14,6 +14,7 @@ import org.sebbas.android.views.CameraPreviewAdvanced;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
@@ -26,6 +27,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -68,6 +70,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private OnClickListener mSwitchFlashListener;
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mShutterListener;
+    private OnClickListener mGalleryListener;
+    private OnClickListener mEffectListener;
     private MediaRecorder mMediaRecorder;
     private View mRootView;
     protected boolean mPictureTaken = false;
@@ -351,6 +355,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             mShutterButton.setOnClickListener(getShutterListener());
             mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
             mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
+            mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
             
             mControlLayout.bringToFront();
             mControlLayout.invalidate();
@@ -365,6 +370,17 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             return !ViewConfiguration.get(context).hasPermanentMenuKey();
         }
         return false;
+    }
+    
+    private OnClickListener getSwitchToGalleryListener() {
+        mGalleryListener = new OnClickListener() {
+
+            @Override
+            public void onClick(View view) {
+                // TODO
+            }
+        };
+        return mGalleryListener;
     }
     
     private OnClickListener getShutterListener() {
