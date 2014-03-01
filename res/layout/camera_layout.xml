@@ -1,35 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:id="@+id/camera_preview_layout">
+     
+<RelativeLayout 
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/control_mask"
+    android:orientation="vertical"
+    android:paddingBottom="48dp">
     
-    <RelativeLayout 
-        android:id="@+id/preview_layout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" >
-
-    <ImageButton
-        android:id="@+id/shutter_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:background="@android:color/transparent"
-        android:contentDescription="@string/shutter_button"
-        android:padding="10dp"
-        android:paddingBottom="50dp"
-        android:src="@drawable/btn_shutter" />
-
     <ImageButton
         android:id="@+id/switch_flash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off" />
@@ -40,9 +27,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:padding="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
         android:contentDescription="@string/switch_camera"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_switch_camera" />
@@ -53,9 +37,6 @@
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
-        android:padding="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginRight="10dp"
         android:contentDescription="@string/accept_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
@@ -67,13 +48,42 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:padding="5dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
         android:contentDescription="@string/discard_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
         android:src="@drawable/ic_action_discard" />
+    
+    <ImageButton
+        android:id="@+id/switch_flash3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/switch_flash"
+        android:background="@drawable/ic_button_selector"
+        android:src="@drawable/ic_action_flash_off" 
+        android:fitsSystemWindows="true" />
+        
+    <ImageButton 
+        android:id="@+id/shutter_button"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/shutter_button"
+        android:background="@drawable/ic_button_selector"
+        android:src="@drawable/btn_shutter" />
+    
+    <ImageButton
+        android:id="@+id/switch_flash2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:contentDescription="@string/switch_flash"
+        android:background="@drawable/ic_button_selector"
+        android:src="@drawable/ic_action_flash_off" />
 
-    </RelativeLayout>
-</LinearLayout>
+    
+</RelativeLayout>
+</FrameLayout>

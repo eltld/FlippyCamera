@@ -5,7 +5,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 
 import org.sebbas.android.interfaces.CameraFragmentListener;
@@ -21,7 +20,6 @@ import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
-import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -29,13 +27,17 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -74,14 +76,14 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ImageButton mCancelButton;
     private ImageButton mAcceptButton;
     private byte[] mPictureData;
-    private RelativeLayout mPreviewLayout;
+    private FrameLayout mPreviewLayout;
     private OnClickListener mAcceptListener;
-    private CameraFragmentListener mCameraFragmentListener;
+    RelativeLayout mShutterButtonContainer;
+    private RelativeLayout mControlLayout;
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ONCREATEVIEW");
         initParameters(inflater, container);
-        hideSystemNavigation();
         return mRootView;
     }
 
@@ -98,14 +100,14 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         Log.d(TAG, "ONRESUME");
         super.onResume();
         
-        initializeCamera();
-        startPreview();
+        CameraInitializer ci = new CameraInitializer();
+        ci.execute();
         
-        if(!supportsSDK(14)) {
+        /*if(!supportsSDK(14)) {
             mCameraPreview.setVisibility(View.VISIBLE);
         } else {
-            //mCameraPreviewAdvanced.setVisibility(View.VISIBLE);
-        }
+            mCameraPreviewAdvanced.setVisibility(View.VISIBLE);
+        }*/
         
     }
     
@@ -130,21 +132,30 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     public void onStop() {
         Log.d(TAG, "ONSTOP");
         super.onStop();
-        if(!supportsSDK(14)) {
+        /*if(!supportsSDK(14)) {
             mCameraPreview.setVisibility(View.INVISIBLE);
             mCameraPreview = null;
         } else {
             mCameraPreviewAdvanced.setVisibility(View.INVISIBLE);
             mCameraPreviewAdvanced = null;
-        }
+        }*/
     }
 
     private void initParameters(LayoutInflater inflater, ViewGroup container) {
         mContext = this.getActivity();
         mRootView = inflater.inflate(R.layout.camera_layout, container, false);
-        mPreviewLayout = (RelativeLayout) mRootView.findViewById(R.id.preview_layout);
+        mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.camera_preview_layout);
+        mControlLayout = (RelativeLayout) mRootView.findViewById(R.id.control_mask);
         mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
+        
+        /*
+        View v = LayoutInflater.from(mContext).inflate(R.layout.imagebutton_shutterbutton, null);
+        mShutterButtonContainer = (RelativeLayout) v.findViewById(R.id.button_container);
+        mShutterButton = (ImageButton) mShutterButtonContainer.findViewById(R.id.shutter_button);*/
+        
+        //mShutterButtonContainer = (RelativeLayout) mRootView.findViewById(R.id.button_container);
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
+        
         mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
         mAcceptButton = (ImageButton) mRootView.findViewById(R.id.accept_image);
         mCancelButton = (ImageButton) mRootView.findViewById(R.id.discard_image);
@@ -229,9 +240,9 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     // Check to see if the device supports the indicated SDK
     private static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return true;
+            return false;
         } 
-        return false;
+        return true;
     }
     
     @SuppressLint("NewApi")
@@ -326,15 +337,21 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (mCamera != null) {
             //if (mCameraPreview == null) {
 
+                
                 // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
-                if(supportsSDK(14)) {
+                if (supportsSDK(14)) {
                     mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
                     mPreviewLayout.addView(mCameraPreviewAdvanced);
                 } else {
                     mCameraPreview = new CameraPreview(mContext, this, mCamera);
                     mPreviewLayout.addView(mCameraPreview);
                 }
+                mControlLayout.bringToFront();
+                //mPreviewLayout.addView(mShutterButtonContainer);
+                //positionShutterButtonContainer();
                 
+                //mShutterButtonContainer.bringToFront();
+                //mShutterButtonContainer.invalidate();
                 
                 mShutterButton.setOnClickListener(getShutterListener());
                 mShutterButton.bringToFront();
@@ -347,18 +364,47 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
                 mSwitchFlashButton.bringToFront();
                 mSwitchFlashButton.invalidate();
-                
                 if(supportsSDK(14)) {
                     mCameraPreviewAdvanced.invalidate();
                 } else {
                     mCameraPreview.invalidate();
                 }
-                
                 Log.d(TAG, "New Preview Started");
             /*} else {
                 mCamera.startPreview();
             }*/
         }
+    }
+    
+    @SuppressLint("NewApi")
+    private void positionShutterButtonContainer() {
+        // TODO THis is wrong
+       if (hasSoftButtons() && !supportsSDK(11)) {
+           System.out.println("Entered");
+           
+           mShutterButtonContainer.setPadding(0, 0, 0, getStatusBarHeight()*2);
+           mShutterButtonContainer.bringToFront();
+       }
+    }
+    
+    public int getStatusBarHeight() {
+        int result = 0;
+        int resourceId = getResources().getIdentifier("status_bar_height", "dimen", "android");
+
+        if (resourceId > 0) {
+            result = getResources().getDimensionPixelSize(resourceId);
+        }
+        return result;
+    }
+    
+    // Check if the device has soft buttons
+    @SuppressLint("NewApi")
+    private boolean hasSoftButtons() {
+        // TODO THis is wrong 
+        if (!supportsSDK(14)) {
+            return !ViewConfiguration.get(mContext).hasPermanentMenuKey();
+        }
+        return false;
     }
     
     private OnClickListener getShutterListener() {
@@ -385,6 +431,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
 
     private void retakePicture() {
         resetShutter();
+        removeCameraPreviewView();
         startPreview();
     }
     
@@ -481,7 +528,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     
     private void setShutterRetake() {
         mPictureTaken = true;
-        mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.btn_shutter_retake));
+        mShutterButton.setImageDrawable(getResources().getDrawable(R.drawable.shutter_button));
         mAcceptButton.setVisibility(View.VISIBLE);
         mCancelButton.setVisibility(View.VISIBLE);
         mAcceptButton.bringToFront();
@@ -490,6 +537,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mSwitchFlashButton.setVisibility(View.GONE);
     }
     
+    @SuppressLint("NewApi")
     private void resetShutter() {
         mPictureTaken = false;
         mPictureData = null;
@@ -673,6 +721,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
+    
     // This sets up and starts the media recorder
     private class MediarRecorderInitializer extends AsyncTask<Void, Void, Void> {
 
@@ -680,7 +729,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         protected Void doInBackground(Void... params) {
             prepareMediaRecorder();
             startMediaRecorder();
-            
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

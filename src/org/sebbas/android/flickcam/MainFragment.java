@@ -20,6 +20,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.ViewGroup;
+import android.view.ViewGroup.LayoutParams;
 
 public class MainFragment extends FragmentActivity implements ProgressListener, CameraFragmentListener {
 
@@ -115,26 +117,12 @@ public class MainFragment extends FragmentActivity implements ProgressListener, 
         fragmentList.add(Fragment.instantiate(getApplicationContext(), GalleryFragment.class.getName()));
         
         mSplashScreenFragment = new SplashScreenFragment();
-        mFragmentManager.beginTransaction().add(android.R.id.content, mSplashScreenFragment, SplashScreenFragment.TAG).commit();
+        //mFragmentManager.beginTransaction().add(android.R.id.content, mSplashScreenFragment, SplashScreenFragment.TAG).commit();
         setContentView(R.layout.viewpager_layout);
         
         initialisePaging(fragmentList);
     }
     
-    private boolean checkCompletionStatus() {
-        if (mCameraLoaderFragment.hasLoaded()) {
-            //onCompletion(mCameraLoaderFragment.hasLoaded());
-            FragmentManager fm = getSupportFragmentManager();
-            mSplashScreenFragment = (SplashScreenFragment) fm.findFragmentByTag(TAG_SPLASH_SCREEN);
-            if (mSplashScreenFragment != null) {
-                fm.beginTransaction().remove(mSplashScreenFragment).commit();
-            }
-            
-            return true;
-        }
-        mCameraLoaderFragment.setProgressListener(this);
-        return false;
-    }
 
     @Override
     public void onCompletion(ArrayList<Fragment> fragmentList) {
@@ -153,15 +141,6 @@ public class MainFragment extends FragmentActivity implements ProgressListener, 
     @Override
     public void onCompletion() {
         // TODO Auto-generated method stub
-        
-    }
-    
-    private class FragmentLoader extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            return null;
-        }
         
     }
 

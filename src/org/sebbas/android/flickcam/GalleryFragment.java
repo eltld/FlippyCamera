@@ -32,7 +32,7 @@ public class GalleryFragment extends Fragment {
     private int mColumnWidth;
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        GridView gridView = (GridView)inflater.inflate(R.layout.activity_grid_view, container, false);
+        GridView gridView = (GridView)inflater.inflate(R.layout.gallery_grid_view, container, false);
         
         mGridView = (GridView)gridView.findViewById(R.id.grid_view);
         
@@ -61,7 +61,6 @@ public class GalleryFragment extends Fragment {
                 
             }
         });
-        
         return gridView;
     }
     

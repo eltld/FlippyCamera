@@ -1,5 +1,7 @@
 package org.sebbas.android.views;
 
+import java.io.IOException;
+
 import org.sebbas.android.interfaces.CameraPreviewListener;
 import org.sebbas.android.listener.ScaleListener;
 
@@ -58,7 +60,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-    	Log.d(TAG, "Surface was Created");
+        Log.d(TAG, "Surface was Created");
     }
 
     @Override
