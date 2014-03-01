@@ -35,8 +35,6 @@ public class MainFragment extends FragmentActivity implements ProgressListener, 
     private CameraLoaderFragment mCameraLoaderFragment;
     private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
-    private Fragment mCameraFragment;
-    private Fragment mGalleryFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

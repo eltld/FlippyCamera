@@ -35,17 +35,17 @@ public final class R {
         public static final int ic_action_flash_off=0x7f02000b;
         public static final int ic_action_flash_on=0x7f02000c;
         public static final int ic_action_picture=0x7f02000d;
-        public static final int ic_action_switch_camera=0x7f02000e;
-        public static final int ic_button_selector=0x7f02000f;
-        public static final int ic_launcher=0x7f020010;
-        public static final int shutter_button=0x7f020011;
-        public static final int shutter_button_pressed=0x7f020012;
-        public static final int splash_screen_bg=0x7f020013;
+        public static final int ic_action_settings=0x7f02000e;
+        public static final int ic_action_switch_camera=0x7f02000f;
+        public static final int ic_button_selector=0x7f020010;
+        public static final int ic_launcher=0x7f020011;
+        public static final int shutter_button=0x7f020012;
+        public static final int shutter_button_pressed=0x7f020013;
+        public static final int splash_screen_bg=0x7f020014;
     }
     public static final class id {
         public static final int accept_image=0x7f080004;
         public static final int action_settings=0x7f080015;
-        public static final int apply_effect=0x7f080006;
         public static final int btnClose=0x7f080012;
         public static final int button_container2=0x7f08000d;
         public static final int camera_preview_layout=0x7f080000;
@@ -58,6 +58,7 @@ public final class R {
         public static final int navigationbar_filler_view=0x7f080009;
         public static final int pager=0x7f08000c;
         public static final int progressBar1=0x7f080014;
+        public static final int settings_button=0x7f080006;
         public static final int shutter_button=0x7f080007;
         public static final int shutter_button2=0x7f08000f;
         public static final int splash_icon=0x7f080013;
