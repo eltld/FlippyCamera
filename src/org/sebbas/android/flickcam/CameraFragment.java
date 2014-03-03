@@ -52,6 +52,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private static final int MAX_VIDEO_DURATION = 60000;
     private static final long MAX_FILE_SIZE = 500000;
     private static final String VIDEO_PATH_NAME = "/FlickCam.mp4/";
+    private static final int GALLERY_FRAGMENT_NUMBER = 2;
+    private static final String ALBUM_NAME = "FlickCam";
     
     private Camera mCamera;
     private int mCurrentCameraId;
@@ -70,11 +72,15 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ImageButton mSwitchFlashButton;
     private ImageButton mGalleryButton;
     private ImageButton mSettingsButton;
+    private ImageButton mCancelButton;
+    private ImageButton mAcceptButton;
     private OnClickListener mSwitchFlashListener;
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mShutterListener;
     private OnClickListener mGalleryListener;
     private OnClickListener mSettingsListener;
+    private OnClickListener mAcceptListener;
+    private OnClickListener mCancelListener;
     private MediaRecorder mMediaRecorder;
     private View mRootView;
     protected boolean mPictureTaken = false;
@@ -82,14 +88,17 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
     private PictureCallback mJpegCallback;
-    private ImageButton mCancelButton;
-    private ImageButton mAcceptButton;
     private byte[] mPictureData;
     private FrameLayout mPreviewLayout;
-    private OnClickListener mAcceptListener;
-    RelativeLayout mShutterButtonContainer;
     private FrameLayout mControlLayout;
     private ViewPager mViewPager;
+    private CameraFragmentListener mCameraFragmentListener;
+    
+    // Static factory method that returns a new fragment instance to the client
+    public static CameraFragment newInstance() {
+        CameraFragment cf = new CameraFragment();
+        return cf;
+    }
     
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ONCREATEVIEW");
@@ -103,7 +112,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         super.onStart();
     }
 
-    
     @SuppressLint("NewApi")
     @Override
     public void onResume() {
@@ -171,6 +179,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mGalleryButton = (ImageButton) mRootView.findViewById(R.id.goto_gallery);
         mSettingsButton = (ImageButton) mRootView.findViewById(R.id.settings_button);
         mViewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
+        
+        mCameraFragmentListener = (CameraFragmentListener) mContext;
     }
     
     @SuppressLint("NewApi")
@@ -365,6 +375,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
             mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
             mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
+            mAcceptButton.setOnClickListener(getAcceptListener());
+            mCancelButton.setOnClickListener(getCancelListener());
             
             mControlLayout.bringToFront();
             mControlLayout.invalidate();
@@ -386,7 +398,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
 
             @Override
             public void onClick(View view) {
-                mViewPager.setCurrentItem(2);
+                mViewPager.setCurrentItem(GALLERY_FRAGMENT_NUMBER);
             }
         };
         return mGalleryListener;
@@ -426,12 +438,20 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
 
                 @Override
                 public void onClick(View view) {
-                    Toast toast = Toast.makeText(mContext, "Saving Image...", Toast.LENGTH_LONG);
+                    Toast toast;
+                    if (!isExternalStorageWritable()) {
+                        toast = Toast.makeText(mContext, "Cannot save image. No storage available", Toast.LENGTH_LONG);
+                        toast.show();
+                        return;
+                    }
+                    
+                    toast = Toast.makeText(mContext, "Saving Image...", Toast.LENGTH_LONG);
                     toast.show();
 
                     Log.d(TAG, "Accept Button Clicked.");
-                    if (writeBytesToFile(mPictureData, getDefaultSavePath() + getDefaultFilename())) {
+                    if (writeBytesToFile(mPictureData, getAlbumStorageDir() + "/" + getDefaultFilename())) {
                         toast = Toast.makeText(mContext, "Image Saved Successfully.", Toast.LENGTH_LONG);
+                        refreshUI();
                     }
                     else {
                         toast = Toast.makeText(mContext, "Failed to Save Image. See Log for Details.", Toast.LENGTH_LONG);
@@ -443,12 +463,29 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         return mAcceptListener;
     }
     
+    private void refreshUI() {
+        mCameraFragmentListener.updateAdapter();
+    }
+    
+    private OnClickListener getCancelListener() {
+        if (mCancelListener == null) {
+            mCancelListener = new OnClickListener() {
+
+                @Override
+                public void onClick(View v) {
+                    resetShutter();
+                }
+            };
+        }
+        return mCancelListener;
+    }
+    
     private boolean writeBytesToFile(byte[] data, String filename) {
         if (data == null) {
             Log.d(TAG, "Data Was Empty, Not Writing to File");
             return false;
         }
-        Log.d(TAG, "Filename is" + filename);
+        Log.d(TAG, "Filename is " + filename);
         try {
             FileOutputStream output = new FileOutputStream(filename);
             output.write(data);
@@ -462,22 +499,28 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
-    private String getDefaultSavePath() {
-        createSavingDirectory();
-        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/Android/data/" + mContext.getPackageName() + "/";
-    }
-    
     private String getDefaultFilename() {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         return "IMG_" + timeStamp + ".jpeg";
     }
     
-    private void createSavingDirectory() {
-        File sdcard = Environment.getExternalStorageDirectory();
-        File dir = new File(sdcard.getAbsoluteFile() + "/Android/data/" + mContext.getPackageName() + "/");
-        if (!dir.isDirectory()) {
-            dir.mkdirs();
+    public File getAlbumStorageDir() {
+        // Get the directory for the user's public pictures directory.
+        File file = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), ALBUM_NAME);
+        if (!file.mkdirs()) {
+            Log.e(TAG, "Directory not created");
         }
+        return file;
+    }
+    
+    /* Checks if external storage is available for read and write */
+    public boolean isExternalStorageWritable() {
+        String state = Environment.getExternalStorageState();
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            return true;
+        }
+        return false;
     }
     
     /*
@@ -540,15 +583,17 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             @Override
             public void onClick(View v) {
                 Log.d(TAG, "Camera switched");
-                stopMediaRecorder();
+                deinitializeCamera();
+                //stopMediaRecorder();
+                //releaseMediaRecorder();
                 //removeCameraPreviewView();
-                /*deinitializeCamera();
                 
-                releaseMediaRecorder();
+                
+                
                 
                 switchCamera();
                 CameraInitializer ci = new CameraInitializer();
-                ci.execute();*/
+                ci.execute();
             }
         };
         return mSwitchCameraListener;
@@ -617,8 +662,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         //mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
         //mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
         //mMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
-        mMediaRecorder.setVideoSize(1280, 720);
-        mMediaRecorder.setVideoFrameRate(30);
+        //mMediaRecorder.setVideoSize(1280, 720);
+        //mMediaRecorder.setVideoFrameRate(30);
         
         mMediaRecorder.setOutputFile(getPipeFD()/*getFile().getAbsolutePath()*/);
         //mMediaRecorder.setMaxDuration(MAX_VIDEO_DURATION);
@@ -732,9 +777,9 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-            }
-            stopMediaRecorder(); // We immediately stop the recorder because there is no need to record, we just need the preview
-            */
+            }*/
+            //stopMediaRecorder(); // We immediately stop the recorder because there is no need to record, we just need the preview
+            
             
             return null;
         }
@@ -742,8 +787,23 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
-                CameraFragmentListener listener = (CameraFragmentListener) mContext; 
-                listener.startupComplete();
+                 mCameraFragmentListener.startupComplete();
+        }
+    }
+    
+    
+    // Very likely to be used later
+    
+    private String getDefaultSavePath() {
+        createSavingDirectory();
+        return Environment.getExternalStorageDirectory().getAbsolutePath() + "/FlickCam/" + mContext.getPackageName() + "/";
+    }
+    
+    private void createSavingDirectory() {
+        File sdcard = Environment.getExternalStorageDirectory();
+        File dir = new File(sdcard.getAbsoluteFile() + "/FlickCam/" + mContext.getPackageName() + "/");
+        if (!dir.isDirectory()) {
+            dir.mkdirs();
         }
     }
 }

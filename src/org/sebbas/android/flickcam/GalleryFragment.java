@@ -1,8 +1,6 @@
 package org.sebbas.android.flickcam;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
@@ -19,7 +17,6 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.RelativeLayout;
 
 public class GalleryFragment extends Fragment {
 
@@ -31,25 +28,30 @@ public class GalleryFragment extends Fragment {
     private GridView mGridView;
     private int mColumnWidth;
     
+    // Static factory method that returns a new fragment instance to the client
+    public static GalleryFragment newInstance() {
+        GalleryFragment gf = new GalleryFragment();
+        return gf;
+    }
+    
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    
         GridView gridView = (GridView)inflater.inflate(R.layout.gallery_grid_view, container, false);
-        
         mGridView = (GridView)gridView.findViewById(R.id.grid_view);
-        
         mUtils = new Utils(this.getActivity());
- 
-        // Initilizing Grid View
-        initilizeGridLayout();
- 
-        // loading all image paths from SD card
-        mImagePaths = mUtils.getFilePaths();
- 
-        // Gridview adapter
-        mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
- 
-        // setting grid view adapter
-        mGridView.setAdapter(mAdapter);
         
+        setupGridView();
+        
+        return gridView;
+    }
+
+    public void setupGridView() {
+        initilizeGridLayout();
+        setGridViewAdapter();
+        setGridViewClickListener();
+    }
+
+    private void setGridViewClickListener() {
         mGridView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
@@ -61,7 +63,17 @@ public class GalleryFragment extends Fragment {
                 
             }
         });
-        return gridView;
+    }
+
+    private void setGridViewAdapter() {
+        // loading all image paths from SD card
+        mImagePaths = mUtils.getFilePaths();
+ 
+        // Gridview adapter
+        mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
+ 
+        // setting grid view adapter
+        mGridView.setAdapter(mAdapter);
     }
     
     private void initilizeGridLayout() {

@@ -45,27 +45,23 @@ public final class R {
     }
     public static final class id {
         public static final int accept_image=0x7f080004;
-        public static final int action_settings=0x7f080015;
-        public static final int btnClose=0x7f080012;
-        public static final int button_container2=0x7f08000d;
+        public static final int action_settings=0x7f080011;
+        public static final int btnClose=0x7f08000e;
         public static final int camera_preview_layout=0x7f080000;
         public static final int control_mask=0x7f080001;
         public static final int discard_image=0x7f080005;
         public static final int gallery=0x7f08000b;
         public static final int goto_gallery=0x7f080008;
         public static final int grid_view=0x7f08000a;
-        public static final int imgDisplay=0x7f080011;
+        public static final int imgDisplay=0x7f08000d;
         public static final int navigationbar_filler_view=0x7f080009;
         public static final int pager=0x7f08000c;
-        public static final int progressBar1=0x7f080014;
+        public static final int progressBar1=0x7f080010;
         public static final int settings_button=0x7f080006;
         public static final int shutter_button=0x7f080007;
-        public static final int shutter_button2=0x7f08000f;
-        public static final int splash_icon=0x7f080013;
+        public static final int splash_icon=0x7f08000f;
         public static final int switch_camera=0x7f080003;
         public static final int switch_flash=0x7f080002;
-        public static final int switch_flash24=0x7f080010;
-        public static final int switch_flash34=0x7f08000e;
         public static final int viewpager=0x01010000;
     }
     public static final class layout {
@@ -74,10 +70,9 @@ public final class R {
         public static final int gallery_grid_view=0x7f030002;
         public static final int gallery_layout=0x7f030003;
         public static final int image_fullscreen_view=0x7f030004;
-        public static final int imagebutton_shutterbutton=0x7f030005;
-        public static final int layout_fullscreen_image=0x7f030006;
-        public static final int splash_screen=0x7f030007;
-        public static final int viewpager_layout=0x7f030008;
+        public static final int layout_fullscreen_image=0x7f030005;
+        public static final int splash_screen=0x7f030006;
+        public static final int viewpager_layout=0x7f030007;
     }
     public static final class menu {
         public static final int main=0x7f070000;
