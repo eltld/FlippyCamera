@@ -2,6 +2,7 @@ package org.sebbas.android.flickcam;
 
 import org.sebbas.android.adapter.FullScreenImageAdapter;
 import org.sebbas.android.helper.Utils;
+import org.sebbas.android.viewpager.ZoomOutPageTransformer;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -30,7 +31,7 @@ public class FullScreenViewActivity extends Activity{
                 mUtils.getFilePaths());
 
         mViewPager.setAdapter(mAdapter);
-
+        mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         // displaying selected image first
         mViewPager.setCurrentItem(position);
     }

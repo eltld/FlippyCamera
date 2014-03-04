@@ -6,6 +6,29 @@
     android:orientation="vertical">
     
     <!-- Here we will programmatically add the camera preview -->
+    <ViewFlipper 
+        android:id="@+id/camera_view_flipper"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center">
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/splash_screen_bg"
+            android:gravity="center"
+            android:orientation="vertical" >
+
+        <ImageView
+            android:id="@+id/splash_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:scaleX="1.5"
+            android:scaleY="1.5"
+            android:contentDescription="@string/app_name"
+            android:src="@drawable/ic_action_camera" />
+        </LinearLayout>
+    </ViewFlipper>
     
     <FrameLayout 
         android:layout_width="match_parent"
@@ -38,7 +61,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:layout_gravity="top|right"
+        android:layout_gravity="bottom|right"
+        android:layout_marginBottom="48dp"
         android:contentDescription="@string/accept_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
@@ -49,7 +73,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:layout_gravity="top|left"
+        android:layout_gravity="bottom|left"
+        android:layout_marginBottom="48dp"
         android:contentDescription="@string/discard_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"

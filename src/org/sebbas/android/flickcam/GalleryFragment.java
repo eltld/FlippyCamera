@@ -59,6 +59,7 @@ public class GalleryFragment extends Fragment {
                     long id) {
                 Intent i = new Intent(GalleryFragment.this.getActivity(), FullScreenViewActivity.class);
                 i.putExtra("position", position);
+                System.out.println("Clicked on position " + position);
                 GalleryFragment.this.getActivity().startActivity(i);
                 
             }

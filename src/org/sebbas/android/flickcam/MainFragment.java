@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
 import org.sebbas.android.interfaces.CameraFragmentListener;
+import org.sebbas.android.viewpager.DepthPageTransformer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -22,12 +23,43 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
     private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
 
+
+    private boolean mShowingFrontCamera;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "ON CREATE");
         
-        initialiseStartup();
+        mFragmentManager = getSupportFragmentManager();
+        
+        /*CameraFragment cameraFragment = CameraFragment.newInstance();
+        GalleryFragment galleryFragment = GalleryFragment.newInstance();
+        SplashScreenFragment splashScreenFragment = SplashScreenFragment.newInstance();
+        
+        ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
+        fragmentList.add(cameraFragment);
+        fragmentList.add(galleryFragment);*/
+        System.out.println("Called mainfragment");
+        /*if (savedInstanceState == null) {
+            mFragmentManager
+                    .beginTransaction()
+                    .add(R.id.viewpager, CameraFragment.newInstance(0), CameraFragment.TAG)
+                    .commit();
+        }*/
+        
+        // Optional splash screen that stays as long as the camera initializes
+        //mFragmentManager.beginTransaction().add(android.R.id.content, splashScreenFragment, SplashScreenFragment.TAG).commit();
+        
+        setContentView(R.layout.viewpager_layout);
+        
+        mPagerAdapter = new MainPagerAdapter(mFragmentManager);
+        ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
+        
+        // This fixes the overlapping fragments inside the viewpager
+        pager.setPageMargin(getPageMargin());
+        pager.setPageTransformer(true, new DepthPageTransformer());
+        pager.setAdapter(mPagerAdapter);
     }
     
     @Override
@@ -44,34 +76,10 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
         
     }
     
-    private void initialiseStartup() {
-        mFragmentManager = getSupportFragmentManager();
-        
-        CameraFragment cameraFragment = CameraFragment.newInstance();
-        GalleryFragment galleryFragment = GalleryFragment.newInstance();
-        SplashScreenFragment splashScreenFragment = SplashScreenFragment.newInstance();
-        
-        ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
-        fragmentList.add(cameraFragment);
-        fragmentList.add(galleryFragment);
-        
-        mFragmentManager.beginTransaction().add(android.R.id.content, splashScreenFragment, SplashScreenFragment.TAG).commit();
-        setContentView(R.layout.viewpager_layout);
-        
-        initialisePaging(fragmentList);
+    private int getPageMargin() {
+        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
     
-    private void initialisePaging(ArrayList<Fragment> fragmentList) {
-        System.out.println("initialisePaging");
-        mPagerAdapter = new MainPagerAdapter(super.getSupportFragmentManager(), fragmentList);
-        ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
-        
-        // This fixes the overlapping fragments inside the viewpager
-        int margin = (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
-        pager.setPageMargin(margin);
-        
-        pager.setAdapter(mPagerAdapter);
-    }
     
     @Override
     public void startupComplete() {
@@ -84,7 +92,12 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
     }
     
     @Override
-    public void updateAdapter() {
+    public void refreshAdapter() {
         mPagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void switchCameraFragment() {
+        mPagerAdapter.switchCameraFragment();
     }
 }

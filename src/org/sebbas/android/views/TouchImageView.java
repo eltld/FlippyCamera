@@ -1,4 +1,4 @@
-package org.sebbas.android.helper;
+package org.sebbas.android.views;
 
 import android.content.Context;
 import android.graphics.Matrix;

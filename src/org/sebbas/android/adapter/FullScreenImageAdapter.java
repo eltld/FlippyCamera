@@ -3,7 +3,7 @@ package org.sebbas.android.adapter;
 import java.util.ArrayList;
 
 import org.sebbas.android.flickcam.R;
-import org.sebbas.android.helper.TouchImageView;
+import org.sebbas.android.views.TouchImageView;
 
 import android.app.Activity;
 import android.content.Context;
