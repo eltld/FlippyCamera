@@ -49,6 +49,7 @@ import android.view.View.OnClickListener;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.view.animation.LayoutAnimationController;
+import android.view.animation.RotateAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -207,9 +208,12 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         mDeviceRotation = getDeviceRotation(mContext);
         
-        Animation rotateAnim = AnimationUtils.loadAnimation(mContext, R.animator.ui_rotation);
-        LayoutAnimationController animController = new LayoutAnimationController(rotateAnim, 0);
-        mControlLayout.setLayoutAnimation(animController);
+        Animation an = new RotateAnimation(90, 360, (float) 50.0, (float) 50.0); 
+        an.setDuration(5000);
+        an.setRepeatCount(0);
+        an.setRepeatMode(Animation.REVERSE);
+        an.setFillAfter(true);
+        mSwitchCameraButton.startAnimation(an);
     }
     
     @SuppressLint("NewApi")

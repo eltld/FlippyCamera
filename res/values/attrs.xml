@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
    <declare-styleable name="OrientationImageButton">
-       <attr name="animationSpeed" format="integer" />
-       <attr name="labelPosition" format="enum">
-           <enum name="left" value="0"/>
-           <enum name="right" value="1"/>
-       </attr>
+       <!-- Animation duration in milliseconds -->
+       <attr name="animationDuration" format="integer" />
    </declare-styleable>
 </resources>
