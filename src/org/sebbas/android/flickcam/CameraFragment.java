@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import org.sebbas.android.interfaces.CameraFragmentListener;
 import org.sebbas.android.interfaces.CameraPreviewListener;
+import org.sebbas.android.listener.DeviceOrientationListener;
 import org.sebbas.android.listener.FragmentListener;
 import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.CameraPreviewAdvanced;
@@ -21,6 +22,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
@@ -44,6 +46,9 @@ import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -99,7 +104,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ViewPager mViewPager;
     private CameraFragmentListener mCameraFragmentListener;
     private ViewFlipper mCameraViewFlipper;
-    private CameraPreviewAdvanced mCameraPreviewAdvancedFront;
+    private DeviceOrientationListener mOrientationEventListener;
+	private int mDeviceRotation;
     
     // Static factory method that returns a new fragment instance to the client
     public static CameraFragment newInstance(int cameraId) {
@@ -154,6 +160,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     public void onDestroy() {
         Log.d(TAG, "ONDESTROY");
         super.onDestroy();
+        mOrientationEventListener.disable();
     }
 
     @SuppressLint("NewApi")
@@ -193,8 +200,16 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         
         mCameraFragmentListener = (CameraFragmentListener) mContext;
         
+        mOrientationEventListener = new DeviceOrientationListener(mContext);
+        mOrientationEventListener.enable();
+        
         mCurrentCameraId = this.getArguments().getInt("cameraId");
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
+        mDeviceRotation = getDeviceRotation(mContext);
+        
+        Animation rotateAnim = AnimationUtils.loadAnimation(mContext, R.animator.ui_rotation);
+        LayoutAnimationController animController = new LayoutAnimationController(rotateAnim, 0);
+        mControlLayout.setLayoutAnimation(animController);
     }
     
     @SuppressLint("NewApi")
@@ -309,12 +324,26 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         if (!mSmoothZoomSupported) {
             mParameters.setZoom(mZoomValue);
         }
+        
+        mParameters.setRotation(mDeviceRotation);
         // TODO Does this work with other devices ???
         //List<Size> supportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
         //mParameters.setPreviewSize(supportedPreviewSizes.get(2).width, supportedPreviewSizes.get(2).height);
         
         // Finally, add the parameters to the camera
         mCamera.setParameters(mParameters);
+    }
+    
+    private int getDeviceRotation(Context context) {
+        int rotation = ((WindowManager) context.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        int degrees = 0;
+        switch (rotation) {
+            case Surface.ROTATION_0: degrees = 90; break;
+            case Surface.ROTATION_90: degrees = 180; break;
+            case Surface.ROTATION_180: degrees = 270; break;
+            case Surface.ROTATION_270: degrees = 0; break;
+        }
+        return degrees;
     }
     
     public static void setCameraDisplayOrientation(Context context,
@@ -467,6 +496,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                         toast = Toast.makeText(mContext, "Image Saved Successfully.", Toast.LENGTH_LONG);
                         // We have to refresh the grid view UI to make the new photo show up
                         refreshUI();
+                        resetShutter();
                     }
                     else {
                         toast = Toast.makeText(mContext, "Failed to Save Image. See Log for Details.", Toast.LENGTH_LONG);
