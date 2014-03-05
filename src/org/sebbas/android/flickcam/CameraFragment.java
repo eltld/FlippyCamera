@@ -207,13 +207,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mCurrentCameraId = this.getArguments().getInt("cameraId");
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         mDeviceRotation = getDeviceRotation(mContext);
-        
-        Animation an = new RotateAnimation(90, 360, (float) 50.0, (float) 50.0); 
-        an.setDuration(5000);
-        an.setRepeatCount(0);
-        an.setRepeatMode(Animation.REVERSE);
-        an.setFillAfter(true);
-        mSwitchCameraButton.startAnimation(an);
     }
     
     @SuppressLint("NewApi")

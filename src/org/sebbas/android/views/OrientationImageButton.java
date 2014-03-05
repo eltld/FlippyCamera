@@ -17,8 +17,8 @@ import android.widget.ImageButton;
 
 public class OrientationImageButton extends ImageButton {
 
-    private static final float PIVOT_X = (float) 50.0;
-    private static final float PIVOT_Y = (float) 50.0;
+    private static final float PIVOT_X = (float) 0.5f;
+    private static final float PIVOT_Y = (float) 0.5f;
     private static final int DEFAULT_ANIMATION_DURATION = 1000; // in milliseconds
     private static final int ROTATION_OFFSET = 90;
     
@@ -67,12 +67,6 @@ public class OrientationImageButton extends ImageButton {
             }
         };*/
     }
-    
-    @Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        enableOrientationListener();
-    }
 
     @Override
     protected void onDetachedFromWindow() {
@@ -83,9 +77,11 @@ public class OrientationImageButton extends ImageButton {
     private void startAnimation(int oldRotation, boolean clockwise) {
         Animation animation;
         if (clockwise) {
-            animation = new RotateAnimation(-oldRotation, -oldRotation + ROTATION_OFFSET, PIVOT_X, PIVOT_Y);
+            animation = new RotateAnimation(-oldRotation, -oldRotation + ROTATION_OFFSET, 
+                    Animation.RELATIVE_TO_SELF, PIVOT_X, Animation.RELATIVE_TO_SELF, PIVOT_Y);
         } else {
-            animation = new RotateAnimation(-oldRotation,  -oldRotation - ROTATION_OFFSET, PIVOT_X, PIVOT_Y); 
+            animation = new RotateAnimation(-oldRotation,  -oldRotation - ROTATION_OFFSET, 
+                    Animation.RELATIVE_TO_SELF, PIVOT_X, Animation.RELATIVE_TO_SELF, PIVOT_Y);
         }
         animation.setDuration(mAnimationDuration);
         animation.setRepeatCount(0);
@@ -140,6 +136,7 @@ public class OrientationImageButton extends ImageButton {
                     }
                 }
             };
+            enableOrientationListener();
             return null;
         }
     }
