@@ -60,7 +60,8 @@ import android.widget.ViewFlipper;
 
 public class CameraFragment extends Fragment implements CameraPreviewListener {
 
-    public static final String TAG = "camera_fragment";
+    private static final int FLIP_PREVIEW_ANIMATION_DURATION = 250;
+	public static final String TAG = "camera_fragment";
     private static final int MAX_VIDEO_DURATION = 60000;
     private static final long MAX_FILE_SIZE = 500000;
     private static final String VIDEO_PATH_NAME = "/FlickCam.mp4/";
@@ -82,10 +83,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ImageButton mShutterButton;
     private OrientationImageButton mSwitchCameraButton;
     private OrientationImageButton mSwitchFlashButton;
-    private OrientationImageButton mGalleryButton;
-    private OrientationImageButton mSettingsButton;
-    private OrientationImageButton mCancelButton;
-    private OrientationImageButton mAcceptButton;
+    private ImageButton mGalleryButton;
+    private ImageButton mSettingsButton;
+    private ImageButton mCancelButton;
+    private ImageButton mAcceptButton;
     private OnClickListener mSwitchFlashListener;
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mShutterListener;
@@ -194,10 +195,10 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
         mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);
         mSwitchFlashButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_flash);
-        mAcceptButton = (OrientationImageButton) mRootView.findViewById(R.id.accept_image);
-        mCancelButton = (OrientationImageButton) mRootView.findViewById(R.id.discard_image);
-        mGalleryButton = (OrientationImageButton) mRootView.findViewById(R.id.goto_gallery);
-        mSettingsButton = (OrientationImageButton) mRootView.findViewById(R.id.settings_button);
+        mAcceptButton = (ImageButton) mRootView.findViewById(R.id.accept_image);
+        mCancelButton = (ImageButton) mRootView.findViewById(R.id.discard_image);
+        mGalleryButton = (ImageButton) mRootView.findViewById(R.id.goto_gallery);
+        mSettingsButton = (ImageButton) mRootView.findViewById(R.id.settings_button);
         mViewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
         
         mCameraFragmentListener = (CameraFragmentListener) mContext;
@@ -631,7 +632,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 //releaseMediaRecorder();
                 //removeCameraPreviewView();
                 
-                AnimationFactory.flipTransition(mCameraViewFlipper, FlipDirection.LEFT_RIGHT, 250);
+                AnimationFactory.flipTransition(mCameraViewFlipper, FlipDirection.LEFT_RIGHT, FLIP_PREVIEW_ANIMATION_DURATION);
                 
                 //mCameraFragmentListener.switchCameraFragment();
                 /*

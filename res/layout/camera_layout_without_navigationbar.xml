@@ -39,7 +39,7 @@
         android:padding="10dp"
         android:id="@+id/control_mask">
         
-    <org.sebbas.android.views.OrientationImageButton
+    <ImageButton        
         android:id="@+id/switch_flash"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -48,7 +48,7 @@
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off"
-        orientationButton:animationDuration="300" />
+        />
     
     <org.sebbas.android.views.OrientationImageButton
         android:id="@+id/switch_camera"
@@ -61,8 +61,7 @@
         android:src="@drawable/ic_action_switch_camera"
         orientationButton:animationDuration="300" />
     
-    <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/accept_image"
+    <ImageButton        android:id="@+id/accept_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
@@ -72,10 +71,9 @@
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
         android:src="@drawable/ic_action_accept" 
-        orientationButton:animationDuration="300" />
+        />
     
-    <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/discard_image"
+    <ImageButton        android:id="@+id/discard_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
@@ -85,10 +83,9 @@
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
         android:src="@drawable/ic_action_discard" 
-        orientationButton:animationDuration="300" />
+        />
     
-    <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/settings_button"
+    <ImageButton        android:id="@+id/settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
@@ -96,7 +93,7 @@
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_settings" 
-        orientationButton:animationDuration="300" />
+        />
         
     <ImageButton
         android:id="@+id/shutter_button"
@@ -108,8 +105,7 @@
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/btn_shutter" />
     
-    <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/goto_gallery"
+    <ImageButton        android:id="@+id/goto_gallery"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
@@ -117,7 +113,7 @@
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_picture" 
-        orientationButton:animationDuration="300" />
+        />
       
     </FrameLayout>
 </FrameLayout>
