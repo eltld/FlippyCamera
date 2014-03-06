@@ -48,7 +48,6 @@ public class CameraPreviewAdvanced extends TextureView implements
             // Something bad happened
             e.printStackTrace();
         }
-        
     }
 
     @Override
