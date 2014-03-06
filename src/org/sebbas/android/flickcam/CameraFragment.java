@@ -14,6 +14,7 @@ import org.sebbas.android.listener.DeviceOrientationListener;
 import org.sebbas.android.listener.FragmentListener;
 import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.CameraPreviewAdvanced;
+import org.sebbas.android.views.OrientationImageButton;
 
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
@@ -79,12 +80,12 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private CameraPreviewAdvanced mCameraPreviewAdvanced;
     private CameraPreview mCameraPreview;
     private ImageButton mShutterButton;
-    private ImageButton mSwitchCameraButton;
-    private ImageButton mSwitchFlashButton;
-    private ImageButton mGalleryButton;
-    private ImageButton mSettingsButton;
-    private ImageButton mCancelButton;
-    private ImageButton mAcceptButton;
+    private OrientationImageButton mSwitchCameraButton;
+    private OrientationImageButton mSwitchFlashButton;
+    private OrientationImageButton mGalleryButton;
+    private OrientationImageButton mSettingsButton;
+    private OrientationImageButton mCancelButton;
+    private OrientationImageButton mAcceptButton;
     private OnClickListener mSwitchFlashListener;
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mShutterListener;
@@ -191,12 +192,12 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mControlLayout = (FrameLayout) mRootView.findViewById(R.id.control_mask);
         
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
-        mSwitchCameraButton = (ImageButton) mRootView.findViewById(R.id.switch_camera);
-        mSwitchFlashButton = (ImageButton) mRootView.findViewById(R.id.switch_flash);
-        mAcceptButton = (ImageButton) mRootView.findViewById(R.id.accept_image);
-        mCancelButton = (ImageButton) mRootView.findViewById(R.id.discard_image);
-        mGalleryButton = (ImageButton) mRootView.findViewById(R.id.goto_gallery);
-        mSettingsButton = (ImageButton) mRootView.findViewById(R.id.settings_button);
+        mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);
+        mSwitchFlashButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_flash);
+        mAcceptButton = (OrientationImageButton) mRootView.findViewById(R.id.accept_image);
+        mCancelButton = (OrientationImageButton) mRootView.findViewById(R.id.discard_image);
+        mGalleryButton = (OrientationImageButton) mRootView.findViewById(R.id.goto_gallery);
+        mSettingsButton = (OrientationImageButton) mRootView.findViewById(R.id.settings_button);
         mViewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
         
         mCameraFragmentListener = (CameraFragmentListener) mContext;

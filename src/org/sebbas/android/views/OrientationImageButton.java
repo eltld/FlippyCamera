@@ -2,16 +2,15 @@ package org.sebbas.android.views;
 
 import org.sebbas.android.flickcam.R;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.OrientationEventListener;
-import android.view.Surface;
-import android.view.WindowManager;
 import android.view.animation.Animation;
-import android.view.animation.Animation.AnimationListener;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageButton;
 
@@ -24,7 +23,15 @@ public class OrientationImageButton extends ImageButton {
     
     private int mAnimationDuration;
     private OrientationEventListener mOrientationEventListener;
-    private boolean isAnimating = false;
+    private int mNewRotation;
+    
+    public OrientationImageButton(Context context) {
+        super(context);
+    }
+    
+    public OrientationImageButton(Context context, AttributeSet attrs, int defStyle) {
+        super(context, attrs, defStyle);
+    }
     
     public OrientationImageButton(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -101,7 +108,15 @@ public class OrientationImageButton extends ImageButton {
         mOrientationEventListener.disable();
     }
 
-    private class OrientationHandler extends AsyncTask<Context, Void, Void> {
+    @SuppressLint("NewApi")
+	@Override
+	public void setImageDrawable(Drawable drawable) {
+		super.setImageDrawable(drawable);
+		this.setImageDrawable(drawable);
+		this.setRotation(mNewRotation);
+	}
+
+	private class OrientationHandler extends AsyncTask<Context, Void, Void> {
 
         @Override
         protected Void doInBackground(Context... params) {
@@ -109,29 +124,28 @@ public class OrientationImageButton extends ImageButton {
             mOrientationEventListener = new OrientationEventListener(params[0], SensorManager.SENSOR_DELAY_NORMAL) {
                 
                 int oldRotation = 0;
-                int newRotation = 0;
                 
                 @Override
                 public void onOrientationChanged(int currentOrientation) {
                     
-                    oldRotation = newRotation;;
+                    oldRotation = mNewRotation;;
                     
                     if (currentOrientation < 45 || currentOrientation >= 315) {
-                        newRotation = 0;
+                        mNewRotation = 0;
                     } else if (currentOrientation >= 45 && currentOrientation < 135) {
-                        newRotation = 90;
+                        mNewRotation = 90;
                     } else if (currentOrientation >= 135 && currentOrientation < 225) {
-                        newRotation = 180;
+                        mNewRotation = 180;
                     } else if (currentOrientation >= 225 && currentOrientation < 315){
-                        newRotation = 270;
+                        mNewRotation = 270;
                     }
                     //System.out.println("old rotation = " + mOldRotation + " / " + "new rotation = " + mNewRotation);
-                    if (oldRotation == 0 && newRotation == 90 || oldRotation == 90 && newRotation == 180 ||
-                            oldRotation == 180 && newRotation == 270 || oldRotation == 270 && newRotation == 0) {
+                    if (oldRotation == 0 && mNewRotation == 90 || oldRotation == 90 && mNewRotation == 180 ||
+                            oldRotation == 180 && mNewRotation == 270 || oldRotation == 270 && mNewRotation == 0) {
                         startAnimation(oldRotation, false);
                     }
-                    if (oldRotation == 0 && newRotation == 270 || oldRotation == 270 && newRotation == 180 ||
-                            oldRotation == 180 && newRotation == 90 || oldRotation == 90 && newRotation == 0) {
+                    if (oldRotation == 0 && mNewRotation == 270 || oldRotation == 270 && mNewRotation == 180 ||
+                            oldRotation == 180 && mNewRotation == 90 || oldRotation == 90 && mNewRotation == 0) {
                         startAnimation(oldRotation, true);
                     }
                 }
