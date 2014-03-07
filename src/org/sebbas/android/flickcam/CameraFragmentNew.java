@@ -26,7 +26,6 @@ import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
-import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -793,7 +792,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             
             prepareMediaRecorder();
             startMediaRecorder();
-            resetMediaRecorder(); // Since there is no need to record now
+            
             /*try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -807,6 +806,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         @Override
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
+                resetMediaRecorder(); // Since there is no need to record now
                 mCameraFragmentListener.startupComplete();
         }
     }

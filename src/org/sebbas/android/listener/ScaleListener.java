@@ -5,7 +5,6 @@ import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 
 import android.annotation.SuppressLint;
-import android.hardware.Camera;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.SimpleOnScaleGestureListener;
 

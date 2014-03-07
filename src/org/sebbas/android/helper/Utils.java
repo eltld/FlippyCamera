@@ -15,8 +15,7 @@ import android.widget.Toast;
 public class Utils {
  
     private Context mContext;
- 
-    // constructor
+
     public Utils(Context context) {
         this.mContext = context;
     }
@@ -24,40 +23,36 @@ public class Utils {
     // Reading file paths from SDCard
     public ArrayList<String> getFilePaths() {
         ArrayList<String> filePaths = new ArrayList<String>();
- 
-        File directory = new File(
-                android.os.Environment.getExternalStorageDirectory()
+
+        File directory = new File(android.os.Environment.getExternalStorageDirectory()
                         + File.separator + AppConstant.PHOTO_ALBUM);
- 
-        // check for directory
+
+        // Check for directory
         if (directory.isDirectory()) {
             // getting list of file paths
             File[] listFiles = directory.listFiles();
- 
+
             // Check for count
             if (listFiles.length > 0) {
- 
-                // loop through all files
+
+                // Loop through all files
                 for (int i = 0; i < listFiles.length; i++) {
- 
-                    // get file path
+
+                    // Get the file path
                     String filePath = listFiles[i].getAbsolutePath();
- 
-                    // check for supported file extension
+
+                    // Check for supported file extension
                     if (IsSupportedFile(filePath)) {
                         // Add image path to array list
                         filePaths.add(filePath);
                     }
                 }
             } else {
-                // image directory is empty
-                Toast.makeText(
-                        mContext,
-                        AppConstant.PHOTO_ALBUM
-                                + " is empty. Please load some images in it !",
+                // Image directory is empty
+                Toast.makeText(mContext, AppConstant.PHOTO_ALBUM + " is empty. Please load some images in it !",
                         Toast.LENGTH_LONG).show();
             }
- 
+
         } else {
             AlertDialog.Builder alert = new AlertDialog.Builder(mContext);
             alert.setTitle("Error!");
@@ -66,25 +61,23 @@ public class Utils {
             alert.setPositiveButton("OK", null);
             alert.show();
         }
- 
         return filePaths;
     }
- 
+    
     // Check supported file extensions
     private boolean IsSupportedFile(String filePath) {
         String ext = filePath.substring((filePath.lastIndexOf(".") + 1),
                 filePath.length());
- 
+
         if (AppConstant.FILE_EXTN.contains(ext.toLowerCase(Locale.getDefault()))) {
             return true;
         } else {
             return false;
         }
- 
     }
  
     /*
-     * getting screen width
+     * Getting the screen width
      */
     @SuppressLint("NewApi")
 	public int getScreenWidth() {

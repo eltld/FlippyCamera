@@ -74,7 +74,7 @@ public class GalleryFragment extends Fragment {
         mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
  
         // setting grid view adapter
-        mGridView.setAdapter(mAdapter);
+        mGridView.setAdapter(/*new GridViewAdapter(this.getActivity())*/mAdapter);
     }
     
     private void initializeGridLayout() {

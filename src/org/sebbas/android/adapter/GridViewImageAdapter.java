@@ -1,45 +1,40 @@
 package org.sebbas.android.adapter;
 
+import static android.widget.ImageView.ScaleType.CENTER_CROP;
+
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
-import org.sebbas.android.flickcam.FullScreenViewActivity;
+import org.sebbas.android.flickcam.R;
+import org.sebbas.android.views.SquaredImageView;
+
+import com.squareup.picasso.Picasso;
  
 import android.app.Activity;
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.content.Context;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.GridView;
-import android.widget.ImageView;
-import android.widget.Toast;
  
 public class GridViewImageAdapter extends BaseAdapter {
  
-    private Activity mActivity;
+    private Context mContext;
     private ArrayList<String> mFilePaths = new ArrayList<String>();
-    private int mImageWidth;
  
     public GridViewImageAdapter(Activity activity, ArrayList<String> filePaths,
             int imageWidth) {
-        this.mActivity = activity;
-        this.mFilePaths = filePaths;
-        this.mImageWidth = imageWidth;
+        mContext = activity;
+        mFilePaths = filePaths;
     }
  
     @Override
     public int getCount() {
-        return this.mFilePaths.size();
+        return mFilePaths.size();
     }
  
     @Override
-    public Object getItem(int position) {
-        return this.mFilePaths.get(position);
+    public String getItem(int position) {
+        return mFilePaths.get(position);
     }
  
     @Override
@@ -49,51 +44,22 @@ public class GridViewImageAdapter extends BaseAdapter {
  
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        ImageView imageView;
-        if (convertView == null) {
-            imageView = new ImageView(mActivity);
-        } else {
-            imageView = (ImageView) convertView;
+        SquaredImageView view = (SquaredImageView) convertView;
+        if (view == null) {
+            view = new SquaredImageView(mContext);
+            view.setScaleType(CENTER_CROP);
         }
- 
-        // get screen dimensions
-        Bitmap image = decodeFile(mFilePaths.get(position), mImageWidth,
-                mImageWidth);
- 
-        imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        imageView.setLayoutParams(new GridView.LayoutParams(mImageWidth,
-                mImageWidth));
-        imageView.setImageBitmap(image);
-  
-        return imageView;
-    }
 
-    /*
-     * Resizing image size
-     */
-    public static Bitmap decodeFile(String filePath, int WIDTH, int HIGHT) {
-        try {
- 
-            File f = new File(filePath);
- 
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(new FileInputStream(f), null, o);
- 
-            final int REQUIRED_WIDTH = WIDTH;
-            final int REQUIRED_HIGHT = HIGHT;
-            int scale = 1;
-            while (o.outWidth / scale / 2 >= REQUIRED_WIDTH
-                    && o.outHeight / scale / 2 >= REQUIRED_HIGHT)
-                scale *= 2;
- 
-            BitmapFactory.Options o2 = new BitmapFactory.Options();
-            o2.inSampleSize = scale;
-            return BitmapFactory.decodeStream(new FileInputStream(f), null, o2);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
+        // Get the image URL for the current position.
+        String url = getItem(position);
+
+        // Trigger the download of the URL asynchronously into the image view.
+        Picasso.with(mContext) //
+            .load(new File(url)) //
+            .placeholder(R.drawable.ic_action_camera) //
+            .error(R.drawable.ic_action_camera) //
+            .fit() //
+            .into(view);
+        return view;
     }
- 
 }
