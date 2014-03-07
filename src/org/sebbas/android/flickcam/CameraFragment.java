@@ -381,7 +381,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
         return mErrorCallback;
     }
-    /*
+    
     @Override
     public void performZoom(float scaleFactor) {
         mZoomValue = (int) ((scaleFactor - 1) * (mZoomMax + 1));
@@ -394,7 +394,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 setCameraParameters(); // Just update the camera parameters. This will also set the new zoom level
             }
         }
-    }*/
+    }
     
     @SuppressLint("NewApi")
     private void startPreview() {
@@ -409,7 +409,7 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
                 //mCameraViewFlipper.addView(mCameraPreviewAdvanced2);
             } else {
                 Log.d(TAG, "CameraPreview");
-                mCameraPreview = new CameraPreview(mContext, this, mCamera);
+                mCameraPreview = new CameraPreview(mContext, this);
                 mCameraViewFlipper.addView(mCameraPreview);
             }
             
@@ -752,12 +752,12 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             mMediaRecorder.stop();
         }
     }
-    /*
+    
     @Override
     public void startRecorder() {
         MediarRecorderInitializer mri = new MediarRecorderInitializer();
         mri.execute();
-    }*/
+    }
     
     private FileDescriptor getPipeFD() {
         FileDescriptor outputPipe = null;
@@ -850,16 +850,4 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             dir.mkdirs();
         }
     }
-
-	@Override
-	public void performZoom(Camera camera, float scaleFactor) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void startRecorder(Camera camera) {
-		// TODO Auto-generated method stub
-		
-	}
 }

@@ -1,12 +1,9 @@
 package org.sebbas.android.views;
 
-import java.io.IOException;
-
 import org.sebbas.android.interfaces.CameraPreviewListener;
 import org.sebbas.android.listener.ScaleListener;
 
 import android.content.Context;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -20,7 +17,6 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private static final int INVALID_POINTER_ID = -1;
 
     private SurfaceHolder mHolder;
-    private Camera mCamera;
     private CameraPreviewListener mListener;
     
     private float mPosX;
@@ -38,11 +34,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     }
     
     @SuppressWarnings("deprecation")
-    public CameraPreview(Context context, CameraPreviewListener listener, Camera camera) {
+    public CameraPreview(Context context, CameraPreviewListener listener) {
         super(context);
-        mCamera = camera;
         mListener = listener;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this, camera));
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this));
         
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -55,7 +50,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.d(TAG, "Surface was Changed");
-        mListener.startRecorder(mCamera);
+        mListener.startRecorder();
     }
 
     @Override

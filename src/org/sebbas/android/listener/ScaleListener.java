@@ -15,18 +15,15 @@ public class ScaleListener extends SimpleOnScaleGestureListener {
     private CameraPreviewListener mListener;
     private CameraPreview mCameraPreview;
     private CameraPreviewAdvanced mCameraPreviewAdvanced;
-    private Camera mCamera;
 
-    public ScaleListener(CameraPreviewListener listener, CameraPreview cameraPreview, Camera camera) {
+    public ScaleListener(CameraPreviewListener listener, CameraPreview cameraPreview) {
        mListener = listener;
        mCameraPreview = cameraPreview;
-       mCamera = camera;
     }
     
-    public ScaleListener(CameraPreviewListener listener, CameraPreviewAdvanced cameraPreviewAdvanced, Camera camera) {
+    public ScaleListener(CameraPreviewListener listener, CameraPreviewAdvanced cameraPreviewAdvanced) {
         mListener = listener;
         mCameraPreviewAdvanced = cameraPreviewAdvanced;
-        mCamera = camera;
      }
     
     @SuppressLint("NewApi")
@@ -37,7 +34,7 @@ public class ScaleListener extends SimpleOnScaleGestureListener {
         // Don't let the object get too small or too large.
         mScaleFactor = Math.max(1.0f, Math.min(mScaleFactor, 2.0f));
         
-        mListener.performZoom(mCamera, mScaleFactor);
+        mListener.performZoom(mScaleFactor);
         
         // Depending on which type of Camera preview we are using (depends on minimum SDK of device) we use this
         if (mCameraPreviewAdvanced != null) {
