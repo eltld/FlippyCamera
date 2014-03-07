@@ -109,13 +109,11 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
     private ViewFlipper mCameraViewFlipper;
     private DeviceOrientationListener mOrientationEventListener;
 	private int mDeviceRotation;
+	private CameraPreviewAdvanced mCameraPreviewAdvanced2;
     
     // Static factory method that returns a new fragment instance to the client
-    public static CameraFragment newInstance(int cameraId) {
+    public static CameraFragment newInstance() {
         CameraFragment cf = new CameraFragment();
-        Bundle args = new Bundle();
-        args.putInt("cameraId", cameraId);
-        cf.setArguments(args);
         return cf;
     }
     
@@ -206,7 +204,6 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         mOrientationEventListener = new DeviceOrientationListener(mContext);
         mOrientationEventListener.enable();
         
-        mCurrentCameraId = this.getArguments().getInt("cameraId");
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         mDeviceRotation = getDeviceRotation(mContext);
     }
@@ -406,7 +403,9 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
             if (supportsSDK(14)) {
                 Log.d(TAG, "CameraPreviewAdvanced");
                 mCameraPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
+                //mCameraPreviewAdvanced2 = new CameraPreviewAdvanced(mContext, this, mCamera);
                 mCameraViewFlipper.addView(mCameraPreviewAdvanced);
+                //mCameraViewFlipper.addView(mCameraPreviewAdvanced2);
             } else {
                 Log.d(TAG, "CameraPreview");
                 mCameraPreview = new CameraPreview(mContext, this, mCamera);
