@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.sebbas.android.interfaces.CameraFragmentListener;
@@ -25,6 +26,7 @@ import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
@@ -114,6 +116,9 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
     private PictureCallback mJpegCallback;
+    
+    // Initializers
+    private MediaRecorderInitializer mMediaRecorderInitializer;
     
     // Static factory method that returns a new fragment instance to the client
     public static CameraFragmentNew newInstance() {
@@ -219,6 +224,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     @SuppressLint("NewApi")
     private void setCameraParameters() {
         Parameters parameters = mCamera.getParameters();
+        System.out.println(listToString(parameters.getSupportedVideoSizes()));
         // Adds continuous auto focus (only if API is high enough) to the parameters.
         if (supportsSDK(14)) {
             parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
@@ -244,6 +250,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         if (!mSmoothZoomSupported) {
             parameters.setZoom(mZoomValue);
         }
+        parameters.setPreviewSize(1280, 720);
         
         parameters.setRotation(mDeviceRotation);
         // Finally, add the parameters to the camera
@@ -268,11 +275,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
         mAcceptButton.setOnClickListener(getAcceptListener());
         mCancelButton.setOnClickListener(getCancelListener());
-    }
-    
-    private void reorganizeUI() {
-        mControlLayout.bringToFront();
-        mControlLayout.invalidate();
     }
     
     @SuppressLint("NewApi")
@@ -512,6 +514,11 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     /*
      * Methods that handle UI events
      */
+    private void reorganizeUI() {
+        mControlLayout.bringToFront();
+        mControlLayout.invalidate();
+    }
+    
     private void refreshUI() {
         mCameraFragmentListener.refreshAdapter();
     }
@@ -541,6 +548,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mCancelButton.setVisibility(View.GONE);
         mSettingsButton.setVisibility(View.VISIBLE);
         mGalleryButton.setVisibility(View.VISIBLE);
+        MediaRecorderInitializer mi = new MediaRecorderInitializer();
+        mi.execute();
     }
     
     private void removeCameraPreviewView() {
@@ -562,8 +571,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
      */
     @Override
     public void startRecorder() {
-        MediarRecorderInitializer mri = new MediarRecorderInitializer();
-        mri.execute();
+        mMediaRecorderInitializer = new MediaRecorderInitializer();
+        mMediaRecorderInitializer.execute();
         
     }
     
@@ -641,6 +650,9 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
     
+    private void setCameraSpecificAttributes() {
+        
+    }
     /*
      * Methods that handle camera functionalities
      */
@@ -650,8 +662,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
 
     private void retakePicture() {
         resetShutter();
-        removeCameraPreviewView();
-        startPreview();
     }
     
     private boolean writeBytesToFile(byte[] data, String filename) {
@@ -734,7 +744,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                 initializeCameraProperties();
                 setCameraParameters();
                 setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
-                System.out.println("done initializing");
             } 
             return null;
         }
@@ -752,7 +761,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     }
     
     // This sets up and starts the media recorder
-    private class MediarRecorderInitializer extends AsyncTask<Void, Void, Void> {
+    private class MediaRecorderInitializer extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... params) {
@@ -832,6 +841,18 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         return degrees;
     }
     
+    public static String listToString(List<Camera.Size> sizes) {
+        String result = "[";
+        for (int i = 0; i < sizes.size(); i++) {
+            Camera.Size  a = sizes.get(i);
+            int width = a.width;
+            int height = a.height;
+            result += "(" + width + " / " + height + ")";
+            
+            //result += a + " ";
+        } 
+        return result += "]";
+    }
     
     /* 
      * Very likely to be used later
