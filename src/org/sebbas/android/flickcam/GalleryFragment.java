@@ -46,7 +46,7 @@ public class GalleryFragment extends Fragment {
     }
 
     public void setupGridView() {
-        initilizeGridLayout();
+        initializeGridLayout();
         setGridViewAdapter();
         setGridViewClickListener();
     }
@@ -77,7 +77,7 @@ public class GalleryFragment extends Fragment {
         mGridView.setAdapter(mAdapter);
     }
     
-    private void initilizeGridLayout() {
+    private void initializeGridLayout() {
         Resources r = getResources();
         float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
  

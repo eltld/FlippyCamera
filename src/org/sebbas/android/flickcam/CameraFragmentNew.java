@@ -152,7 +152,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         super.onPause();
         
         deinitializeCamera();
-        removeCameraPreviewView();
+        removeAllCameraPreviewViews();
     }
     
     @Override
@@ -250,8 +250,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         if (!mSmoothZoomSupported) {
             parameters.setZoom(mZoomValue);
         }
-        parameters.setPreviewSize(1280, 720);
-        
         parameters.setRotation(mDeviceRotation);
         // Finally, add the parameters to the camera
         mCamera.setParameters(parameters);
@@ -344,7 +342,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private void releaseCamera() {
         if (mCamera != null) {
             mCamera.release();
-            mCamera = null;
         }
     }
 
@@ -548,17 +545,36 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mCancelButton.setVisibility(View.GONE);
         mSettingsButton.setVisibility(View.VISIBLE);
         mGalleryButton.setVisibility(View.VISIBLE);
-        MediaRecorderInitializer mi = new MediaRecorderInitializer();
-        mi.execute();
+        
+        deinitializeCamera();
+        CameraInitializer ci = new CameraInitializer();
+        ci.execute();
+        removeAllCameraPreviewViews();
     }
     
-    private void removeCameraPreviewView() {
+    private void removeAllCameraPreviewViews() {
         if(supportsSDK(14)) {
             mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
             mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
         } else {
             mCameraViewFlipper.removeView(mCameraOnePreview);
             mCameraViewFlipper.removeView(mCameraTwoPreview);
+        }
+    }
+    
+    private void removeHiddenCameraPreviewView() {
+        if(supportsSDK(14)) {
+            if (mCurrentCameraID == CAMERA_ID_BACK) {
+                mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
+            } else if (mCurrentCameraID == CAMERA_ID_FRONT) {
+                mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
+            }
+        } else {
+            if (mCurrentCameraID == CAMERA_ID_BACK) {
+                mCameraViewFlipper.removeView(mCameraTwoPreview);
+            } else if (mCurrentCameraID == CAMERA_ID_FRONT) {
+                mCameraViewFlipper.removeView(mCameraOnePreview);
+            }
         }
     }
     
@@ -620,6 +636,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
     
+    
     private void startMediaRecorder() {
         if (mMediaRecorder != null) {
             mMediaRecorder.start();
@@ -627,6 +644,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             Log.d(TAG, "Start media recorder successful");
         }
     }
+    
     
     public void releaseMediaRecorder() {
         if (mMediaRecorder != null) {
@@ -637,6 +655,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
     
+    
     private void stopMediaRecorder() {
         if (mMediaRecorder != null) {
             mMediaRecorder.stop();
@@ -644,21 +663,25 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
     
+    
     private void resetMediaRecorder() {
         if (mMediaRecorder != null) {
             mMediaRecorder.reset();
         }
     }
     
+    
     private void setCameraSpecificAttributes() {
-        
+        // TODO
     }
     /*
      * Methods that handle camera functionalities
      */
     private void takePicture() {
-        mCamera.takePicture(getShutterCallback(), getRawCallback(), getPostViewCallback(), getJpegCallback());
+        PictureTaker pt = new PictureTaker();
+        pt.execute();
     }
+    
 
     private void retakePicture() {
         resetShutter();
@@ -755,10 +778,12 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             reorganizeUI();
             if (mCameraWasSwapped) {
                 startAnimation();
+                removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
                 mCameraWasSwapped = false;
             }
         }
     }
+    
     
     // This sets up and starts the media recorder
     private class MediaRecorderInitializer extends AsyncTask<Void, Void, Void> {
@@ -783,6 +808,15 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         protected void onPostExecute(Void result) {
             super.onPostExecute(result);
                 mCameraFragmentListener.startupComplete();
+        }
+    }
+    
+    private class PictureTaker extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mCamera.takePicture(getShutterCallback(), getRawCallback(), getPostViewCallback(), getJpegCallback());
+            return null;
         }
     }
     

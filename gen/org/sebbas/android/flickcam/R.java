@@ -37,27 +37,22 @@ containing a value of this type.
         public static final int activity_vertical_margin=0x7f050001;
     }
     public static final class drawable {
-        public static final int btn_camera_shutter_holo=0x7f020000;
-        public static final int btn_camera_shutter_pressed_holo=0x7f020001;
-        public static final int btn_retake_shutter_holo=0x7f020002;
-        public static final int btn_retake_shutter_pressed_holo=0x7f020003;
-        public static final int btn_shutter=0x7f020004;
-        public static final int btn_shutter_retake=0x7f020005;
-        public static final int button_background=0x7f020006;
-        public static final int button_border=0x7f020007;
-        public static final int ic_action_accept=0x7f020008;
-        public static final int ic_action_camera=0x7f020009;
-        public static final int ic_action_discard=0x7f02000a;
-        public static final int ic_action_flash_off=0x7f02000b;
-        public static final int ic_action_flash_on=0x7f02000c;
-        public static final int ic_action_picture=0x7f02000d;
-        public static final int ic_action_settings=0x7f02000e;
-        public static final int ic_action_switch_camera=0x7f02000f;
-        public static final int ic_button_selector=0x7f020010;
-        public static final int ic_launcher=0x7f020011;
-        public static final int shutter_button=0x7f020012;
-        public static final int shutter_button_pressed=0x7f020013;
-        public static final int splash_screen_bg=0x7f020014;
+        public static final int btn_shutter=0x7f020000;
+        public static final int button_background=0x7f020001;
+        public static final int button_border=0x7f020002;
+        public static final int ic_action_accept=0x7f020003;
+        public static final int ic_action_camera=0x7f020004;
+        public static final int ic_action_discard=0x7f020005;
+        public static final int ic_action_flash_off=0x7f020006;
+        public static final int ic_action_flash_on=0x7f020007;
+        public static final int ic_action_picture=0x7f020008;
+        public static final int ic_action_settings=0x7f020009;
+        public static final int ic_action_switch_camera=0x7f02000a;
+        public static final int ic_button_selector=0x7f02000b;
+        public static final int ic_launcher=0x7f02000c;
+        public static final int shutter_button=0x7f02000d;
+        public static final int shutter_button_pressed=0x7f02000e;
+        public static final int splash_screen_bg=0x7f02000f;
     }
     public static final class id {
         public static final int accept_image=0x7f0a0005;
