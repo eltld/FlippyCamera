@@ -63,7 +63,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private Context mContext;
     private Camera mCameraOne;
     private Camera mCameraTwo;
-    private int mNumberOfCameras;
+    private int mNumberOfCamerasSupported;
+    private int mNumberOfCamerasFound;
     private boolean mFlashEnabled;
     private Camera mCurrentCamera;
     private int mCurrentCameraID;
@@ -158,18 +159,30 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mOrientationEventListener.disable();
     }
     
-    private boolean initializeCameras() {
-        if (mNumberOfCameras == 0) {
+    private boolean initializeCamerasAndMediaRecorders() {
+        if (mNumberOfCamerasSupported == 0) {
             alertNoCamera();
-            return false;
         }
-        if (mNumberOfCameras >= 1) {
+        if (mNumberOfCamerasSupported >= 1) {
             mCameraOne = getCameraInstance(CAMERA_ID_BACK);
+            if (mCameraOne != null) mNumberOfCamerasFound++; // Increase # cameras because camera was found
+            mMediaRecorderOne = new MediaRecorder(); // Instantiate according MediaRecorder
         }
-        if (mNumberOfCameras >= 2) {
+        if (mNumberOfCamerasSupported >= 2) {
             mCameraTwo = getCameraInstance(CAMERA_ID_FRONT);
+            if (mCameraTwo != null) mNumberOfCamerasFound++; // Increase # cameras because camera was found
+            mMediaRecorderTwo = new MediaRecorder(); // Instantiate according MediaRecorder
         }
-        return true;
+        if (mNumberOfCamerasFound > 0) {
+            return true;
+        }
+        return false;
+    }
+    
+    private void setDefaultCamera() {
+        // The default camera is the camera whose preview is shown first
+        mCurrentCamera = mCameraOne; 
+        mCurrentCameraID = CAMERA_ID_BACK;
     }
 
     private void alertNoCamera() {
@@ -209,32 +222,18 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mViewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
         
         mCameraFragmentListener = (CameraFragmentListener) mContext;
-        mNumberOfCameras = Camera.getNumberOfCameras();
+        mNumberOfCamerasSupported = Camera.getNumberOfCameras();
         
         mOrientationEventListener = new DeviceOrientationListener(mContext);
         mOrientationEventListener.enable();
         
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         mDeviceRotation = getDeviceRotation(mContext);
-        
-        // We set the back camera as our default 
-        mCurrentCamera = mCameraOne; 
-        mCurrentCameraID = CAMERA_ID_BACK;
-    }
-    
-    @SuppressLint("NewApi")
-    private void initializeCameraProperties(Camera camera) {
-        Parameters parameters = camera.getParameters();
-        mZoomMax = parameters.getMaxZoom();
-        mSmoothZoomSupported = parameters.isSmoothZoomSupported();
-        if (supportsSDK(15)) {
-            mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
-        }
-        mZoomValue = 0;
     }
     
     @SuppressLint("NewApi")
     private void setCameraParameters(Camera camera) {
+        System.out.println(mCameraOne + " / " + mCameraTwo);
         Parameters parameters = camera.getParameters();
         // Adds continuous auto focus (only if API is high enough) to the parameters.
         if (supportsSDK(14)) {
@@ -267,6 +266,17 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         camera.setParameters(parameters);
     }
     
+    @SuppressLint("NewApi")
+    private void initializeCameraProperties(Camera camera) {
+        Parameters parameters = camera.getParameters();
+        mZoomMax = parameters.getMaxZoom();
+        mSmoothZoomSupported = parameters.isSmoothZoomSupported();
+        if (supportsSDK(15)) {
+            mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
+        }
+        mZoomValue = 0;
+    }
+    
     private void setViewListeners() {
         mShutterButton.setOnClickListener(getShutterListener());
         mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
@@ -293,7 +303,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                 mCameraViewFlipper.addView(mCameraOnePreview);
             }
         }
-        if (mCameraTwo != null) {
+        if (mCameraOne != null) {
             if (supportsSDK(14)) {
                 mCameraTwoPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCameraOne);
                 mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
@@ -311,7 +321,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             if (mSmoothZoomSupported) {
                 camera.startSmoothZoom(mZoomValue);
             } else {
-                setCameraParameters(mCurrentCamera); // Just update the camera parameters. This will also set the new zoom level
+                setCameraParameters(camera); // Just update the camera parameters. This will also set the new zoom level
             }
         }
     }
@@ -493,7 +503,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                 public void onError(int error, Camera camera) {
                     if (error == Camera.CAMERA_ERROR_SERVER_DIED) {
                         deinitializeCamera();
-                        initializeCameras();
+                        initializeCamerasAndMediaRecorders();
                     }
                 }
             };
@@ -577,13 +587,13 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
      * Methods that handle the media recorder
      */
     @Override
-    public void startRecorder() {
+    public void startRecorder(Camera camera) {
         MediarRecorderInitializer mri = new MediarRecorderInitializer();
-        mri.execute();
+        MediaRecorder recorderForCamera = mapCameraToPreview(camera);
+        mri.execute(recorderForCamera, camera);
     }
     
     private void prepareMediaRecorder(MediaRecorder mediaRecorder, Camera camera) {
-        mediaRecorder = new MediaRecorder();
         camera.unlock();
         mediaRecorder.setCamera(camera);
         
@@ -626,6 +636,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private void startMediaRecorder(MediaRecorder mediaRecorder) {
         if (mediaRecorder != null) {
             mediaRecorder.start();
+            Log.d(TAG, "Started media recorder successfully");
         }
     }
     
@@ -722,6 +733,16 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
 
+    private MediaRecorder mapCameraToPreview(Camera camera) {
+        if (camera == mCameraOne) {
+            return mMediaRecorderOne;
+        } else if (camera == mCameraTwo) {
+            return mMediaRecorderTwo;
+        }
+        Log.d(TAG, "No media recorder found for camera");
+        return null;
+    }
+    
     /*
      * Async Helper classes
      */
@@ -730,15 +751,20 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
 
         @Override
         protected Void doInBackground(Void... params) {
-            if (initializeCameras()) {
-                setCameraParameters(mCameraOne);
-                setCameraParameters(mCameraTwo);
+            if (initializeCamerasAndMediaRecorders()) {
                 
+                setDefaultCamera();
                 // We have to call this every time we switch the camera
                 initializeCameraProperties(getCurrentCamera());
                 
-                setCameraDisplayOrientation(mContext, CAMERA_ID_BACK, mCameraOne);
-                setCameraDisplayOrientation(mContext, CAMERA_ID_FRONT, mCameraTwo);
+                if (mNumberOfCamerasFound >= 1) {
+                    setCameraParameters(mCameraOne);
+                    setCameraDisplayOrientation(mContext, CAMERA_ID_BACK, mCameraOne);
+                }
+                if (mNumberOfCamerasFound >= 2) {
+                    setCameraParameters(mCameraTwo);
+                    setCameraDisplayOrientation(mContext, CAMERA_ID_FRONT, mCameraTwo);
+                }
             } 
             return null;
         }
@@ -760,6 +786,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             Camera camera = (Camera) params[1];
             
             prepareMediaRecorder(mediaRecorder, camera);
+            System.out.println("mediarecorder is " + mMediaRecorderOne + " / camera is " + camera);
             startMediaRecorder(mediaRecorder);
             try {
                 Thread.sleep(1000);

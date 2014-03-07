@@ -42,7 +42,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         super(context);
         mCamera = camera;
         mListener = listener;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this));
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this, camera));
         
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -55,7 +55,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.d(TAG, "Surface was Changed");
-        mListener.startRecorder();
+        mListener.startRecorder(mCamera);
     }
 
     @Override

@@ -32,7 +32,7 @@ public class CameraPreviewAdvanced extends TextureView implements
         super(context);
         mCamera = camera;
         mListener = listener;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this));
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this, camera));
         setSurfaceTextureListener(this);
     }
 
@@ -43,7 +43,7 @@ public class CameraPreviewAdvanced extends TextureView implements
         try {
         	System.out.println("Camera is " + mCamera + " and surface is: " + surface);
             mCamera.setPreviewTexture(surface);
-            mListener.startRecorder();
+            mListener.startRecorder(mCamera);
         } catch (IOException e) {
             // Something bad happened
             e.printStackTrace();

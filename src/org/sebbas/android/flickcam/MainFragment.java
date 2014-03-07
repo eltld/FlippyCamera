@@ -30,7 +30,7 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
         
         mFragmentManager = getSupportFragmentManager();
         
-        CameraFragment cameraFragment = CameraFragment.newInstance();
+        CameraFragmentNew cameraFragment = CameraFragmentNew.newInstance();
         GalleryFragment galleryFragment = GalleryFragment.newInstance();
         
         
