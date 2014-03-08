@@ -8,6 +8,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.sebbas.android.interfaces.CameraFragmentListener;
 import org.sebbas.android.interfaces.CameraPreviewListener;
@@ -50,15 +51,19 @@ import android.widget.ViewFlipper;
 
 public class CameraFragmentNew extends Fragment implements CameraPreviewListener {
 
-    private static final String VIDEO_PATH_NAME = "/FlickCam.mp4/";
-    
     // Camera constants
-    private static int CAMERA_ID_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
-    private static int CAMERA_ID_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
-    private static final String NO_CAMERA_AVAILABLE = "No Camera found on your device";
-    private static final int GALLERY_FRAGMENT_NUMBER = 2;
-    private static final String ALBUM_NAME = "FlickCam";
+    private static final int CAMERA_ID_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
+    private static final int CAMERA_ID_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
     private static final int FLIP_PREVIEW_ANIMATION_DURATION = 300;
+    private static final int GALLERY_FRAGMENT_NUMBER = 2;
+    
+    private static final String NO_CAMERA_AVAILABLE = "No Camera found on your device";
+    private static final String CANNOT_CONNECT_TO_CAMERA = "Cannot connect to camera. Try restarting the application";
+    private static final String IMAGE_SAVED_SUCCESSFULLY = "Image Saved Successfully";
+    private static final String CANNOT_SAVE_IMAGE_NO_STORAGE_AVAILABLE = "Cannot save image. No storage available";
+    private static final String SAVING_IMAGE = "Saving Image...";
+    private static final String FAILED_TO_SAVE_IMAGE = "Failed to Save Image";
+    private static final String ALBUM_NAME = "FlickCam";
     public static final String TAG = "camera_fragment";
     
     // General instance variables
@@ -71,6 +76,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private byte[] mPictureData;
     private int mDeviceRotation;
     private boolean mCameraWasSwapped;
+    private boolean mCameraStartupComplete;
     
     // Camera Properties
     private int mZoomMax;
@@ -117,7 +123,13 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private PictureCallback mJpegCallback;
     
     // Initializers
-    private MediaRecorderInitializer mMediaRecorderInitializer;
+    private CameraInitializer mCameraInitializer;
+    
+    // Flag that says if the camera is need or not (e.g. onPause() was called) 
+    private volatile boolean mIsNeeded;
+    
+    // Locks
+    private ReentrantLock mReentrantLock;
     
     // Static factory method that returns a new fragment instance to the client
     public static CameraFragmentNew newInstance() {
@@ -130,14 +142,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ON CREATE VIEW");
-        
-        // ContextThemeWrapper from the original Activity Context with the custom theme
-        final Context contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.Camera);
 
-        // Clonen the inflater using the ContextThemeWrapper
-        LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
-        
-        initializeInstanceVariables(localInflater, container);
+        initializeInstanceVariables(inflater, container);
         setViewListeners(); // Maybe move this stuff to other place so that onCreateView becomes lighter and faster
         return mRootView;
     }
@@ -148,22 +154,31 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         Log.d(TAG, "ON RESUME");
         super.onResume();
         
-        CameraInitializer ci = new CameraInitializer();
-        ci.execute();
+        mIsNeeded = true;
+        mCameraInitializer = new CameraInitializer();
+        mCameraInitializer.execute();
     }
     
     @Override
     public void onPause() {
         Log.d(TAG, "ON PAUSE");
         super.onPause();
-        deinitializeCamera();
+        
+        mIsNeeded = false;
+        if (mReentrantLock.tryLock()) {
+            deinitializeCamera();
+            removeAllCameraPreviewViews();
+            mReentrantLock.unlock();
+        }
+        mCameraInitializer.cancel(true); // 
+        
     }
     
     @Override
     public void onStop() {
         Log.d(TAG, "ON STOP");
         super.onStop();
-        removeAllCameraPreviewViews();
+        
         clearPictureData();
         swapUIElements();
     }
@@ -181,12 +196,13 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             return false;
         } else {
             mCamera = getCameraInstance(cameraID);
-            return true;
+            if (mCamera != null) {
+                return true;
+            } else {
+                alertCannotConnectToCamera();
+                return false;
+            }
         }
-    }
-
-    private void alertNoCamera() {
-        Toast.makeText(mContext, NO_CAMERA_AVAILABLE, Toast.LENGTH_LONG).show();
     }
     
     private Camera getCameraInstance(int cameraID) {
@@ -231,6 +247,11 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         mDeviceRotation = getDeviceRotation(mContext);
         mCameraWasSwapped = false;
+        mCameraStartupComplete = false;
+        
+        // Locking stuff
+        mIsNeeded = true;
+        mReentrantLock = new ReentrantLock();
     }
     
     @SuppressLint("NewApi")
@@ -325,6 +346,58 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     }
     
     /*
+     * Alerts
+     */
+    private void alertNoCamera() {
+        this.getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(mContext, NO_CAMERA_AVAILABLE, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    
+    private void alertCannotConnectToCamera() {
+        this.getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(mContext, CANNOT_CONNECT_TO_CAMERA, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    
+    private void alertNoStorageAvailable() {
+        this.getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(mContext, CANNOT_SAVE_IMAGE_NO_STORAGE_AVAILABLE, Toast.LENGTH_LONG).show();
+            }
+        });
+    }
+    
+    private void alertIsSaving() {
+        this.getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                Toast.makeText(mContext, SAVING_IMAGE, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+    
+    private void alertSavingSuccess(boolean success) {
+        if (success) {
+            Toast.makeText(mContext, IMAGE_SAVED_SUCCESSFULLY, Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(mContext, FAILED_TO_SAVE_IMAGE, Toast.LENGTH_LONG).show();
+        }
+        
+    }
+    
+    /*
      * Setter and Getters
      */
     private void setCurrentCameraID(int cameraID) {
@@ -338,7 +411,9 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     /*
      * Methods to stop and release the cameras
      */
-    private void deinitializeCamera() {
+    @Override
+    public void deinitializeCamera() {
+        mCameraStartupComplete = false;
         stopPreview();
         releaseCamera();
         
@@ -402,7 +477,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             @Override
             public void onClick(View v) {
                 // TODO Auto-generated method stub
-                
             }
            
        };
@@ -418,7 +492,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                     Log.d(TAG, "Shutter Button Clicked.");
                     if (mPictureTaken) {
                         retakePicture();
-                    } else {
+                    } else if (cameraIsReady()){
                         takePicture();
                         setShutterRetake();
                     }
@@ -434,27 +508,11 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
 
                 @Override
                 public void onClick(View view) {
-                    Toast toast;
-                    if (!isExternalStorageWritable()) {
-                        toast = Toast.makeText(mContext, "Cannot save image. No storage available", Toast.LENGTH_LONG);
-                        toast.show();
-                        return;
+                    if (pictureDataIsReady()) {
+                        String fileName = getAlbumStorageDir() + "/" + getDefaultFilename();
+                        WriteToFileHelper writeFileHelper = new WriteToFileHelper();
+                        writeFileHelper.execute(mPictureData, fileName);
                     }
-                    
-                    toast = Toast.makeText(mContext, "Saving Image...", Toast.LENGTH_LONG);
-                    toast.show();
-
-                    Log.d(TAG, "Accept Button Clicked.");
-                    if (writeBytesToFile(mPictureData, getAlbumStorageDir() + "/" + getDefaultFilename())) {
-                        toast = Toast.makeText(mContext, "Image Saved Successfully.", Toast.LENGTH_LONG);
-                        // We have to refresh the grid view UI to make the new photo show up
-                        refreshGalleryUI();
-                        resetShutter();
-                    }
-                    else {
-                        toast = Toast.makeText(mContext, "Failed to Save Image. See Log for Details.", Toast.LENGTH_LONG);
-                    }
-                    toast.show();
                 }
             };
         }
@@ -550,8 +608,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         swapUIElements();
         
         deinitializeCamera();
-        CameraInitializer ci = new CameraInitializer();
-        ci.execute();
+        mCameraInitializer = new CameraInitializer();
+        mCameraInitializer.execute();
         removeAllCameraPreviewViews();
     }
     
@@ -610,9 +668,22 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
      */
     @Override
     public void startRecorder() {
-        mMediaRecorderInitializer = new MediaRecorderInitializer();
-        mMediaRecorderInitializer.execute();
-        
+        if (mReentrantLock.tryLock() && mCamera != null) {
+            Thread mediaRecorderThread = new Thread(new Runnable() {
+
+                @Override
+                public void run() {
+                    prepareMediaRecorder();
+                    startMediaRecorder();
+                    resetMediaRecorder();
+                    mCameraFragmentListener.startupComplete();
+                    mCameraStartupComplete = true;
+                }
+            });
+            mediaRecorderThread.start();
+            mReentrantLock.unlock();
+        } 
+        checkIfFragmentPaused();
     }
     
     private void prepareMediaRecorder() {
@@ -661,8 +732,13 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     
     private void startMediaRecorder() {
         if (mMediaRecorder != null) {
-            mMediaRecorder.start();
-            Log.d(TAG, "Start media recorder successful");
+            try {
+                mMediaRecorder.start();
+                Log.d(TAG, "Start media recorder successful");
+            } catch (RuntimeException ie){
+                mMediaRecorder.reset();
+            }
+            
         }
     }
     
@@ -687,10 +763,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
     }
     
-    private void setCameraSpecificAttributes() {
-        // TODO
-    }
-    
     /*
      * Methods that handle camera functionalities
      */
@@ -701,25 +773,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     
     private void retakePicture() {
         resetShutter();
-    }
-    
-    private boolean writeBytesToFile(byte[] data, String filename) {
-        if (data == null) {
-            Log.d(TAG, "Data Was Empty, Not Writing to File");
-            return false;
-        }
-        Log.d(TAG, "Filename is " + filename);
-        try {
-            FileOutputStream output = new FileOutputStream(filename);
-            output.write(data);
-            output.close();
-
-            Log.d(TAG, "Image Saved Successfully");
-            return true;
-        } catch (IOException e) {
-            Log.d(TAG, "Saving Image Failed!");
-            return false;
-        }
     }
     
     private String getDefaultFilename() {
@@ -745,9 +798,17 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             mCurrentCameraID = CAMERA_ID_BACK;
         }
         mCameraWasSwapped = true; // TODO Using a boolean for this is very hacky. Maybe later a better implementation?
-        CameraInitializer ci = new CameraInitializer();
-        ci.execute();
+        mCameraInitializer = new CameraInitializer();
+        mCameraInitializer.execute();
         
+    }
+    
+    private boolean pictureDataIsReady() {
+        return (mPictureData != null);
+    }
+    
+    private boolean cameraIsReady() {
+        return mCameraStartupComplete;
     }
     
     /* Checks if external storage is available for read and write */
@@ -770,6 +831,14 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         return outputPipe;
     }
     
+    private void checkIfFragmentPaused() {
+        if (!mIsNeeded) {
+            deinitializeCamera();
+            removeAllCameraPreviewViews();
+            mReentrantLock.unlock();
+        } 
+    }
+    
     /*
      * Async Helper classes
      */
@@ -778,17 +847,21 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
 
         @Override
         protected Void doInBackground(Void... params) {
+            mReentrantLock.lock();
             if (initializeCamera(mCurrentCameraID)) {
                 
                 initializeCameraProperties();
                 setCameraParameters();
                 setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
             } 
+            checkIfFragmentPaused();
+            mReentrantLock.unlock();
             return null;
         }
 
         @Override
         protected void onPostExecute(Void result) {
+            mReentrantLock.lock();
             super.onPostExecute(result);
             startPreview();
             reorganizeUI();
@@ -797,35 +870,57 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                 removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
                 mCameraWasSwapped = false;
             }
+            checkIfFragmentPaused();
+            mReentrantLock.unlock();
         }
     }
     
-    
-    // This sets up and starts the media recorder
-    private class MediaRecorderInitializer extends AsyncTask<Void, Void, Void> {
+    private class WriteToFileHelper extends AsyncTask<Object, Void, Boolean> {
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Boolean doInBackground(Object... params) {
+        	mReentrantLock.lock();
+            byte[] data = (byte[]) params[0];
+            String filename = (String) params[1];
             
-            prepareMediaRecorder();
-            startMediaRecorder();
-            
-            /*try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (!isExternalStorageWritable()) {
+                alertNoStorageAvailable();
+                this.cancel(true);
             }
-            stopMediaRecorder(); // We immediately stop the recorder because there is no need to record, we just need the preview
-            */
-            return null;
+            alertIsSaving();
+            if (data == null) {
+                Log.d(TAG, "Data Was Empty, Not Writing to File");
+                mReentrantLock.unlock();
+                return false;
+            }
+            Log.d(TAG, "Filename is " + filename);
+            try {
+                FileOutputStream output = new FileOutputStream(filename);
+                output.write(data);
+                output.close();
+
+                Log.d(TAG, "Image Saved Successfully");
+                mReentrantLock.unlock();
+                return true;
+            } catch (IOException e) {
+                Log.d(TAG, "Saving Image Failed!");
+                mReentrantLock.unlock();
+                return false;
+            }
         }
 
-        @SuppressLint("NewApi")
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(Boolean result) {
             super.onPostExecute(result);
-                resetMediaRecorder(); // Since there is no need to record now
-                mCameraFragmentListener.startupComplete();
+            if (result) {
+                alertSavingSuccess(true);
+                 // We have to refresh the grid view UI to make the new photo show up
+                 refreshGalleryUI();
+                 resetShutter();
+             }
+             else {
+                 alertSavingSuccess(false);
+             }
         }
     }
     
@@ -924,7 +1019,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     }
     
     private File getFile() {
-        File file = new File(Environment.getExternalStorageDirectory(), VIDEO_PATH_NAME);
+        File file = new File(Environment.getExternalStorageDirectory(), "/FlickCam.mp4");
         // "touch" the file
         if(!file.exists()) {
             File parent = file.getParentFile();

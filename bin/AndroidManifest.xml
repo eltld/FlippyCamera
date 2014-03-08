@@ -23,13 +23,12 @@
         android:hardwareAccelerated="true"
         android:icon="@drawable/ic_action_camera"
         android:label="@string/app_name">
-        <!-- android:theme="@style/Gallery" -->
         
         <activity
             android:name="org.sebbas.android.flickcam.MainFragment"
             android:screenOrientation="portrait"
             android:label="@string/app_name" 
-            >
+            android:theme="@style/FlickCamera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -37,7 +36,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="FullScreenViewActivity">
+            android:name="FullScreenViewActivity"
+            android:theme="@style/FlickCamera">
         </activity>
     </application>
 

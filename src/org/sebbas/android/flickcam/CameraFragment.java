@@ -225,7 +225,8 @@ public class CameraFragment extends Fragment implements CameraPreviewListener {
         }
     }
     
-    private void deinitializeCamera() {
+    @Override
+    public void deinitializeCamera() {
         stopPreview();
         releaseCamera();
         

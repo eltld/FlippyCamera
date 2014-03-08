@@ -17,19 +17,10 @@
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
     </style>
      
-    <style name="Camera" parent="android:Theme.Holo.NoActionBar.TranslucentDecor">
+    <style name="FlickCamera" parent="android:Theme.Holo.NoActionBar.TranslucentDecor">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowNoTitle">true</item>
         <item name="android:windowFullscreen">true</item>
     </style>
-    
-    <style name="Gallery" parent="@style/Theme.AppCompat.Light.DarkActionBar">
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowFullscreen">true</item> 
-        <item name="actionBarStyle">@style/MyActionBar</item>
-    </style>
 
-    <style name="MyActionBar" parent="@style/Widget.AppCompat.Light.ActionBar">
-    <!-- Setting values in the default namespace affects API levels 7-13 -->
-</style>
 </resources>

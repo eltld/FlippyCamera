@@ -8,14 +8,14 @@ import org.sebbas.android.viewpager.DepthPageTransformer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 
-public class MainFragment extends ActionBarActivity implements CameraFragmentListener {
+public class MainFragment extends FragmentActivity implements CameraFragmentListener {
 
     private static final String TAG = "main_fragment";
     

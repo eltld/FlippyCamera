@@ -41,9 +41,10 @@ public class CameraPreviewAdvanced extends TextureView implements
         Log.d(TAG, "ON SURFACE TEXTURE AVAILABLE");
         
         try {
-        	System.out.println("Camera is " + mCamera + " and surface is: " + surface);
-            mCamera.setPreviewTexture(surface);
-            mListener.startRecorder();
+            if (mCamera != null) {
+                mCamera.setPreviewTexture(surface);
+                mListener.startRecorder();
+            }
         } catch (IOException e) {
             // Something bad happened
             e.printStackTrace();
