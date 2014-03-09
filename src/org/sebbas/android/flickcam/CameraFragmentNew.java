@@ -1,5 +1,5 @@
 package org.sebbas.android.flickcam;
-
+import android.support.v7.app.ActionBarActivity;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -35,6 +35,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -137,7 +138,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         return cf;
     }
 
-    /* 
+	/* 
      * Methods for the Fragment life-cycle
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -453,8 +454,10 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Camera switched");
-                switchCamera();
+                if (cameraIsReady()) {
+                    Log.d(TAG, "Camera switched");
+                    switchCamera();
+                }
             }
         };
         return mSwitchCameraListener;

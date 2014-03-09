@@ -22,6 +22,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,22 +53,26 @@ public class GalleryFragment extends Fragment {
         return gf;
     }
     
-    
-    
     @Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mContext = this.getActivity();
-		mShortAnimationDuration = getResources().getInteger(
-                android.R.integer.config_shortAnimTime);
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mContext = this.getActivity();
+        mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+    }
 
 
 
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     
         //GridView gridView = (GridView)inflater.inflate(R.layout.gallery_grid_view, container, false);
-        mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_grid_view, container, false);
+
+        // Create ContextThemeWrapper from the original Activity Context with the custom theme
+        final Context contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.Gallery);
+
+        // Clone the inflater using the ContextThemeWrapper
+        LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
+        
+        mFrameLayout = (FrameLayout) localInflater.inflate(R.layout.gallery_grid_view, container, false);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
         expandedImageView = (ImageView) mFrameLayout.findViewById(R.id.expanded_image);
         mUtils = new Utils(this.getActivity());
@@ -93,17 +98,17 @@ public class GalleryFragment extends Fragment {
                 i.putExtra("position", position);
                 System.out.println("Clicked on position " + position);
                 GalleryFragment.this.getActivity().startActivity(i);*/
-            	
-            	
-            	File imgFile = new  File(mImagePaths.get(position));
-            	if(imgFile.exists()){
+                
+                
+                File imgFile = new  File(mImagePaths.get(position));
+                if(imgFile.exists()){
 
-            	    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            	    zoomImageFromThumb(new View(mContext), myBitmap);
+                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+                    zoomImageFromThumb(new View(mContext), myBitmap);
 
 
-            	}
-            	
+                }
+                
             }
         });
     }
@@ -138,7 +143,7 @@ public class GalleryFragment extends Fragment {
     private int mShortAnimationDuration;
     
     @SuppressLint("NewApi")
-	private void zoomImageFromThumb(final View thumbView, Bitmap bitmap) {
+    private void zoomImageFromThumb(final View thumbView, Bitmap bitmap) {
         // If there's an animation in progress, cancel it
         // immediately and proceed with this one.
         if (mCurrentAnimator != null) {

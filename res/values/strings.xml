@@ -9,5 +9,6 @@
     <string name="switch_flash">Switch Flash</string>
     <string name="accept_image">Accept Image</string>
     <string name="discard_image">Discard Image</string>
+    <string name="description_zoom_touch_close">Zoomed Image</string>
 
 </resources>
