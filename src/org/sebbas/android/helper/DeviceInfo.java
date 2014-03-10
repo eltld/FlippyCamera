@@ -9,16 +9,16 @@ import android.view.WindowManager;
 
 public class DeviceInfo {
 
-	private Context mContext;
+    private Context mContext;
 
-	public DeviceInfo(Context context) {
-		mContext = context;
-	}
-	
-	// Check to see if the device supports the indicated SDK
+    public DeviceInfo(Context context) {
+        mContext = context;
+    }
+    
+    // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return !true;
+            return true;
         } 
         return false;
     }

@@ -27,6 +27,7 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.view.Surface;
+import android.view.View;
 import android.view.WindowManager;
 
 public class CameraThread extends Thread {
@@ -175,7 +176,7 @@ public class CameraThread extends Thread {
                 if (!mSmoothZoomSupported) {
                     parameters.setZoom(mZoomValue);
                 }
-                parameters.setRotation(deviceRotation);
+                //parameters.setRotation(deviceRotation);
                 // Finally, add the parameters to the camera
                 mCamera.setParameters(parameters);
                 mFlashEnabled = flashEnabled; // Keep track of the flash settings
@@ -213,12 +214,12 @@ public class CameraThread extends Thread {
         });
     }
     
-    public synchronized void startRecorder(final CameraPreviewNew... cameraPreview) {
+    public synchronized void startRecorder() {
         mHandler.post(new Runnable() {
-
+            
             @Override
             public void run() {
-                prepareMediaRecorder(cameraPreview[0]);
+                prepareMediaRecorder();
                 startMediaRecorder();
                 resetMediaRecorder();
             }
@@ -226,17 +227,34 @@ public class CameraThread extends Thread {
         });
     }
     
+    // Overloaded method
+    public synchronized void startRecorder(final CameraPreviewNew cameraPreview) {
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                prepareMediaRecorder();
+                setPreviewDisplayForMediaRecorder(cameraPreview);
+                startMediaRecorder();
+                resetMediaRecorder();
+            }
+            
+        });
+    }
+    
+    
     public synchronized void switchCamera() {
         mHandler.post(new Runnable() {
 
             @Override
             public void run() {
-                deinitializeCamera();
+                stopCamera();
                 if (mCurrentCameraID == CAMERA_ID_BACK) {
                     mCurrentCameraID = CAMERA_ID_FRONT;
                 } else if (mCurrentCameraID == CAMERA_ID_FRONT) {
                     mCurrentCameraID = CAMERA_ID_BACK;
                 }
+                
                 initializeCamera(mCurrentCameraID);
                 initializeCameraProperties();
                 setCameraParameters(mFlashEnabled, mCurrentCameraID);
@@ -334,7 +352,7 @@ public class CameraThread extends Thread {
         return (mPictureData != null);
     }
 
-    private void prepareMediaRecorder(CameraPreviewNew cameraPreview) {
+    private void prepareMediaRecorder() {
         mMediaRecorder = new MediaRecorder();
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
@@ -344,11 +362,6 @@ public class CameraThread extends Thread {
         
         mMediaRecorder.setProfile(CamcorderProfile.get(mCurrentCameraID, CamcorderProfile.QUALITY_HIGH));
         mMediaRecorder.setOutputFile(getPipeFD());
-        
-        // We have to set the preview display for devices that use a SurfaceView
-        if(!DeviceInfo.supportsSDK(14)) {
-            setPreviewDisplayForMediaRecorder(cameraPreview);
-        }
         
         try {
             mMediaRecorder.prepare();
@@ -361,9 +374,12 @@ public class CameraThread extends Thread {
             Log.d(TAG, "Failed to prepare media recorder. IOException");
         }
     }
-    
+        
     private void setPreviewDisplayForMediaRecorder(CameraPreviewNew cameraPreview) {
-        mMediaRecorder.setPreviewDisplay(cameraPreview.getHolder().getSurface());
+        if (!DeviceInfo.supportsSDK(14)) {
+            // We have to set the preview display for devices that use a SurfaceView
+            mMediaRecorder.setPreviewDisplay(((CameraPreviewNew)cameraPreview).getHolder().getSurface());
+        }
     }
     
     private void startMediaRecorder() {

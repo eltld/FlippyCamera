@@ -9,14 +9,18 @@
     android:background="@android:color/black"
     android:orientation="vertical">
     
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/preview_mask">
+        
     <!-- Here we will programmatically add the camera preview -->
     <ViewFlipper 
         android:id="@+id/camera_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center">
-
-    </ViewFlipper>
+        android:layout_gravity="center" />
+    </FrameLayout>
     
     <FrameLayout 
         android:layout_width="match_parent"

@@ -16,6 +16,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
+import android.view.View;
 
 @SuppressLint("NewApi")
 public class CameraPreviewAdvancedNew extends TextureView implements
@@ -45,7 +46,7 @@ public class CameraPreviewAdvancedNew extends TextureView implements
         try {
             if (mCamera != null) {
                 mCamera.setPreviewTexture(surface);
-                mCameraThread.startRecorder(null);
+                mCameraThread.startRecorder();
             }
         } catch (IOException e) {
             // Something bad happened
