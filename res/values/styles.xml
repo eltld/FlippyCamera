@@ -39,5 +39,10 @@
         <!-- Support library compatibility -->
         <item name="background">@drawable/ab_solid_actionbar9</item>
     </style>
+    
+    <style name="Theme.AppCompat.Dark.NoActionBar" parent="@style/Theme.AppCompat">
+        <item name="android:windowNoTitle">true</item>
+  
+  </style>
 
 </resources>

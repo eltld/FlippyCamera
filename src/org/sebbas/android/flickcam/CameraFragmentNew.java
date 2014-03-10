@@ -43,6 +43,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.FrameLayout;
@@ -100,6 +101,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     private OrientationImageButton mCancelButton;
     private OrientationImageButton mAcceptButton;
     private FrameLayout mControlLayout;
+    private FrameLayout mPreviewLayout;
     private CameraPreviewAdvanced mCameraOnePreviewAdvanced;
     private CameraPreviewAdvanced mCameraTwoPreviewAdvanced;
     private CameraPreview mCameraOnePreview;
@@ -137,13 +139,20 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         CameraFragmentNew cf = new CameraFragmentNew();
         return cf;
     }
+    
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+    	this.getActivity().setTheme(R.style.FlickCamera);
+        super.onCreate(savedInstanceState);
+        
+    }
 
-	/* 
+    /* 
      * Methods for the Fragment life-cycle
      */
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         Log.d(TAG, "ON CREATE VIEW");
-
+        
         initializeInstanceVariables(inflater, container);
         setViewListeners(); // Maybe move this stuff to other place so that onCreateView becomes lighter and faster
         return mRootView;
@@ -228,6 +237,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
         
         mControlLayout = (FrameLayout) mRootView.findViewById(R.id.control_mask);
+        mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.preview_mask);
         
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
         mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);
@@ -316,20 +326,20 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
             System.out.println("Entered camera back");
             if (supportsSDK(14)) {
                 mCameraOnePreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
-                mCameraViewFlipper.addView(mCameraOnePreviewAdvanced);
+                mPreviewLayout.addView(mCameraOnePreviewAdvanced);
             } else {
                 mCameraOnePreview = new CameraPreview(mContext, this);
-                mCameraViewFlipper.addView(mCameraOnePreview);
+                mPreviewLayout.addView(mCameraOnePreview);
             }
         }
         if (mCurrentCameraID == CAMERA_ID_FRONT) {
             System.out.println("Entered camera front");
             if (supportsSDK(14)) {
                 mCameraTwoPreviewAdvanced = new CameraPreviewAdvanced(mContext, this, mCamera);
-                mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
+                mPreviewLayout.addView(mCameraTwoPreviewAdvanced);
             } else {
                 mCameraTwoPreview = new CameraPreview(mContext, this);
-                mCameraViewFlipper.addView(mCameraTwoPreview);
+                mPreviewLayout.addView(mCameraTwoPreview);
             }
         }    
     }
@@ -412,7 +422,6 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     /*
      * Methods to stop and release the cameras
      */
-    @Override
     public void deinitializeCamera() {
         mCameraStartupComplete = false;
         stopPreview();
@@ -739,7 +748,8 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
                 mMediaRecorder.start();
                 Log.d(TAG, "Start media recorder successful");
             } catch (RuntimeException ie){
-                mMediaRecorder.reset();
+                mCameraInitializer = new CameraInitializer();
+                mCameraInitializer.execute();
             }
             
         }
@@ -846,33 +856,40 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
      * Async Helper classes
      */
     // This initializes the camera and starts a preview.
-    private class CameraInitializer extends AsyncTask<Void, Void, Void> {
+    private class CameraInitializer extends AsyncTask<Void, Void, Boolean> {
 
         @Override
-        protected Void doInBackground(Void... params) {
+        protected Boolean doInBackground(Void... params) {
+            boolean success = false;
             mReentrantLock.lock();
             if (initializeCamera(mCurrentCameraID)) {
                 
                 initializeCameraProperties();
                 setCameraParameters();
                 setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
-            } 
+                success = true;
+            } else {
+                success = false;
+            }
             checkIfFragmentPaused();
             mReentrantLock.unlock();
-            return null;
+            return success;
         }
 
         @Override
-        protected void onPostExecute(Void result) {
+        protected void onPostExecute(Boolean result) {
             mReentrantLock.lock();
             super.onPostExecute(result);
-            startPreview();
-            reorganizeUI();
-            if (mCameraWasSwapped) {
-                startAnimation();
-                removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
-                mCameraWasSwapped = false;
+            if (result) {
+                startPreview();
+                reorganizeUI();
+                if (mCameraWasSwapped) {
+                    startAnimation();
+                    removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
+                    mCameraWasSwapped = false;
+                }
             }
+            
             checkIfFragmentPaused();
             mReentrantLock.unlock();
         }
@@ -882,7 +899,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
 
         @Override
         protected Boolean doInBackground(Object... params) {
-        	mReentrantLock.lock();
+            mReentrantLock.lock();
             byte[] data = (byte[]) params[0];
             String filename = (String) params[1];
             
@@ -965,7 +982,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
     // Check to see if the device supports the indicated SDK
     private static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return true;
+            return !true;
         } 
         return false;
     }

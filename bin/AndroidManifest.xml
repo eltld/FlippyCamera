@@ -29,7 +29,7 @@
             android:name="org.sebbas.android.flickcam.MainFragment"
             android:screenOrientation="portrait"
             android:label="@string/app_name" 
-            android:theme="@style/Gallery">
+            android:theme="@style/FlickCamera">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

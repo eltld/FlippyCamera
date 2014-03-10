@@ -8,6 +8,7 @@ import org.sebbas.android.viewpager.DepthPageTransformer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
@@ -15,7 +16,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 
-public class MainFragment extends ActionBarActivity implements CameraFragmentListener {
+public class MainFragment extends FragmentActivity implements CameraFragmentListener {
 
     private static final String TAG = "main_fragment";
     
@@ -30,7 +31,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         
         mFragmentManager = getSupportFragmentManager();
         
-        CameraFragmentNew cameraFragment = CameraFragmentNew.newInstance();
+        CameraFragmentUI cameraFragment = CameraFragmentUI.newInstance();
         GalleryFragment galleryFragment = GalleryFragment.newInstance();
         
         
@@ -71,7 +72,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
     private int getPageMargin() {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
-    
     
     @Override
     public void startupComplete() {

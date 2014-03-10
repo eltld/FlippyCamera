@@ -9,19 +9,22 @@
     android:background="@android:color/black"
     android:orientation="vertical">
     
-    <!-- Here we will programmatically add the camera preview -->
-    <ViewFlipper 
-        android:id="@+id/camera_view_flipper"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center">
-
-    </ViewFlipper>
-    
+    <FrameLayout 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/preview_mask">
+            
+        <!-- Here we will programmatically add the camera preview -->
+	    <ViewFlipper 
+	        android:id="@+id/camera_view_flipper"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_gravity="center" />
+    </FrameLayout>
     <FrameLayout 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp"
+        
         android:id="@+id/control_mask">
         
     <org.sebbas.android.views.OrientationImageButton
@@ -29,6 +32,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="top|left"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
@@ -40,6 +44,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="top|right"
         android:contentDescription="@string/switch_camera"
         android:background="@drawable/ic_button_selector"
@@ -51,8 +56,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="bottom|right"
-        android:layout_marginBottom="48dp"
         android:contentDescription="@string/accept_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
@@ -64,8 +69,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="bottom|left"
-        android:layout_marginBottom="48dp"
         android:contentDescription="@string/discard_image"
         android:background="@drawable/ic_button_selector"
         android:visibility="gone"
@@ -77,6 +82,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="bottom|left"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
@@ -88,9 +94,10 @@
         android:layout_width="80dp"
         android:layout_height="80dp"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="bottom|center"
         android:contentDescription="@string/shutter_button"
-        android:background="@drawable/ic_button_selector"
+        android:background="@android:color/transparent"
         android:src="@drawable/btn_shutter" />
     
     <org.sebbas.android.views.OrientationImageButton
@@ -98,6 +105,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_margin="10dp"
         android:layout_gravity="bottom|right"
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
