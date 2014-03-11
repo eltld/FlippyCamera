@@ -114,7 +114,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     @Override
     public void onPause() {
         super.onPause();
-        mCameraThread.stopCamera();
+        mCameraThread.quitThread();
         waitForCameraThreadToFinish();
         removeAllCameraPreviewViews();
     }
@@ -176,21 +176,21 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
         if (cameraID == CameraThread.CAMERA_ID_BACK) {
             if (DeviceInfo.supportsSDK(14)) {
-                mCameraOnePreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread, camera);
-                mPreviewLayout.addView(mCameraOnePreviewAdvanced);
+                mCameraOnePreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread);
+                mCameraViewFlipper.addView(mCameraOnePreviewAdvanced);
             } else {
                 mCameraOnePreview = new CameraPreviewNew(mContext, mCameraThread);
-                mPreviewLayout.addView(mCameraOnePreview);
+                mCameraViewFlipper.addView(mCameraOnePreview);
             }
             setCurrentPreviewID(CameraThread.CAMERA_ID_BACK); // Keep track of the current camera/ preview that is shown
         }
         if (cameraID == CameraThread.CAMERA_ID_FRONT) {
             if (DeviceInfo.supportsSDK(14)) {
-                mCameraTwoPreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread, camera);
-                mPreviewLayout.addView(mCameraTwoPreviewAdvanced);
+                mCameraTwoPreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread);
+                mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
             } else {
                 mCameraTwoPreview = new CameraPreviewNew(mContext, mCameraThread);
-                mPreviewLayout.addView(mCameraTwoPreview);
+                mCameraViewFlipper.addView(mCameraTwoPreview);
             }
             setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
         }
@@ -246,10 +246,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private void resetShutter() {
         mPictureTaken = false;
         swapUIElements();
-        removeAllCameraPreviewViews();
-        mCameraThread.deinitializeCamera(); // Deinitialize camera
+        
+        mCameraThread.stopCamera(); // Deinitialize camera
         waitForCameraThreadToFinish(); // Wait until finished
         postCameraInitializations(); // Reinitialize camera
+        removeAllCameraPreviewViews();
         
     }
     
@@ -283,7 +284,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         AnimationFactory.flipTransition(mCameraViewFlipper, FlipDirection.LEFT_RIGHT, FLIP_PREVIEW_ANIMATION_DURATION);
     }
     
-    
      // Listeners
     private OnClickListener getSwitchFlashListener() {
         mSwitchFlashListener = new View.OnClickListener() {
@@ -305,6 +305,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
             public void onClick(View v) {
                 Log.d(TAG, "Camera switched");
                 mCameraThread.switchCamera();
+                mCameraWasSwapped = true;
             }
         };
         return mSwitchCameraListener;

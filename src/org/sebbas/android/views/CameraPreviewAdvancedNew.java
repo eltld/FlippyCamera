@@ -24,16 +24,14 @@ public class CameraPreviewAdvancedNew extends TextureView implements
 
     private static final String TAG = "camera_preview_advanced";
     private CameraThread mCameraThread;
-    private Camera mCamera;
     private ScaleGestureDetector mScaleDetector;
 
     public CameraPreviewAdvancedNew(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
-    public CameraPreviewAdvancedNew(Context context, CameraThread cameraThread, Camera camera) {
+    public CameraPreviewAdvancedNew(Context context, CameraThread cameraThread) {
         super(context);
-        mCamera = camera;
         mCameraThread = cameraThread;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListenerNew(this, cameraThread));
         setSurfaceTextureListener(this);
@@ -42,16 +40,15 @@ public class CameraPreviewAdvancedNew extends TextureView implements
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.d(TAG, "ON SURFACE TEXTURE AVAILABLE");
-        
+        mCameraThread.setPreviewTexture(surface);
+        // Make sure that the preview is set before starting the camera/ recorder
         try {
-            if (mCamera != null) {
-                mCamera.setPreviewTexture(surface);
-                mCameraThread.startRecorder();
-            }
-        } catch (IOException e) {
-            // Something bad happened
+            Thread.sleep(100);
+            // TODO This is not really safe ... 
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        mCameraThread.startRecorder();
     }
 
     @Override

@@ -14,6 +14,7 @@ import org.sebbas.android.views.CameraPreviewNew;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
@@ -42,7 +43,7 @@ public class CameraThread extends Thread {
     protected static final String NO_STORAGE_AVAILABLE = "No storage available on this device";
     protected static final String FAILED_TO_SAVE_PICTURE = "Failed to save picture";
     protected static final String IS_SAVING_PICTURE = "Saving your picture ...";
-    protected static final String SAVED_PICTURE_SUCCESSFULLY = "Saved picture successfully!";
+    protected static final String SAVED_PICTURE_SUCCESSFULLY = "Picture saved successfully!";
     private static final String ALBUM_NAME = "FlickCam";
     
     // Private instance variables
@@ -86,6 +87,19 @@ public class CameraThread extends Thread {
     }
     
     // Public methods
+    public synchronized void quitThread() {
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                Log.i(TAG, "Camera thread loop quitting by request");
+                deinitializeCamera();
+                Looper.myLooper().quit();
+            }
+            
+        });
+    }
+    
     public synchronized void stopCamera() {
         mHandler.post(new Runnable() {
 
@@ -248,7 +262,7 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                stopCamera();
+                deinitializeCamera();
                 if (mCurrentCameraID == CAMERA_ID_BACK) {
                     mCurrentCameraID = CAMERA_ID_FRONT;
                 } else if (mCurrentCameraID == CAMERA_ID_FRONT) {
@@ -309,6 +323,24 @@ public class CameraThread extends Thread {
         });
     }
     
+    // This method is only called in onSurfaceTextureAvailable from the Camera preview that uses a TextureView
+    public synchronized void setPreviewTexture(final SurfaceTexture surface) {
+        mHandler.post(new Runnable() {
+
+            @SuppressLint("NewApi")
+            @Override
+            public void run() {
+                try {
+                    mCamera.setPreviewTexture(surface);
+                } catch (IOException e) {
+                    Log.e(TAG, "Could not set preview texture to camera");
+                    e.printStackTrace();
+                }
+            }
+            
+        });
+    }
+    
     
     
     // Private methods
@@ -324,7 +356,7 @@ public class CameraThread extends Thread {
         return camera; // returns null if camera is unavailable
     }
     
-    public void deinitializeCamera() {
+    private void deinitializeCamera() {
         stopPreview();
         releaseCamera();
         clearPictureData();
