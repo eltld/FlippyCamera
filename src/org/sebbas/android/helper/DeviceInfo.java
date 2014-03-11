@@ -1,5 +1,7 @@
 package org.sebbas.android.helper;
 
+import java.util.List;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
@@ -18,7 +20,7 @@ public class DeviceInfo {
     // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return true;
+            return !true;
         } 
         return false;
     }
@@ -50,5 +52,16 @@ public class DeviceInfo {
             return true;
         }
         return false;
+    }
+    
+    // Helper method for printing out camera values. Mainly used for debugging
+    public static String listToString(List<int[]> sizes) {
+        String result = "Range is [";
+        for (int[] entry : sizes) {
+            int low = entry[0];
+            int high = entry[1];
+            result += "(" + low + "/" + high + ")";
+        }
+        return result += "]";
     }
 }

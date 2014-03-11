@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.sebbas.android.helper.DeviceInfo;
@@ -190,6 +191,8 @@ public class CameraThread extends Thread {
                 if (!mSmoothZoomSupported) {
                     parameters.setZoom(mZoomValue);
                 }
+                // TODO Set the picture size according to device capabilities
+                parameters.setPictureSize(1280, 720);
                 //parameters.setRotation(deviceRotation);
                 // Finally, add the parameters to the camera
                 mCamera.setParameters(parameters);
@@ -233,9 +236,10 @@ public class CameraThread extends Thread {
             
             @Override
             public void run() {
-                prepareMediaRecorder();
+                /*prepareMediaRecorder();
                 startMediaRecorder();
-                resetMediaRecorder();
+                resetMediaRecorder();*/
+            	mCamera.startPreview();
             }
             
         });
@@ -247,10 +251,17 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                prepareMediaRecorder();
-                setPreviewDisplayForMediaRecorder(cameraPreview);
-                startMediaRecorder();
-                resetMediaRecorder();
+                //prepareMediaRecorder();
+                //setPreviewDisplayForMediaRecorder(cameraPreview);
+                //startMediaRecorder();
+                //resetMediaRecorder();*/
+                try {
+                    mCamera.setPreviewDisplay(cameraPreview.getHolder());
+                } catch (IOException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+                mCamera.startPreview();
             }
             
         });

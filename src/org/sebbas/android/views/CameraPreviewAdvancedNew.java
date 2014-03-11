@@ -1,22 +1,17 @@
 package org.sebbas.android.views;
-import java.io.IOException;
 
 import org.sebbas.android.flickcam.CameraThread;
-import org.sebbas.android.interfaces.CameraPreviewListener;
-import org.sebbas.android.listener.ScaleListener;
 import org.sebbas.android.listener.ScaleListenerNew;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.TextureView;
 import android.view.TextureView.SurfaceTextureListener;
-import android.view.View;
 
 @SuppressLint("NewApi")
 public class CameraPreviewAdvancedNew extends TextureView implements
@@ -40,15 +35,11 @@ public class CameraPreviewAdvancedNew extends TextureView implements
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surface, int width, int height) {
         Log.d(TAG, "ON SURFACE TEXTURE AVAILABLE");
-        mCameraThread.setPreviewTexture(surface);
-        // Make sure that the preview is set before starting the camera/ recorder
-        try {
-            Thread.sleep(100);
-            // TODO This is not really safe ... 
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (mCameraThread.isAlive()) {
+            mCameraThread.setPreviewTexture(surface);
+            mCameraThread.startRecorder();
         }
-        mCameraThread.startRecorder();
+        
     }
 
     @Override
