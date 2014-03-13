@@ -22,7 +22,7 @@ public class DeviceInfo {
     // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return true;
+            return !true;
         } 
         return false;
     }

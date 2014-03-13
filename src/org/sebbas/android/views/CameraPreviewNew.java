@@ -63,4 +63,15 @@ public class CameraPreviewNew extends SurfaceView implements SurfaceHolder.Callb
 
         return true;
     }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.d(TAG, "ON MEASURE");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
+        final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
+        setMeasuredDimension(width, height);
+
+        mCameraThread.setCameraPreviewSize(width, height);
+    }
 }
