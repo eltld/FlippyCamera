@@ -113,9 +113,7 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                Log.i(TAG, "Camera thread loop quitting by request");
                 deinitializeCamera();
-                Looper.myLooper().quit();
             }
             
         });
@@ -187,7 +185,6 @@ public class CameraThread extends Thread {
                     } 
                 }
                 
-                
                 if (mWhiteBalanceSupported) {
                     parameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
                 }
@@ -255,7 +252,7 @@ public class CameraThread extends Thread {
         });
     }
     
-    public synchronized void startRecorder() {
+    public synchronized void startCameraPreview() {
         mHandler.post(new Runnable() {
             
             @Override
@@ -263,14 +260,14 @@ public class CameraThread extends Thread {
                 //prepareMediaRecorder();
                 //startMediaRecorder();
                 //resetMediaRecorder();
-                mCamera.startPreview();
+                startPreview();
             }
             
         });
     }
     
     // Overloaded method
-    public synchronized void startRecorder(final CameraPreviewNew cameraPreview) {
+    public synchronized void startCameraPreview(final CameraPreviewNew cameraPreview) {
         mHandler.post(new Runnable() {
 
             @Override
@@ -282,10 +279,9 @@ public class CameraThread extends Thread {
                 try {
                     mCamera.setPreviewDisplay(cameraPreview.getHolder());
                 } catch (IOException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                mCamera.startPreview();
+                startPreview();
             }
             
         });
@@ -428,6 +424,12 @@ public class CameraThread extends Thread {
         }
     }
     
+    private void startPreview() {
+        if (mCamera != null) {
+            mCamera.startPreview();
+        }
+    }
+    
     private void clearPictureData() {
         mPictureData = null;
     }
@@ -551,6 +553,7 @@ public class CameraThread extends Thread {
                 public void onPictureTaken(byte[] data, Camera camera) {
                     Log.d(TAG, "On picture taken");
                     mPictureData = data;
+                    stopPreview();
                 }
             };
         }

@@ -88,7 +88,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         initializeInstanceVariables();
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
@@ -114,7 +113,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     public void onPause() {
         super.onPause();
         mCameraThread.quitThread();
-        waitForCameraThreadToFinish();
         removeAllCameraPreviewViews();
     }
 
@@ -247,7 +245,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         swapUIElements();
         
         mCameraThread.stopCamera(); // Deinitialize camera
-        waitForCameraThreadToFinish(); // Wait until finished
         postCameraInitializations(); // Reinitialize camera
         removeAllCameraPreviewViews();
         
@@ -386,7 +383,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
 
             @Override
             public void run() {
-                Toast.makeText(mContext, message, Toast.LENGTH_LONG).show();
+                Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
             }
             
         });
@@ -406,7 +403,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
                     removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
                     mCameraWasSwapped = false;
                 }
-                
             }
             
         });

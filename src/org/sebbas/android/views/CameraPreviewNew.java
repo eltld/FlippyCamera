@@ -43,7 +43,7 @@ public class CameraPreviewNew extends SurfaceView implements SurfaceHolder.Callb
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.d(TAG, "Surface was Changed");
-        mCameraThread.startRecorder(this);
+        mCameraThread.startCameraPreview(this);
     }
 
     @Override
