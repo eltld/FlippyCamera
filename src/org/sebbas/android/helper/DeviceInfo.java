@@ -4,6 +4,8 @@ import java.util.List;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
 import android.os.Environment;
 import android.view.Surface;
 import android.view.ViewConfiguration;
@@ -20,7 +22,7 @@ public class DeviceInfo {
     // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return !true;
+            return true;
         } 
         return false;
     }
@@ -63,5 +65,33 @@ public class DeviceInfo {
             result += "(" + low + "/" + high + ")";
         }
         return result += "]";
+    }
+    
+    public static boolean supportsAutoFocus(Parameters parameters) {
+        List<String> focusModes = parameters.getSupportedFocusModes();
+        if (focusModes == null) return false;
+        if (focusModes.contains((String)Camera.Parameters.FOCUS_MODE_AUTO)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean supportsFlash(Parameters parameters) {
+        List<String> flashModes = parameters.getSupportedFlashModes();
+        if (flashModes == null) return false;
+        if (flashModes.contains((String)Camera.Parameters.FLASH_MODE_ON) 
+                && flashModes.contains((String)Camera.Parameters.FLASH_MODE_OFF)) {
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean supportsWhiteBalance(Parameters parameters) {
+        List<String> whiteBalanceModes = parameters.getSupportedWhiteBalance();
+        if (whiteBalanceModes == null) return false;
+        if (whiteBalanceModes.contains((String)Camera.Parameters.WHITE_BALANCE_AUTO)) { 
+            return true;
+        }
+        return false;
     }
 }

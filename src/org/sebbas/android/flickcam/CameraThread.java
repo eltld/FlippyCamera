@@ -15,6 +15,7 @@ import org.sebbas.android.views.CameraPreviewNew;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
@@ -56,10 +57,16 @@ public class CameraThread extends Thread {
     protected int mCurrentCameraID;
     private boolean mVideoStabilizationSupported;
     private boolean mSmoothZoomSupported;
+    protected boolean mAutoFocusSupported;
+    protected boolean mFlashSupported;
+    protected boolean mWhiteBalanceSupported;
     protected int mZoomMax;
     private int mZoomValue;
     protected boolean mFlashEnabled;
     private MediaRecorder mMediaRecorder;
+    private List<Camera.Size> mSupportedPreviewSizes;
+    private Camera.Size mPreviewSize;
+    protected byte[] mPictureData;
     
     // Callbacks
     private ErrorCallback mErrorCallback;
@@ -67,12 +74,12 @@ public class CameraThread extends Thread {
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
     private PictureCallback mJpegCallback;
-    protected byte[] mPictureData;
 
     public CameraThread(CameraFragmentUI cameraFragment, Context context) {
         mContext = context;
         mCameraThreadListener = (CameraThreadListener) cameraFragment;
         mNumberOfCamerasSupported = Camera.getNumberOfCameras();
+        
     }
     
     @Override
@@ -151,6 +158,9 @@ public class CameraThread extends Thread {
                 mZoomMax = parameters.getMaxZoom();
                 mZoomValue = 0;
                 mSmoothZoomSupported = parameters.isSmoothZoomSupported();
+                mAutoFocusSupported = DeviceInfo.supportsAutoFocus(parameters);
+                mFlashSupported = DeviceInfo.supportsFlash(parameters);
+                mWhiteBalanceSupported = DeviceInfo.supportsWhiteBalance(parameters);
                 if (DeviceInfo.supportsSDK(15)) {
                     mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
                 }
@@ -159,27 +169,35 @@ public class CameraThread extends Thread {
         });
     }
     
+    // Parameters will be set when setCameraPreviewSize() is called and when zoom changes
     public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation) {
         mHandler.post(new Runnable() {
 
             @SuppressLint("NewApi")
             @Override
             public void run() {
+                // TODO refactor this method
                 Parameters parameters = mCamera.getParameters();
                 // Adds continuous auto focus (only if API is high enough) to the parameters.
-                if (DeviceInfo.supportsSDK(14)) {
-                    parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-                } else {
-                    parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                } 
+                if (mAutoFocusSupported) {
+                    if (DeviceInfo.supportsSDK(14)) {
+                        parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+                    } else {
+                        parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
+                    } 
+                }
                 
-                // Enable auto white balance. This makes preview look smoother
-                parameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
                 
-                if (flashEnabled) {
-                    parameters.setFlashMode(Parameters.FLASH_MODE_ON);
-                } else {
-                    parameters.setFlashMode(Parameters.FLASH_MODE_OFF);
+                if (mWhiteBalanceSupported) {
+                    parameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
+                }
+                
+                if (mFlashSupported) {
+                    if (flashEnabled) {
+                        parameters.setFlashMode(Parameters.FLASH_MODE_ON);
+                    } else {
+                        parameters.setFlashMode(Parameters.FLASH_MODE_OFF);
+                    }
                 }
                 
                 // This will only get called if video stabilization is supported and if the API is high enough. All handled in initCameraProperties.
@@ -194,8 +212,11 @@ public class CameraThread extends Thread {
                 // TODO Set the picture size according to device capabilities
                 parameters.setPictureSize(1280, 720);
                 //parameters.setRotation(deviceRotation);
+                parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                
                 // Finally, add the parameters to the camera
                 mCamera.setParameters(parameters);
+                
                 mFlashEnabled = flashEnabled; // Keep track of the flash settings
             }
             
@@ -236,10 +257,10 @@ public class CameraThread extends Thread {
             
             @Override
             public void run() {
-                /*prepareMediaRecorder();
-                startMediaRecorder();
-                resetMediaRecorder();*/
-            	mCamera.startPreview();
+                //prepareMediaRecorder();
+                //startMediaRecorder();
+                //resetMediaRecorder();
+                mCamera.startPreview();
             }
             
         });
@@ -347,6 +368,23 @@ public class CameraThread extends Thread {
                     Log.e(TAG, "Could not set preview texture to camera");
                     e.printStackTrace();
                 }
+            }
+            
+        });
+    }
+    
+    // This is called from onMeasure in the Camera Preview View class
+    public void setCameraPreviewSize(final int width, final int height) {
+        mHandler.post(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                mSupportedPreviewSizes = mCamera.getParameters().getSupportedPreviewSizes();
+                if (mSupportedPreviewSizes != null) {
+                    mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
+                }
+                setCameraParameters(mFlashEnabled, mCurrentCameraID);
             }
             
         });
@@ -538,7 +576,36 @@ public class CameraThread extends Thread {
         }
         camera.setDisplayOrientation(result);
     }
-
     
+    private static Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+        final double ASPECT_TOLERANCE = 0.1;
+        double targetRatio=(double)h / w;
 
+        if (sizes == null) return null;
+
+        Camera.Size optimalSize = null;
+        double minDiff = Double.MAX_VALUE;
+
+        int targetHeight = h;
+
+        for (Camera.Size size : sizes) {
+            double ratio = (double) size.width / size.height;
+            if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
+            if (Math.abs(size.height - targetHeight) < minDiff) {
+                optimalSize = size;
+                minDiff = Math.abs(size.height - targetHeight);
+            }
+        }
+
+        if (optimalSize == null) {
+            minDiff = Double.MAX_VALUE;
+            for (Camera.Size size : sizes) {
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    optimalSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+        }
+        return optimalSize;
+    }
 }

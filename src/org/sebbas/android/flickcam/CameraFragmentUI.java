@@ -105,7 +105,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         try {
             Thread.sleep(100);
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         postCameraInitializations();
@@ -166,7 +165,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private void postCameraInitializations() {
         mCameraThread.initializeCamera(mCurrentPreviewID); // Default id setup
         mCameraThread.initializeCameraProperties();
-        mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion()); 
+        //mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion()); 
         mCameraThread.setCameraDisplayOrientation();
     }
     
