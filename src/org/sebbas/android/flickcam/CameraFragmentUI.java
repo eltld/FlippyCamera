@@ -75,6 +75,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private OnClickListener mShutterListener;
     private OnClickListener mAcceptListener;
     private OnClickListener mCancelListener;
+	protected volatile boolean mPreviewIsRunning;
     
     
     public static CameraFragmentUI newInstance() {
@@ -299,9 +300,12 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
            
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Camera switched");
-                mCameraThread.switchCamera();
-                mCameraWasSwapped = true;
+                if (mPreviewIsRunning) {
+                    Log.d(TAG, "Camera switched");
+                    mCameraThread.switchCamera();
+                    mCameraWasSwapped = true;
+                    mPreviewIsRunning = false;
+                }
             }
         };
         return mSwitchCameraListener;
@@ -339,9 +343,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
                     Log.d(TAG, "Shutter Button Clicked.");
                     if (mPictureTaken) {
                         retakePicture();
-                    } else {
+                    } else if (mPreviewIsRunning) {
                         mCameraThread.takePicture();
                         setShutterRetake();
+                        mPreviewIsRunning = false;
                     }
                 }
             };
@@ -403,6 +408,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
                     removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
                     mCameraWasSwapped = false;
                 }
+                mPreviewIsRunning = true;
             }
             
         });
