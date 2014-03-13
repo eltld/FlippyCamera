@@ -1,5 +1,7 @@
 package org.sebbas.android.flickcam;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.CameraFragmentListener;
 import org.sebbas.android.listener.CameraThreadListener;
@@ -75,7 +77,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private OnClickListener mShutterListener;
     private OnClickListener mAcceptListener;
     private OnClickListener mCancelListener;
-	protected volatile boolean mPreviewIsRunning;
+	protected AtomicBoolean mPreviewIsRunning;
     
     
     public static CameraFragmentUI newInstance() {
@@ -129,6 +131,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         mFlashEnabled = false;
         mOrientationEventListener = new DeviceOrientationListener(mContext);
         mOrientationEventListener.enable();
+        mPreviewIsRunning = new AtomicBoolean(false);
     }
     
     private void initializeViews(LayoutInflater inflater, ViewGroup container) {
@@ -300,11 +303,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
            
             @Override
             public void onClick(View v) {
-                if (mPreviewIsRunning) {
+                if (mPreviewIsRunning.get()) {
                     Log.d(TAG, "Camera switched");
                     mCameraThread.switchCamera();
                     mCameraWasSwapped = true;
-                    mPreviewIsRunning = false;
+                    mPreviewIsRunning.set(false);
                 }
             }
         };
@@ -343,10 +346,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
                     Log.d(TAG, "Shutter Button Clicked.");
                     if (mPictureTaken) {
                         retakePicture();
-                    } else if (mPreviewIsRunning) {
+                    } else if (mPreviewIsRunning.get()) {
                         mCameraThread.takePicture();
                         setShutterRetake();
-                        mPreviewIsRunning = false;
+                        mPreviewIsRunning.set(false);
                     }
                 }
             };
@@ -408,7 +411,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
                     removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
                     mCameraWasSwapped = false;
                 }
-                mPreviewIsRunning = true;
+                mPreviewIsRunning.set(true);
             }
             
         });
