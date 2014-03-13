@@ -45,8 +45,16 @@ public class OrientationImageButton extends ImageButton {
         super.onDetachedFromWindow();
         disableOrientationListener();
     }
+    
+    
 
-    private void startAnimation(int oldRotation, boolean clockwise) {
+    @Override
+	protected void onAttachedToWindow() {
+		super.onAttachedToWindow();
+		this.invalidate();
+	}
+
+	private void startAnimation(int oldRotation, boolean clockwise) {
         if (clockwise) {
             ObjectAnimator.ofFloat(this, "rotation", -oldRotation, -oldRotation + ROTATION_OFFSET)
                 .setDuration(mAnimationDuration)

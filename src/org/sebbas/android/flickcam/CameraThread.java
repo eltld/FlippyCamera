@@ -363,14 +363,14 @@ public class CameraThread extends Thread {
             @SuppressLint("NewApi")
             @Override
             public void run() {
-            	if (mCamera != null) {
-            		try {
+                if (mCamera != null) {
+                    try {
                         mCamera.setPreviewTexture(surface);
                     } catch (IOException e) {
                         Log.e(TAG, "Could not set preview texture to camera");
                         e.printStackTrace();
                     }
-            	}
+                }
                 
             }
             
