@@ -10,12 +10,15 @@ import org.sebbas.android.views.CameraPreviewAdvancedNew;
 import org.sebbas.android.views.CameraPreviewNew;
 import org.sebbas.android.views.OrientationImageButton;
 
+import com.squareup.seismic.ShakeDetector;
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.hardware.Camera;
+import android.hardware.Sensor;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.Fragment;
@@ -30,7 +33,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class CameraFragmentUI extends Fragment implements CameraThreadListener {
+public class CameraFragmentUI extends Fragment implements CameraThreadListener, ShakeDetector.Listener {
 
     // Private constants
     protected static final int GALLERY_FRAGMENT_NUMBER = 2;
@@ -77,7 +80,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private OnClickListener mShutterListener;
     private OnClickListener mAcceptListener;
     private OnClickListener mCancelListener;
-	protected AtomicBoolean mPreviewIsRunning;
+    protected AtomicBoolean mPreviewIsRunning;
     
     
     public static CameraFragmentUI newInstance() {
@@ -132,6 +135,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
         mOrientationEventListener = new DeviceOrientationListener(mContext);
         mOrientationEventListener.enable();
         mPreviewIsRunning = new AtomicBoolean(false);
+        
+        // Setup the shake detection
+        SensorManager sensorManager = (SensorManager) mContext.getSystemService(mContext.SENSOR_SERVICE);
+        ShakeDetector sd = new ShakeDetector(this);
+        sd.start(sensorManager);
     }
     
     private void initializeViews(LayoutInflater inflater, ViewGroup container) {
@@ -442,5 +450,13 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
             
         });
         
+    }
+
+    // When device is shaken the preview is discarded
+    @Override
+    public void hearShake() {
+        if (mPictureTaken) {
+            resetShutter();
+        }
     }
 }

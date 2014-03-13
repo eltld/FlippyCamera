@@ -6,6 +6,7 @@ import com.nineoldandroids.animation.ObjectAnimator;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Canvas;
 import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
@@ -43,18 +44,16 @@ public class OrientationImageButton extends ImageButton {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        disableOrientationListener();
+        //disableOrientationListener();
     }
-    
-    
 
-    @Override
-	protected void onAttachedToWindow() {
-		super.onAttachedToWindow();
-		this.invalidate();
-	}
+	@Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        this.invalidate();
+    }
 
-	private void startAnimation(int oldRotation, boolean clockwise) {
+    private void startAnimation(int oldRotation, boolean clockwise) {
         if (clockwise) {
             ObjectAnimator.ofFloat(this, "rotation", -oldRotation, -oldRotation + ROTATION_OFFSET)
                 .setDuration(mAnimationDuration)
