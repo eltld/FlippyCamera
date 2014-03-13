@@ -169,7 +169,7 @@ public class CameraThread extends Thread {
         });
     }
     
-    // Parameters will be set when setCameraPreviewSize() is called and when zoom changes
+    // Parameters will be set when setCameraPreviewSize() is called, when zoom changes and in onResume() in the UI
     public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation) {
         mHandler.post(new Runnable() {
 
@@ -212,7 +212,10 @@ public class CameraThread extends Thread {
                 // TODO Set the picture size according to device capabilities
                 parameters.setPictureSize(1280, 720);
                 //parameters.setRotation(deviceRotation);
-                parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                if (mPreviewSize != null) {
+                    parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                }
+                
                 
                 // Finally, add the parameters to the camera
                 mCamera.setParameters(parameters);

@@ -165,7 +165,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener {
     private void postCameraInitializations() {
         mCameraThread.initializeCamera(mCurrentPreviewID); // Default id setup
         mCameraThread.initializeCameraProperties();
-        //mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion()); 
+        mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion()); 
         mCameraThread.setCameraDisplayOrientation();
     }
     
