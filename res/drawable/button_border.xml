@@ -13,4 +13,6 @@
         android:bottomLeftRadius="10dip"
         android:topRightRadius="10dip"
         android:topLeftRadius="10dip" />
+    <solid
+        android:color="@android:color/transparent"/>
 </shape>
