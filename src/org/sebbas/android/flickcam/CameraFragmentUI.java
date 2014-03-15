@@ -112,12 +112,15 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        configureUIElements();
         postCameraInitializations();
     }
 
     @Override
     public void onPause() {
         super.onPause();
+        mPreviewIsRunning.set(false);
+        mPictureTaken = false; // Delete pending picture
         mCameraThread.quitThread();
         removeAllCameraPreviewViews();
     }
@@ -228,10 +231,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     
     private void setShutterRetake() {
         mPictureTaken = true;
-        swapUIElements();
+        configureUIElements();
     }
     
-    private void swapUIElements() {
+    private void configureUIElements() {
         if (mPictureTaken) {
             mAcceptButton.setVisibility(View.VISIBLE);
             mCancelButton.setVisibility(View.VISIBLE);
@@ -253,7 +256,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     
     private void resetShutter() {
         mPictureTaken = false;
-        swapUIElements();
+        configureUIElements();
         
         mCameraThread.stopCamera(); // Deinitialize camera
         postCameraInitializations(); // Reinitialize camera
