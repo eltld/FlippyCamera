@@ -152,15 +152,17 @@ public class CameraThread extends Thread {
             @SuppressLint("NewApi")
             @Override
             public void run() {
-                Parameters parameters = mCamera.getParameters();
-                mZoomMax = parameters.getMaxZoom();
-                mZoomValue = 0;
-                mSmoothZoomSupported = parameters.isSmoothZoomSupported();
-                mAutoFocusSupported = DeviceInfo.supportsAutoFocus(parameters);
-                mFlashSupported = DeviceInfo.supportsFlash(parameters);
-                mWhiteBalanceSupported = DeviceInfo.supportsWhiteBalance(parameters);
-                if (DeviceInfo.supportsSDK(15)) {
-                    mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
+                if (mCamera != null) {
+                	Parameters parameters = mCamera.getParameters();
+                    mZoomMax = parameters.getMaxZoom();
+                    mZoomValue = 0;
+                    mSmoothZoomSupported = parameters.isSmoothZoomSupported();
+                    mAutoFocusSupported = DeviceInfo.supportsAutoFocus(parameters);
+                    mFlashSupported = DeviceInfo.supportsFlash(parameters);
+                    mWhiteBalanceSupported = DeviceInfo.supportsWhiteBalance(parameters);
+                    if (DeviceInfo.supportsSDK(15)) {
+                        mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
+                    }
                 }
             }
             
@@ -230,8 +232,11 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
-                mCameraThreadListener.cameraSetupComplete(mCamera, mCurrentCameraID);
+            	if (mCamera != null) {
+            		setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
+                    mCameraThreadListener.cameraSetupComplete(mCamera, mCurrentCameraID);
+            	}
+                
             }
             
         });

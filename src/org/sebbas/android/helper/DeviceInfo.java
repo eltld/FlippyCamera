@@ -3,10 +3,13 @@ package org.sebbas.android.helper;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
 import android.os.Environment;
+import android.view.Display;
 import android.view.Surface;
 import android.view.ViewConfiguration;
 import android.view.WindowManager;
@@ -14,15 +17,19 @@ import android.view.WindowManager;
 public class DeviceInfo {
 
     private Context mContext;
+    private Point mSize;
+    private Display mDisplay;
 
     public DeviceInfo(Context context) {
         mContext = context;
+        mSize = new Point();
+        mDisplay = ((Activity) context).getWindowManager().getDefaultDisplay();
     }
     
     // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
         if (android.os.Build.VERSION.SDK_INT >= sdk) {
-            return !true;
+            return true;
         } 
         return false;
     }
@@ -93,5 +100,33 @@ public class DeviceInfo {
             return true;
         }
         return false;
+    }
+    
+    @SuppressLint("NewApi")
+    public static int getRealScreenWidth(Context context) {
+        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        int width;
+        try { 
+            display.getRealSize(size);
+            width = size.x; 
+        } catch (NoSuchMethodError e) {
+            width = display.getWidth();
+        }
+        return width;
+    }
+    
+    @SuppressLint("NewApi")
+    public static int getRealScreenHeight(Context context) {
+        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        int height;
+        try { 
+            display.getRealSize(size);
+            height = size.y; 
+        } catch (NoSuchMethodError e) {
+            height = display.getHeight();
+        }
+        return height;
     }
 }

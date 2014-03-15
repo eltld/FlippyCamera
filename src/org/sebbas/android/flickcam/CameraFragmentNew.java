@@ -237,7 +237,7 @@ public class CameraFragmentNew extends Fragment implements CameraPreviewListener
         }
         
         mControlLayout = (FrameLayout) mRootView.findViewById(R.id.control_mask);
-        mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.preview_mask);
+        //mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.preview_mask);
         
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
         mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);

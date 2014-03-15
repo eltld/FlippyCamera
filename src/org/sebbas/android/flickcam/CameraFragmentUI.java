@@ -16,6 +16,7 @@ import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.Camera;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
@@ -57,7 +58,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     // Instance variables for the UI
     private View mRootView;
     private FrameLayout mControlLayout;
-    private FrameLayout mPreviewLayout;
     private ImageButton mShutterButton;
     private OrientationImageButton mSwitchCameraButton;
     private OrientationImageButton mSwitchFlashButton;
@@ -150,7 +150,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         }
         
         mControlLayout = (FrameLayout) mRootView.findViewById(R.id.control_mask);
-        mPreviewLayout = (FrameLayout) mRootView.findViewById(R.id.preview_mask);
         
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
         mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);

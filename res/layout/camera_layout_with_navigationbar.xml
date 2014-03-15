@@ -9,23 +9,16 @@
     android:background="@android:color/black"
     android:orientation="vertical">
     
-    <FrameLayout 
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/preview_mask">
-        
     <!-- Here we will programmatically add the camera preview -->
     <ViewFlipper 
         android:id="@+id/camera_view_flipper"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center" />
-    </FrameLayout>
+        android:layout_height="match_parent" />
     
     <FrameLayout 
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp"
+        android:layout_margin="10dp"
         android:id="@+id/control_mask">
         
     <org.sebbas.android.views.OrientationImageButton

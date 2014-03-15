@@ -1,11 +1,15 @@
 package org.sebbas.android.views;
 
 import org.sebbas.android.flickcam.CameraThread;
+import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.CameraPreviewListener;
 import org.sebbas.android.listener.ScaleListener;
 import org.sebbas.android.listener.ScaleListenerNew;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.Point;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -19,8 +23,9 @@ public class CameraPreviewNew extends SurfaceView implements SurfaceHolder.Callb
 
     private SurfaceHolder mHolder;
     private CameraThread mCameraThread;
-    
     private ScaleGestureDetector mScaleDetector;
+    private int mScreenWidth;
+    private int mScreenHeight;
     
     public CameraPreviewNew(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -30,6 +35,12 @@ public class CameraPreviewNew extends SurfaceView implements SurfaceHolder.Callb
     public CameraPreviewNew(Context context, CameraThread cameraThread) {
         super(context);
         mCameraThread = cameraThread;
+        mScreenWidth = DeviceInfo.getRealScreenWidth(context);
+        mScreenHeight = DeviceInfo.getRealScreenHeight(context);
+        
+        // This is a hacky-fix that makes the preview keep its full screen. If you don't believe, try removing this line and see for yourself ... :)
+        this.setBackgroundColor(Color.parseColor("#00FFFFFF")); 
+        
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListenerNew(this, mCameraThread));
         
         // Install a SurfaceHolder.Callback so we get notified when the
@@ -68,10 +79,10 @@ public class CameraPreviewNew extends SurfaceView implements SurfaceHolder.Callb
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         Log.d(TAG, "ON MEASURE");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        final int width = resolveSize(getSuggestedMinimumWidth(), widthMeasureSpec);
-        final int height = resolveSize(getSuggestedMinimumHeight(), heightMeasureSpec);
-        setMeasuredDimension(width, height);
-
-        mCameraThread.setCameraPreviewSize(width, height);
+        
+        setMeasuredDimension(mScreenWidth, mScreenHeight);
+        if (mCameraThread.isAlive()) {
+            mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
+        }
     }
 }

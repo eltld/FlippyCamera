@@ -44,13 +44,7 @@ public class OrientationImageButton extends ImageButton {
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
-        //disableOrientationListener();
-    }
-
-	@Override
-    protected void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        this.invalidate();
+        disableOrientationListener();
     }
 
     private void startAnimation(int oldRotation, boolean clockwise) {
