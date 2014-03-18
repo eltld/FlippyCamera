@@ -8,6 +8,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -73,6 +74,23 @@ public class CameraPreviewAdvancedNew extends TextureView implements
     public boolean onTouchEvent(MotionEvent event) {
         // Let the ScaleGestureDetector inspect all events.
         mScaleDetector.onTouchEvent(event);
+        
+        // This is disabled temporarly because not working properly
+        /*if (event.getAction() == MotionEvent.ACTION_DOWN) {
+        	float x = event.getX();
+        	float y = event.getY();
+        	float touchMajor = event.getTouchMajor();
+        	float touchMinor = event.getTouchMinor();
+        	
+        	Rect touchRect = new Rect(
+        		(int)(x - touchMajor/2),
+        		(int)(y - touchMinor/2),
+        		(int)(x + touchMajor/2),
+                (int)(y + touchMinor/2));
+            if (mCameraThread.isAlive()) {
+            	mCameraThread.touchFocus(touchRect);
+            }
+        }*/
         return true;
     }
 

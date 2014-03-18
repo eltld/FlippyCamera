@@ -3,15 +3,41 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    
+    <LinearLayout
+        android:id="@+id/fake_action_bar"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:paddingTop="25dp"
+        android:background="@color/actionbar_color" >
+    
+    <ImageButton 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_gravity="center"
+        android:contentDescription="@string/app_name"
+        android:src="@drawable/ic_action_camera"
+        android:background="@android:color/transparent"/>
+    
+    <TextView 
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
+        android:layout_gravity="center"
+        android:textSize="18sp"
+        android:textColor="@android:color/white"
+        android:text="@string/app_name"/>
+    
+    </LinearLayout>
     <GridView
         android:id="@+id/grid_view"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginTop="80dp"
         android:numColumns="auto_fit"
         android:gravity="center"
-        android:stretchMode="columnWidth"
-        android:background="#000000"> 
+        android:stretchMode="columnWidth">
     </GridView>
 
     <!-- This initially-hidden ImageView will hold the expanded/zoomed version of

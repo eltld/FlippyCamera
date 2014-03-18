@@ -13,7 +13,6 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -32,6 +31,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 public class GalleryFragment extends Fragment {
 
@@ -46,6 +46,7 @@ public class GalleryFragment extends Fragment {
     private Context mContext;
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
+    private LinearLayout mFakeActionBar;
     
     // Static factory method that returns a new fragment instance to the client
     public static GalleryFragment newInstance() {
@@ -74,6 +75,8 @@ public class GalleryFragment extends Fragment {
         
         mFrameLayout = (FrameLayout) localInflater.inflate(R.layout.gallery_grid_view, container, false);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
+        mFakeActionBar = (LinearLayout)mFrameLayout.findViewById(R.id.fake_action_bar);
+        mFakeActionBar.bringToFront();
         expandedImageView = (ImageView) mFrameLayout.findViewById(R.id.expanded_image);
         mUtils = new Utils(this.getActivity());
         

@@ -4,7 +4,9 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -14,8 +16,11 @@ import org.sebbas.android.listener.CameraThreadListener;
 import org.sebbas.android.views.CameraPreviewNew;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.ImageFormat;
+import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
@@ -27,7 +32,9 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.os.ParcelFileDescriptor;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Surface;
 import android.view.View;
@@ -67,6 +74,7 @@ public class CameraThread extends Thread {
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera.Size mPreviewSize;
     protected byte[] mPictureData;
+    private ArrayList<Camera.Area> mFocusList;
     
     // Callbacks
     private ErrorCallback mErrorCallback;
@@ -84,24 +92,42 @@ public class CameraThread extends Thread {
     
     @Override
     public void run() {
-        super.run();
-        try {
-            Looper.prepare();
-            mHandler = new Handler();
-            Looper.loop();
-        } catch (Throwable t) {
-            Log.e(TAG, "Camera thread halted due to an error", t);
+        Looper.prepare();
+        synchronized(this) {
+            super.run();
+            try {
+                
+                mHandler = new Handler();
+                this.notifyAll();
+
+            } catch (Throwable t) {
+                Log.e(TAG, "Camera thread halted due to an error", t);
+            }
         }
+        Looper.loop();
+    }
+    
+    private synchronized Handler getHandler() {
+        while (mHandler == null) {
+            try {
+                this.wait();
+            } catch (InterruptedException ie) {
+                ie.printStackTrace();
+            }
+        }
+        return mHandler;
     }
     
     // Public methods
     public synchronized void quitThread() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
                 Log.i(TAG, "Camera thread loop quitting by request");
+                //releasePreview(); // Is this really needed
                 deinitializeCamera();
+                
                 Looper.myLooper().quit();
             }
             
@@ -109,7 +135,7 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void stopCamera() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -120,7 +146,7 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void initializeCamera(final int cameraID) {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -147,13 +173,13 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void initializeCameraProperties() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @SuppressLint("NewApi")
             @Override
             public void run() {
                 if (mCamera != null) {
-                	Parameters parameters = mCamera.getParameters();
+                    Parameters parameters = mCamera.getParameters();
                     mZoomMax = parameters.getMaxZoom();
                     mZoomValue = 0;
                     mSmoothZoomSupported = parameters.isSmoothZoomSupported();
@@ -163,15 +189,17 @@ public class CameraThread extends Thread {
                     if (DeviceInfo.supportsSDK(15)) {
                         mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
                     }
+                    Log.d(TAG, "initializeCameraProperties finished");
                 }
+                
             }
             
         });
     }
     
     // Parameters will be set when setCameraPreviewSize() is called, when zoom changes and in onResume() in the UI
-    public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation) {
-        mHandler.post(new Runnable() {
+    public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation, final ArrayList<Camera.Area> focusList) {
+        getHandler().post(new Runnable() {
 
             @SuppressLint("NewApi")
             @Override
@@ -216,11 +244,17 @@ public class CameraThread extends Thread {
                         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
                     
-                    
+                    if (mFocusList != null) {
+                        parameters.setFocusAreas(focusList);
+                        parameters.setMeteringAreas(focusList);
+                    }
+                     
                     // Finally, add the parameters to the camera
                     mCamera.setParameters(parameters);
                     
                     mFlashEnabled = flashEnabled; // Keep track of the flash settings
+                    
+                    Log.d(TAG, "setCameraParameters finished");
                 }
             }
             
@@ -228,14 +262,15 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void setCameraDisplayOrientation() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
-            	if (mCamera != null) {
-            		setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
-                    mCameraThreadListener.cameraSetupComplete(mCamera, mCurrentCameraID);
-            	}
+                if (mCamera != null) {
+                    setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
+                    mCameraThreadListener.cameraSetupComplete(mCurrentCameraID);
+                    Log.d(TAG, "setCameraDisplayOrientation finished");
+                }
                 
             }
             
@@ -243,7 +278,7 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void performZoom(final float scaleFactor) {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -252,7 +287,7 @@ public class CameraThread extends Thread {
                     if (mSmoothZoomSupported) {
                         mCamera.startSmoothZoom(mZoomValue);
                     } else {
-                        setCameraParameters(mFlashEnabled, mCurrentCameraID); // Just update the camera parameters. This will also set the new zoom level
+                        setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList); // Just update the camera parameters. This will also set the new zoom level
                     }
                 }
             }
@@ -260,7 +295,7 @@ public class CameraThread extends Thread {
     }
     
     public synchronized void startCameraPreview() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
             
             @Override
             public void run() {
@@ -275,7 +310,7 @@ public class CameraThread extends Thread {
     
     // Overloaded method
     public synchronized void startCameraPreview(final CameraPreviewNew cameraPreview) {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -296,7 +331,7 @@ public class CameraThread extends Thread {
     
     
     public synchronized void switchCamera() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -309,14 +344,14 @@ public class CameraThread extends Thread {
                 
                 initializeCamera(mCurrentCameraID);
                 initializeCameraProperties();
-                setCameraParameters(mFlashEnabled, mCurrentCameraID);
+                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
                 setCameraDisplayOrientation();
             }
         });
     }
     
     public synchronized void takePicture() {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -328,7 +363,7 @@ public class CameraThread extends Thread {
     
     public synchronized void writePictureData() {
         if (pictureDataIsAvailable())
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -363,7 +398,7 @@ public class CameraThread extends Thread {
     
     // This method is only called in onSurfaceTextureAvailable from the Camera preview that uses a TextureView
     public synchronized void setPreviewTexture(final SurfaceTexture surface) {
-        mHandler.post(new Runnable() {
+        getHandler().post(new Runnable() {
 
             @SuppressLint("NewApi")
             @Override
@@ -383,8 +418,8 @@ public class CameraThread extends Thread {
     }
     
     // This is called from onMeasure in the Camera Preview View class
-    public void setCameraPreviewSize(final int width, final int height) {
-        mHandler.post(new Runnable() {
+    public synchronized void setCameraPreviewSize(final int width, final int height) {
+        getHandler().post(new Runnable() {
 
             @Override
             public void run() {
@@ -393,14 +428,35 @@ public class CameraThread extends Thread {
                     if (mSupportedPreviewSizes != null) {
                         mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
                     }
-                    setCameraParameters(mFlashEnabled, mCurrentCameraID);
+                    setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
                 }
             }
             
         });
     }
     
-    
+    public synchronized void touchFocus(final Rect touchRect) {
+        getHandler().post(new Runnable() {
+
+            // TODO Fix API
+            @SuppressLint("NewApi")
+            @Override
+            public void run() {
+                final Rect targetFocusRect = new Rect(
+                    touchRect.left * 2000/DeviceInfo.getScreenWidth(mContext) - 1000,
+                    touchRect.top * 2000/DeviceInfo.getScreenHeight(mContext) - 1000,
+                    touchRect.right * 2000/DeviceInfo.getScreenWidth(mContext) - 1000,
+                    touchRect.bottom * 2000/DeviceInfo.getScreenHeight(mContext)  - 1000);
+                
+                Camera.Area focusArea = new Camera.Area(targetFocusRect, 1000);
+                mFocusList = new ArrayList<Camera.Area>();
+                mFocusList.add(focusArea);
+                
+                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                mCameraThreadListener.setTouchFocusView(touchRect); // This is disabled 
+            }
+        });
+    }
     
     // Private methods
     private Camera getCameraInstance(int cameraID) {
@@ -440,6 +496,12 @@ public class CameraThread extends Thread {
         if (mCamera != null) {
             mCamera.startPreview();
         }
+    }
+    
+    private void releasePreview() {
+    	if (mCamera != null) {
+    		mCamera.setPreviewCallback(null);
+    	}
     }
     
     private void clearPictureData() {
@@ -535,7 +597,7 @@ public class CameraThread extends Thread {
                         deinitializeCamera();
                         initializeCamera(mCurrentCameraID);
                         initializeCameraProperties();
-                        setCameraParameters(mFlashEnabled, mCurrentCameraID);
+                        setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
                         setCameraDisplayOrientation();
                     }
                 }

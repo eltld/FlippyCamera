@@ -1,10 +1,11 @@
 package org.sebbas.android.listener;
 
-import android.hardware.Camera;
+import android.graphics.Rect;
 
 public interface CameraThreadListener {
 
 	public void alertCameraThreadError(String message);
-	public void cameraSetupComplete(Camera camera, int cameraID);
+	public void cameraSetupComplete(int cameraID);
 	public void newPictureAddedToGallery();
+	public void setTouchFocusView(Rect tFocusRect);
 }

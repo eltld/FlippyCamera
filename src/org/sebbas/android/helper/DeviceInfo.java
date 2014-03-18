@@ -129,4 +129,32 @@ public class DeviceInfo {
         }
         return height;
     }
+    
+    @SuppressLint("NewApi")
+	public static int getScreenWidth(Context context) {
+        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        int width;
+        try { 
+            display.getSize(size);
+            width = size.x; 
+        } catch (NoSuchMethodError e) {
+            width = display.getWidth();
+        }
+        return width;
+    }
+    
+    @SuppressLint("NewApi")
+	public static int getScreenHeight(Context context) {
+        Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        int height;
+        try { 
+            display.getSize(size);
+            height = size.y; 
+        } catch (NoSuchMethodError e) {
+            height = display.getHeight();
+        }
+        return height;
+    }
 }

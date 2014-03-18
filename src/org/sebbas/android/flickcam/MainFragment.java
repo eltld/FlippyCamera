@@ -11,10 +11,12 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.WindowManager;
 
 public class MainFragment extends FragmentActivity implements CameraFragmentListener {
 
@@ -23,12 +25,13 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
     private MainPagerAdapter mPagerAdapter;
     private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
+    private int mPosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "ON CREATE");
-        
+                
         mFragmentManager = getSupportFragmentManager();
         
         CameraFragmentUI cameraFragment = CameraFragmentUI.newInstance();
@@ -50,7 +53,32 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
         
         // This fixes the overlapping fragments inside the viewpager
         pager.setPageMargin(getPageMargin());
+        pager.setOnPageChangeListener(new OnPageChangeListener() {
         
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                switch(state) {
+                case ViewPager.SCROLL_STATE_IDLE:
+                    if(mPosition == 0) {
+                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                    } else {
+                        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+                        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                    }
+                }
+            }
+
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                mPosition = position;
+            }
+            
+        });
         pager.setPageTransformer(true, new DepthPageTransformer());
         pager.setAdapter(mPagerAdapter);
     }
