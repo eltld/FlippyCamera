@@ -12,13 +12,14 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
 import android.view.WindowManager;
 
-public class MainFragment extends FragmentActivity implements CameraFragmentListener {
+public class MainFragment extends ActionBarActivity implements CameraFragmentListener {
 
     private static final String TAG = "main_fragment";
     
@@ -26,6 +27,7 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
     private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
     private int mPosition;
+    private ActionBar mActionBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +35,8 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
         Log.d(TAG, "ON CREATE");
                 
         mFragmentManager = getSupportFragmentManager();
+        mActionBar = getSupportActionBar();
+        mActionBar.hide(); // Immediately hide ActionBar for startup
         
         CameraFragmentUI cameraFragment = CameraFragmentUI.newInstance();
         GalleryFragment galleryFragment = GalleryFragment.newInstance();
@@ -62,9 +66,11 @@ public class MainFragment extends FragmentActivity implements CameraFragmentList
                     if(mPosition == 0) {
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                        mActionBar.hide();
                     } else {
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+                        mActionBar.show();
                     }
                 }
             }

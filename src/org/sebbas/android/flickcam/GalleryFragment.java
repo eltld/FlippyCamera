@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
+import org.sebbas.android.views.DrawInsetsFrameLayout;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -21,7 +22,6 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,7 +31,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 public class GalleryFragment extends Fragment {
 
@@ -46,7 +45,7 @@ public class GalleryFragment extends Fragment {
     private Context mContext;
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
-    private LinearLayout mFakeActionBar;
+    private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     
     // Static factory method that returns a new fragment instance to the client
     public static GalleryFragment newInstance() {
@@ -61,27 +60,15 @@ public class GalleryFragment extends Fragment {
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
     }
 
-
-
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     
-        //GridView gridView = (GridView)inflater.inflate(R.layout.gallery_grid_view, container, false);
-
-        // Create ContextThemeWrapper from the original Activity Context with the custom theme
-        final Context contextThemeWrapper = new ContextThemeWrapper(getActivity(), R.style.Gallery);
-
-        // Clone the inflater using the ContextThemeWrapper
-        LayoutInflater localInflater = inflater.cloneInContext(contextThemeWrapper);
-        
-        mFrameLayout = (FrameLayout) localInflater.inflate(R.layout.gallery_grid_view, container, false);
+        mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_grid_view, container, false);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
-        mFakeActionBar = (LinearLayout)mFrameLayout.findViewById(R.id.fake_action_bar);
-        mFakeActionBar.bringToFront();
         expandedImageView = (ImageView) mFrameLayout.findViewById(R.id.expanded_image);
         mUtils = new Utils(this.getActivity());
+        mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
         
         setupGridView();
-        
         return mFrameLayout;
     }
 
@@ -124,7 +111,7 @@ public class GalleryFragment extends Fragment {
         mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
  
         // setting grid view adapter
-        mGridView.setAdapter(/*new GridViewAdapter(this.getActivity())*/mAdapter);
+        mGridView.setAdapter(mAdapter);
     }
     
     private void initializeGridLayout() {
@@ -139,6 +126,14 @@ public class GalleryFragment extends Fragment {
         mGridView.setPadding((int) padding, (int) padding, (int) padding, (int) padding);
         mGridView.setHorizontalSpacing((int) padding);
         mGridView.setVerticalSpacing((int) padding);
+        
+        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
+            @Override
+            public void onInsetsChanged(Rect insets) {
+                // Update the padding
+            	mGridView.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            }
+        });
     }
     
     

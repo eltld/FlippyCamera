@@ -1,18 +1,18 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="FlickCamera" parent="Theme.AppCompat">
-        <item name="actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:background">@android:color/transparent</item>
     </style>
  
-    <!-- ActionBar styles -->
-    <style name="TranslucentActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
+    <style name="TranslucentActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@null</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:icon">@drawable/ic_launcher</item>
-        
-        <!-- Support library compatibility -->
-        <item name="titleTextStyle">@style/MyActionBarTitleText</item>
+        <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
     </style>
     
     <!-- ActionBar title text -->

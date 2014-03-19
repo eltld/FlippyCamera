@@ -383,6 +383,12 @@ theme attribute (in the form
 containing a value of this type.
          */
         public static final int initialActivityCount=0x7f010066;
+        /** <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+         */
+        public static final int insetBackground=0x7f01006b;
         /**  Specifies whether the theme is light, otherwise it is dark. 
          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
@@ -810,11 +816,12 @@ containing a value of this type.
         public static final int abc_split_action_bar_is_narrow=0x7f070002;
     }
     public static final class color {
-        public static final int abc_search_url_text_holo=0x7f080005;
+        public static final int abc_search_url_text_holo=0x7f080006;
         public static final int abc_search_url_text_normal=0x7f080000;
         public static final int abc_search_url_text_pressed=0x7f080002;
         public static final int abc_search_url_text_selected=0x7f080001;
         public static final int actionbar_color=0x7f080003;
+        public static final int actionbar_text=0x7f080005;
         public static final int gallery_bg=0x7f080004;
     }
     public static final class dimen {
@@ -1047,15 +1054,15 @@ containing a value of this type.
         public static final int dialog=0x7f06000e;
         public static final int disableHome=0x7f060008;
         public static final int discard_image=0x7f060043;
+        public static final int draw_insets_framelayout=0x7f06004b;
         public static final int dropdown=0x7f06000f;
         public static final int edit_query=0x7f060030;
         public static final int end=0x7f060013;
         public static final int expand_activities_button=0x7f060026;
-        public static final int expanded_image=0x7f06004b;
+        public static final int expanded_image=0x7f06004a;
         public static final int expanded_menu=0x7f06002c;
-        public static final int fake_action_bar=0x7f060049;
         public static final int goto_gallery=0x7f060046;
-        public static final int grid_view=0x7f06004a;
+        public static final int grid_view=0x7f060049;
         public static final int home=0x7f060014;
         public static final int homeAsUp=0x7f060005;
         public static final int icon=0x7f06002a;
@@ -1219,58 +1226,13 @@ containing a value of this type.
         public static final int switch_flash=0x7f0b0012;
     }
     public static final class style {
-        /** 
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
-
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
-
-        Base application theme, dependent on API level. This theme is replaced
-        by AppBaseTheme from res/values-vXX/styles.xml on newer devices.
-    
-
-            Theme customizations available in newer API levels can go in
-            res/values-vXX/styles.xml, while customizations related to
-            backward-compatibility can go here.
-        
+        public static final int FlickCamera=0x7f0c0083;
+        /**  ActionBar title text 
+ The textColor property is backward compatible with the Support Library 
+ ActionBar title text 
+ The textColor property is backward compatible with the Support Library 
          */
-        public static final int AppBaseTheme=0x7f0c0083;
-        /**  Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
- Application theme. 
- All customizations that are NOT specific to a particular API-level can go here. 
-         */
-        public static final int AppTheme=0x7f0c0084;
-        /**  The theme for the camera 
- The theme for the camera 
- The theme for the camera 
-         */
-        public static final int FlickCamera=0x7f0c0085;
-        /**  The theme applied to the gallery fragment 
- The theme applied to the gallery fragment 
- The theme applied to the gallery fragment 
-         */
-        public static final int Gallery=0x7f0c0086;
-        /**  ActionBar styles 
- ActionBar styles 
- ActionBar styles 
-         */
-        public static final int MyActionBar=0x7f0c0087;
+        public static final int MyActionBarTitleText=0x7f0c0085;
         /**  Mimic text appearance in select_dialog_item.xml 
          */
         public static final int TextAppearance_AppCompat_Base_CompactMenu_Dialog=0x7f0c0063;
@@ -1340,7 +1302,6 @@ containing a value of this type.
          */
         public static final int Theme_AppCompat_CompactMenu=0x7f0c007a;
         public static final int Theme_AppCompat_CompactMenu_Dialog=0x7f0c007b;
-        public static final int Theme_AppCompat_Dark_NoActionBar=0x7f0c0088;
         /**  Platform-independent theme providing an action bar in a light-themed activity. 
          */
         public static final int Theme_AppCompat_Light=0x7f0c0078;
@@ -1365,6 +1326,9 @@ containing a value of this type.
         /**  Base platform-dependent theme providing a light-themed activity. 
          */
         public static final int Theme_Base_Light=0x7f0c007d;
+        /**  ActionBar styles 
+         */
+        public static final int TranslucentActionBar=0x7f0c0084;
         /**  Styles in here can be extended for customisation in your application. Each utilises
          one of the Base styles. If Holo themes are available on the current platform version
          they will be used instead of the compat styles. 
@@ -2069,6 +2033,31 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
           @attr name org.sebbas.android.flickcam:textAllCaps
         */
         public static final int CompatTextView_textAllCaps = 0;
+        /** Attributes that can be used with a DrawInsetsFrameLayout.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #DrawInsetsFrameLayout_insetBackground org.sebbas.android.flickcam:insetBackground}</code></td><td></td></tr>
+           </table>
+           @see #DrawInsetsFrameLayout_insetBackground
+         */
+        public static final int[] DrawInsetsFrameLayout = {
+            0x7f01006b
+        };
+        /**
+          <p>This symbol is the offset where the {@link org.sebbas.android.flickcam.R.attr#insetBackground}
+          attribute's value can be found in the {@link #DrawInsetsFrameLayout} array.
+
+
+          <p>May be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
+or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
+<p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
+"<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
+          @attr name org.sebbas.android.flickcam:insetBackground
+        */
+        public static final int DrawInsetsFrameLayout_insetBackground = 0;
         /** Attributes that can be used with a LinearLayoutICS.
            <p>Includes the following attributes:</p>
            <table>

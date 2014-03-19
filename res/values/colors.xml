@@ -2,4 +2,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <color name="actionbar_color">#80000000</color>
     <color name="gallery_bg">#4D3090C7</color>
+    <color name="actionbar_text">#FFFFFF</color>
 </resources>

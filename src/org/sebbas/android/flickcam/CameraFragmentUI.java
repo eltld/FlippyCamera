@@ -85,6 +85,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private OnClickListener mCancelListener;
     protected AtomicBoolean mPreviewIsRunning;
     
+    // Runnables
+    private Runnable mAlertCameraThreadError;
+    private Runnable mCameraSetupComplete;
+    private Runnable mNewPictureAddedToGallery;
+    private Runnable mSetTouchFocusView;
     
     public static CameraFragmentUI newInstance() {
         CameraFragmentUI cameraFragment = new CameraFragmentUI();
@@ -126,7 +131,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mCameraThread.quitThread();
         waitForCameraThreadToFinish();
         removeAllCameraPreviewViews();
-        mHandler.removeCallbacks(setupComplete);
+        removeAllPostedRunnables();
     }
 
     @Override
@@ -318,6 +323,13 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         }
     }
     
+    private void removeAllPostedRunnables() {
+        mHandler.removeCallbacks(mAlertCameraThreadError);
+        mHandler.removeCallbacks(mCameraSetupComplete);
+        mHandler.removeCallbacks(mNewPictureAddedToGallery);
+        mHandler.removeCallbacks(mSetTouchFocusView);
+    }
+    
     private void startAnimation() {
         AnimationFactory.flipTransition(mCameraViewFlipper, FlipDirection.LEFT_RIGHT, FLIP_PREVIEW_ANIMATION_DURATION);
     }
@@ -425,46 +437,54 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     // Overridden methods from CameraThreadListener
     @Override
     public synchronized void alertCameraThreadError(final String message) {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
-            }
-            
-        });
-        
+        mAlertCameraThreadError = new AlertCameraThreadError(message);
+        getHandler().post(mAlertCameraThreadError);
     }
 
     @Override
     public synchronized void cameraSetupComplete(final int cameraID) {
         System.out.println("Entered cameraSetupComplete. Handler is " + getHandler());
-        getHandler().post(setupComplete);
-        /*getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                Log.d(TAG, "Camera setup complete. Now setting up camera previews");
-                setupCameraPreviews(cameraID);
-                reorganizeUI();
-                if (mCameraWasSwapped) {
-                    startAnimation();
-                    removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
-                    mCameraWasSwapped = false;
-                }
-                mPreviewIsRunning.set(true);
-            }
-            
-        });*/
-       
+        mCameraSetupComplete = new CameraSetupComplete(cameraID);
+        getHandler().post(mCameraSetupComplete);
     }
     
-    private Runnable setupComplete = new Runnable() {
+    @Override
+    public synchronized void newPictureAddedToGallery() {
+        mNewPictureAddedToGallery = new NewPictureAddedToGallery();
+        getHandler().post(mNewPictureAddedToGallery);
+    }
+    
+    @Override
+    public synchronized void setTouchFocusView(final Rect tFocusRect) {
+        mSetTouchFocusView = new SetTouchFocusView(tFocusRect);
+        getHandler().post(mSetTouchFocusView);
+    }
+    
+    // Private Runnable classes
+    private class AlertCameraThreadError implements Runnable {
 
-		@Override
-		public void run() {
-			Log.d(TAG, "Camera setup complete. Now setting up camera previews");
-            setupCameraPreviews(0);
+        private String message;
+        public AlertCameraThreadError(String message) {
+            this.message = message;
+        }
+        
+        @Override
+        public void run() {
+            Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private class CameraSetupComplete implements Runnable {
+
+        private int cameraID;
+        public CameraSetupComplete(int cameraID) {
+            this.cameraID = cameraID;
+        }
+        
+        @Override
+        public void run() {
+            Log.d(TAG, "Camera setup complete. Now setting up camera previews");
+            setupCameraPreviews(cameraID);
             reorganizeUI();
             if (mCameraWasSwapped) {
                 startAnimation();
@@ -472,10 +492,32 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
                 mCameraWasSwapped = false;
             }
             mPreviewIsRunning.set(true);
-			
-		}
-    	
-    };
+            
+        }
+    }
+    
+    private class NewPictureAddedToGallery implements Runnable {
+        
+        @Override
+        public void run() {
+            mCameraFragmentListener.refreshAdapter();
+        }
+    }
+    
+    private class SetTouchFocusView implements Runnable {
+
+        private Rect focusRect;
+        public SetTouchFocusView(Rect focusRect) {
+            this.focusRect = focusRect;
+        }
+        
+        @Override
+        public void run() {
+            mDrawingView.setHaveTouch(true, focusRect);
+            mDrawingView.invalidate();
+            mDrawingView.bringToFront();
+        }
+    }
     
     // Setters and getters
     private void setCurrentPreviewID(int previewID) {
@@ -490,39 +532,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         return DeviceInfo.getDeviceRotation(mContext);
     }
 
-    @Override
-    public synchronized void newPictureAddedToGallery() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                mCameraFragmentListener.refreshAdapter();
-            }
-            
-        });
-        
-    }
-
     // When device is shaken the preview is discarded
     @Override
     public void hearShake() {
         if (mPictureTaken) {
             resetShutter();
         }
-    }
-
-    @Override
-    public synchronized void setTouchFocusView(final Rect tFocusRect) {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                mDrawingView.setHaveTouch(true, tFocusRect);
-                mDrawingView.invalidate();
-                mDrawingView.bringToFront();
-                
-            }
-            
-        });
     }
 }

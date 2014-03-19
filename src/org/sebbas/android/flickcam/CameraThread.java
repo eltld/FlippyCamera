@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -16,10 +15,7 @@ import org.sebbas.android.listener.CameraThreadListener;
 import org.sebbas.android.views.CameraPreviewNew;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -32,12 +28,9 @@ import android.media.MediaRecorder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
 import android.os.ParcelFileDescriptor;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Surface;
-import android.view.View;
 import android.view.WindowManager;
 
 public class CameraThread extends Thread {
