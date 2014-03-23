@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
 import org.sebbas.android.helper.DeviceInfo;
@@ -25,6 +27,7 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -47,6 +50,7 @@ public class CameraThread extends Thread {
     protected static final String IS_SAVING_PICTURE = "Saving your picture ...";
     protected static final String SAVED_PICTURE_SUCCESSFULLY = "Picture saved successfully!";
     private static final String ALBUM_NAME = "FlickCam";
+    public static int NUMBER_OF_COLOR_EFFECTS = 0;
     
     // Private instance variables
     private Context mContext;
@@ -68,6 +72,8 @@ public class CameraThread extends Thread {
     private Camera.Size mPreviewSize;
     protected byte[] mPictureData;
     private ArrayList<Camera.Area> mFocusList;
+    private String mCurrentEffect;
+    private List<String> mSupportedColorEffects;
     
     // Callbacks
     private ErrorCallback mErrorCallback;
@@ -182,6 +188,10 @@ public class CameraThread extends Thread {
                     if (DeviceInfo.supportsSDK(15)) {
                         mVideoStabilizationSupported = parameters.isVideoStabilizationSupported();
                     }
+                    mSupportedColorEffects = parameters.getSupportedColorEffects(); // Filter out some effects (for specific devices only)
+                    filterDeviceSpecificEffects();
+                    NUMBER_OF_COLOR_EFFECTS = mSupportedColorEffects.size();
+                    
                     Log.d(TAG, "initializeCameraProperties finished");
                 }
                 
@@ -191,7 +201,8 @@ public class CameraThread extends Thread {
     }
     
     // Parameters will be set when setCameraPreviewSize() is called, when zoom changes and in onResume() in the UI
-    public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation, final ArrayList<Camera.Area> focusList) {
+    public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation, 
+            final ArrayList<Camera.Area> focusList) {
         getHandler().post(new Runnable() {
 
             @SuppressLint("NewApi")
@@ -235,6 +246,10 @@ public class CameraThread extends Thread {
                     //parameters.setRotation(deviceRotation);
                     if (mPreviewSize != null) {
                         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                    }
+                    // Set the current effect of the camera preview
+                    if (mCurrentEffect != null) {
+                        parameters.setColorEffect(mCurrentEffect);
                     }
                     
                     if (mFocusList != null) {
@@ -451,6 +466,18 @@ public class CameraThread extends Thread {
         });
     }
     
+    public synchronized void setCameraEffect(final int location) {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                mCurrentEffect = mSupportedColorEffects.get(location);
+                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+            }
+            
+        });
+    }
+    
     // Private methods
     private Camera getCameraInstance(int cameraID) {
         Camera camera = null;
@@ -492,13 +519,14 @@ public class CameraThread extends Thread {
     }
     
     private void releasePreview() {
-    	if (mCamera != null) {
-    		mCamera.setPreviewCallback(null);
-    	}
+        if (mCamera != null) {
+            mCamera.setPreviewCallback(null);
+        }
     }
     
     private void clearPictureData() {
         mPictureData = null;
+        mCurrentEffect = null;
     }
     
     private boolean pictureDataIsAvailable() {
@@ -680,5 +708,18 @@ public class CameraThread extends Thread {
             }
         }
         return optimalSize;
+    }
+    
+    // Seriously, Google?! How come that the Nexus 4 shows "whiteboard" and "blackboard" as supported effects even though those effects are not supported?
+    private synchronized void filterDeviceSpecificEffects() {
+        if (DeviceInfo.isNexus4()) {
+            Iterator<String> it = mSupportedColorEffects.iterator();
+            while (it.hasNext()) {
+                String item = it.next();
+                if (item.equals("whiteboard") || item.equals("blackboard")) {
+                    it.remove();
+                }
+            }
+        }
     }
 }

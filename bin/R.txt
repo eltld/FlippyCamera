@@ -273,6 +273,7 @@ int id activity_chooser_view_content 0x7f060025
 int id always 0x7f06000b
 int id beginning 0x7f060011
 int id btnClose 0x7f06004e
+int id camera_icon 0x7f060052
 int id camera_preview_layout 0x7f06003c
 int id camera_view_flipper 0x7f06003e
 int id checkbox 0x7f06002d
@@ -390,6 +391,7 @@ int string abc_shareactionprovider_share_with_application 0x7f0b000b
 int string accept_image 0x7f0b0013
 int string action_settings 0x7f0b000e
 int string app_name 0x7f0b000d
+int string camera 0x7f0b0016
 int string description_zoom_touch_close 0x7f0b0015
 int string discard_image 0x7f0b0014
 int string hello_world 0x7f0b000f

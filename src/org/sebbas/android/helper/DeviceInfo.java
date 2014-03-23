@@ -8,6 +8,7 @@ import android.content.Context;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.os.Build;
 import android.os.Environment;
 import android.view.Display;
 import android.view.Surface;
@@ -131,7 +132,7 @@ public class DeviceInfo {
     }
     
     @SuppressLint("NewApi")
-	public static int getScreenWidth(Context context) {
+    public static int getScreenWidth(Context context) {
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         int width;
@@ -145,7 +146,7 @@ public class DeviceInfo {
     }
     
     @SuppressLint("NewApi")
-	public static int getScreenHeight(Context context) {
+    public static int getScreenHeight(Context context) {
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         int height;
@@ -156,5 +157,13 @@ public class DeviceInfo {
             height = display.getHeight();
         }
         return height;
+    }
+    
+    // Check if device is Nexus 4 
+    public static boolean isNexus4() {
+        if (Build.DEVICE.equals("mako")) {
+            return true;
+        }
+        return false;
     }
 }

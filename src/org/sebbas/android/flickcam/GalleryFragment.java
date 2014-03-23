@@ -21,6 +21,7 @@ import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,6 +46,7 @@ public class GalleryFragment extends Fragment {
     private Context mContext;
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
+    private FrameLayout mGridLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     
     // Static factory method that returns a new fragment instance to the client
@@ -63,6 +65,7 @@ public class GalleryFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     
         mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_grid_view, container, false);
+        //mGridLayout = (FrameLayout) mFrameLayout.findViewById(R.id.gridview_holder);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
         expandedImageView = (ImageView) mFrameLayout.findViewById(R.id.expanded_image);
         mUtils = new Utils(this.getActivity());
@@ -71,7 +74,7 @@ public class GalleryFragment extends Fragment {
         setupGridView();
         return mFrameLayout;
     }
-
+    
     public void setupGridView() {
         initializeGridLayout();
         setGridViewAdapter();
@@ -115,15 +118,16 @@ public class GalleryFragment extends Fragment {
     }
     
     private void initializeGridLayout() {
+    	Log.d(TAG, "INITIALIZE GRIDLAYOUT");
         Resources r = getResources();
-        float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
+        final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
  
         mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS + 1) * padding)) / AppConstant.NUM_OF_COLUMNS);
  
         mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS);
         mGridView.setColumnWidth(mColumnWidth);
         mGridView.setStretchMode(GridView.NO_STRETCH);
-        mGridView.setPadding((int) padding, (int) padding, (int) padding, (int) padding);
+        //mGridView.setPadding((int) padding, (int) padding, (int) padding, (int) padding);
         mGridView.setHorizontalSpacing((int) padding);
         mGridView.setVerticalSpacing((int) padding);
         
@@ -131,13 +135,12 @@ public class GalleryFragment extends Fragment {
             @Override
             public void onInsetsChanged(Rect insets) {
                 // Update the padding
-            	mGridView.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            	mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
             }
         });
     }
     
-    
-    private Animator mCurrentAnimator;
+	private Animator mCurrentAnimator;
     private int mShortAnimationDuration;
     
     @SuppressLint("NewApi")

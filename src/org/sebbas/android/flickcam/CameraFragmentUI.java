@@ -24,6 +24,8 @@ import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -74,6 +76,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private CameraPreviewAdvancedNew mCameraTwoPreviewAdvanced;
     private CameraPreviewNew mCameraTwoPreview;
     private DrawingView mDrawingView;
+    private ActionBar mActionBar;
     
     // Listeners
     private OnClickListener mSwitchFlashListener;
@@ -114,7 +117,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     @Override
     public void onResume() {
         super.onResume();
-        
         mCameraThread = new CameraThread(this, mContext);
         mCameraThread.start();
 
@@ -141,6 +143,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     
     private void initializeInstanceVariables() {
         mContext = this.getActivity();
+        
+        /*ActionBarActivity activity = (ActionBarActivity) this.getActivity();
+        mActionBar = activity.getSupportActionBar();
+        mActionBar.hide();*/
+        
         mCameraFragmentListener = (CameraFragmentListener) mContext;
         mFlashEnabled = false;
         mOrientationEventListener = new DeviceOrientationListener(mContext);

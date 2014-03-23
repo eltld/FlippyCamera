@@ -1044,6 +1044,7 @@ containing a value of this type.
         public static final int always=0x7f06000b;
         public static final int beginning=0x7f060011;
         public static final int btnClose=0x7f06004e;
+        public static final int camera_icon=0x7f060052;
         public static final int camera_preview_layout=0x7f06003c;
         public static final int camera_view_flipper=0x7f06003e;
         public static final int checkbox=0x7f06002d;
@@ -1218,6 +1219,7 @@ containing a value of this type.
         public static final int accept_image=0x7f0b0013;
         public static final int action_settings=0x7f0b000e;
         public static final int app_name=0x7f0b000d;
+        public static final int camera=0x7f0b0016;
         public static final int description_zoom_touch_close=0x7f0b0015;
         public static final int discard_image=0x7f0b0014;
         public static final int hello_world=0x7f0b000f;

@@ -6,7 +6,7 @@
     android:id="@+id/container"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    
+
     <GridView
         android:id="@+id/grid_view"
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
         android:clipToPadding="false"
         android:stretchMode="columnWidth">
     </GridView>
-
+    
     <!-- This initially-hidden ImageView will hold the expanded/zoomed version of
          the images above. Without transformations applied, it takes up the entire
          screen. To achieve the "zoom" animation, this view's bounds are animated

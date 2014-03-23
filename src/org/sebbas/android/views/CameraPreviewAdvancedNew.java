@@ -2,6 +2,7 @@ package org.sebbas.android.views;
 
 import org.sebbas.android.flickcam.CameraThread;
 import org.sebbas.android.helper.DeviceInfo;
+import org.sebbas.android.listener.PreviewGestureListener;
 import org.sebbas.android.listener.ScaleListenerNew;
 
 import android.annotation.SuppressLint;
@@ -10,10 +11,13 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.support.v4.view.GestureDetectorCompat;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.TextureView;
@@ -29,6 +33,7 @@ public class CameraPreviewAdvancedNew extends TextureView implements
     private Context mContext;
     private int mScreenWidth;
     private int mScreenHeight;
+    private GestureDetectorCompat mGestureDetector;
 
     public CameraPreviewAdvancedNew(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -42,6 +47,7 @@ public class CameraPreviewAdvancedNew extends TextureView implements
         mScreenHeight = DeviceInfo.getRealScreenHeight(context);
         mCameraThread = cameraThread;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListenerNew(this, cameraThread));
+        mGestureDetector = new GestureDetectorCompat(context, new PreviewGestureListener(this, cameraThread));
         setSurfaceTextureListener(this);
     }
 
@@ -51,8 +57,8 @@ public class CameraPreviewAdvancedNew extends TextureView implements
         if (mCameraThread.isAlive()) {
             mCameraThread.setPreviewTexture(surface);
             mCameraThread.startCameraPreview();
+            mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
         }
-        
     }
 
     @Override
@@ -74,6 +80,7 @@ public class CameraPreviewAdvancedNew extends TextureView implements
     public boolean onTouchEvent(MotionEvent event) {
         // Let the ScaleGestureDetector inspect all events.
         mScaleDetector.onTouchEvent(event);
+        mGestureDetector.onTouchEvent(event);
         
         // This is disabled temporarly because not working properly
         /*if (event.getAction() == MotionEvent.ACTION_DOWN) {
@@ -100,8 +107,6 @@ public class CameraPreviewAdvancedNew extends TextureView implements
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         
         setMeasuredDimension(mScreenWidth, mScreenHeight);
-        if (mCameraThread.isAlive()) {
-            mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
-        }
+        
     }
 }

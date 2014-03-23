@@ -17,17 +17,20 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
 
 public class MainFragment extends ActionBarActivity implements CameraFragmentListener {
 
     private static final String TAG = "main_fragment";
+    private static final int CAMERA_FRAGMENT_NUMBER = 0;
     
     private MainPagerAdapter mPagerAdapter;
     private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
     private int mPosition;
     private ActionBar mActionBar;
+    private ViewPager mViewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +44,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         CameraFragmentUI cameraFragment = CameraFragmentUI.newInstance();
         GalleryFragment galleryFragment = GalleryFragment.newInstance();
         
-        
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(cameraFragment);
         fragmentList.add(galleryFragment);
@@ -53,11 +55,11 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         setContentView(R.layout.viewpager_layout);
         
         mPagerAdapter = new MainPagerAdapter(mFragmentManager, fragmentList);
-        ViewPager pager = (ViewPager)super.findViewById(R.id.viewpager);
+        mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
         
         // This fixes the overlapping fragments inside the viewpager
-        pager.setPageMargin(getPageMargin());
-        pager.setOnPageChangeListener(new OnPageChangeListener() {
+        mViewPager.setPageMargin(getPageMargin());
+        mViewPager.setOnPageChangeListener(new OnPageChangeListener() {
         
             @Override
             public void onPageScrollStateChanged(int state) {
@@ -85,15 +87,25 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
             }
             
         });
-        pager.setPageTransformer(true, new DepthPageTransformer());
-        pager.setAdapter(mPagerAdapter);
+        mViewPager.setPageTransformer(true, new DepthPageTransformer());
+        mViewPager.setAdapter(mPagerAdapter);
     }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.camera_icon:
+            	mViewPager.setCurrentItem(CAMERA_FRAGMENT_NUMBER);
+                return true;
+            default: 
+                return super.onOptionsItemSelected(item);
+        }
     }
 
     @Override

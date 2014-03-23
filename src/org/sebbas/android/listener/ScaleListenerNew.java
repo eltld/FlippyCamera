@@ -1,9 +1,6 @@
 package org.sebbas.android.listener;
 
 import org.sebbas.android.flickcam.CameraThread;
-import org.sebbas.android.interfaces.CameraPreviewListener;
-import org.sebbas.android.views.CameraPreview;
-import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreviewAdvancedNew;
 import org.sebbas.android.views.CameraPreviewNew;
 
@@ -26,7 +23,7 @@ public class ScaleListenerNew extends SimpleOnScaleGestureListener {
     public ScaleListenerNew(CameraPreviewAdvancedNew cameraPreviewAdvanced, CameraThread cameraThread) {
         mCameraPreviewAdvanced = cameraPreviewAdvanced;
         mCameraThread = cameraThread;
-     }
+    }
     
     @SuppressLint("NewApi")
     @Override
