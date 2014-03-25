@@ -1,9 +1,11 @@
 package org.sebbas.android.views;
 
-import org.sebbas.android.interfaces.CameraPreviewListener;
+import org.sebbas.android.flickcam.CameraThread;
+import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.listener.ScaleListener;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,19 +18,26 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     private static final String TAG = "camera_preview";
 
     private SurfaceHolder mHolder;
-    private CameraPreviewListener mListener;
-    
+    private CameraThread mCameraThread;
     private ScaleGestureDetector mScaleDetector;
+    private int mScreenWidth;
+    private int mScreenHeight;
     
     public CameraPreview(Context context, AttributeSet attrs) {
         super(context, attrs);
     }
     
     @SuppressWarnings("deprecation")
-    public CameraPreview(Context context, CameraPreviewListener listener) {
+    public CameraPreview(Context context, CameraThread cameraThread) {
         super(context);
-        mListener = listener;
-        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(listener, this));
+        mCameraThread = cameraThread;
+        mScreenWidth = DeviceInfo.getRealScreenWidth(context);
+        mScreenHeight = DeviceInfo.getRealScreenHeight(context);
+        
+        // This is a hacky-fix that makes the preview keep its full screen. If you don't believe, try removing this line and see for yourself ... :)
+        this.setBackgroundColor(Color.parseColor("#00FFFFFF")); 
+        
+        mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(this, mCameraThread));
         
         // Install a SurfaceHolder.Callback so we get notified when the
         // underlying surface is created and destroyed.
@@ -41,7 +50,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.d(TAG, "Surface was Changed");
-        mListener.startRecorder();
+        mCameraThread.startCameraPreview(this);
     }
 
     @Override
@@ -60,5 +69,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         mScaleDetector.onTouchEvent(event);
 
         return true;
+    }
+    
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        Log.d(TAG, "ON MEASURE");
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        
+        setMeasuredDimension(mScreenWidth, mScreenHeight);
+        if (mCameraThread.isAlive()) {
+            mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
+        }
     }
 }

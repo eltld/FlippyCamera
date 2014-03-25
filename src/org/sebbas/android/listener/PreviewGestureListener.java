@@ -1,8 +1,8 @@
 package org.sebbas.android.listener;
 
 import org.sebbas.android.flickcam.CameraThread;
-import org.sebbas.android.views.CameraPreviewAdvancedNew;
-import org.sebbas.android.views.CameraPreviewNew;
+import org.sebbas.android.views.CameraPreviewAdvanced;
+import org.sebbas.android.views.CameraPreview;
 
 import android.hardware.Camera.Parameters;
 import android.view.GestureDetector.OnGestureListener;
@@ -11,16 +11,16 @@ import android.view.MotionEvent;
 public class PreviewGestureListener implements OnGestureListener {
     
     private CameraThread mCameraThread;
-    private CameraPreviewNew mCameraPreview;
-    private CameraPreviewAdvancedNew mCameraPreviewAdvanced;
+    private CameraPreview mCameraPreview;
+    private CameraPreviewAdvanced mCameraPreviewAdvanced;
     private int mCurrentEffectNumber = 0;
     
-    public PreviewGestureListener(CameraPreviewNew cameraPreview, CameraThread cameraThread) {
+    public PreviewGestureListener(CameraPreview cameraPreview, CameraThread cameraThread) {
        mCameraPreview = cameraPreview;
        mCameraThread = cameraThread;
     }
         
-    public PreviewGestureListener(CameraPreviewAdvancedNew cameraPreviewAdvanced, CameraThread cameraThread) {
+    public PreviewGestureListener(CameraPreviewAdvanced cameraPreviewAdvanced, CameraThread cameraThread) {
         mCameraPreviewAdvanced = cameraPreviewAdvanced;
         mCameraThread = cameraThread;
     }

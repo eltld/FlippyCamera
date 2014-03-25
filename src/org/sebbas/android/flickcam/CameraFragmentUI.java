@@ -5,9 +5,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.CameraFragmentListener;
 import org.sebbas.android.listener.CameraThreadListener;
-import org.sebbas.android.listener.DeviceOrientationListener;
-import org.sebbas.android.views.CameraPreviewAdvancedNew;
-import org.sebbas.android.views.CameraPreviewNew;
+import org.sebbas.android.views.CameraPreviewAdvanced;
+import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.DrawingView;
 import org.sebbas.android.views.OrientationImageButton;
 
@@ -19,15 +18,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.SensorManager;
+import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -42,6 +42,8 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     // Private constants
     protected static final int GALLERY_FRAGMENT_NUMBER = 2;
     private static final int FLIP_PREVIEW_ANIMATION_DURATION = 300;
+    private static final String CAMERA_MODE = "Camera Mode";
+    private static final String VIDEO_MODE = "Video Mode";
     protected static final String TAG = "camera_fragment";
     
     // Instance variables for the fragment
@@ -49,14 +51,14 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private Handler mHandler;
     private int mCurrentPreviewID;
     private CameraFragmentListener mCameraFragmentListener;
-    private DeviceOrientationListener mOrientationEventListener;
     private CameraThread mCameraThread;
     private boolean mCameraWasSwapped;
 
     // Instance variables for the camera
     private boolean mFlashEnabled;
     protected boolean mPictureTaken;
-    
+    private boolean mVideoEnabled;
+    private boolean mIsRecording;
     
     // Instance variables for the UI
     private View mRootView;
@@ -71,12 +73,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private OrientationImageButton mSettingsButton;
     private ViewPager mViewPager;
     private ViewFlipper mCameraViewFlipper;
-    private CameraPreviewAdvancedNew mCameraOnePreviewAdvanced;
-    private CameraPreviewNew mCameraOnePreview;
-    private CameraPreviewAdvancedNew mCameraTwoPreviewAdvanced;
-    private CameraPreviewNew mCameraTwoPreview;
+    private CameraPreviewAdvanced mCameraOnePreviewAdvanced;
+    private CameraPreview mCameraOnePreview;
+    private CameraPreviewAdvanced mCameraTwoPreviewAdvanced;
+    private CameraPreview mCameraTwoPreview;
     private DrawingView mDrawingView;
-    private ActionBar mActionBar;
     
     // Listeners
     private OnClickListener mSwitchFlashListener;
@@ -93,6 +94,8 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private Runnable mCameraSetupComplete;
     private Runnable mNewPictureAddedToGallery;
     private Runnable mSetTouchFocusView;
+    
+    private OrientationEventListener mOrientationEventListener;
     
     public static CameraFragmentUI newInstance() {
         CameraFragmentUI cameraFragment = new CameraFragmentUI();
@@ -144,20 +147,15 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private void initializeInstanceVariables() {
         mContext = this.getActivity();
         
-        /*ActionBarActivity activity = (ActionBarActivity) this.getActivity();
-        mActionBar = activity.getSupportActionBar();
-        mActionBar.hide();*/
-        
         mCameraFragmentListener = (CameraFragmentListener) mContext;
         mFlashEnabled = false;
-        mOrientationEventListener = new DeviceOrientationListener(mContext);
-        mOrientationEventListener.enable();
         mPreviewIsRunning = new AtomicBoolean(false);
         
         // Setup the shake detection
         SensorManager sensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
         ShakeDetector sd = new ShakeDetector(this);
         sd.start(sensorManager);
+        
     }
     
     private void initHandler() {
@@ -210,12 +208,13 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
         mAcceptButton.setOnClickListener(getAcceptListener());
         mCancelButton.setOnClickListener(getCancelListener());
+        mSettingsButton.setOnClickListener(getSettingsListener());
     }
     
     private void postCameraInitializations() {
         mCameraThread.initializeCamera(mCurrentPreviewID); // Default id setup
         mCameraThread.initializeCameraProperties();
-        mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion(), null); 
+        mCameraThread.setCameraParameters(mFlashEnabled, null); 
         mCameraThread.setCameraDisplayOrientation();
     }
     
@@ -225,20 +224,20 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
         if (cameraID == CameraThread.CAMERA_ID_BACK) {
             if (DeviceInfo.supportsSDK(14)) {
-                mCameraOnePreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread);
+                mCameraOnePreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
                 mCameraViewFlipper.addView(mCameraOnePreviewAdvanced);
             } else {
-                mCameraOnePreview = new CameraPreviewNew(mContext, mCameraThread);
+                mCameraOnePreview = new CameraPreview(mContext, mCameraThread);
                 mCameraViewFlipper.addView(mCameraOnePreview);
             }
             setCurrentPreviewID(CameraThread.CAMERA_ID_BACK); // Keep track of the current camera/ preview that is shown
         }
         if (cameraID == CameraThread.CAMERA_ID_FRONT) {
             if (DeviceInfo.supportsSDK(14)) {
-                mCameraTwoPreviewAdvanced = new CameraPreviewAdvancedNew(mContext, mCameraThread);
+                mCameraTwoPreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
                 mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
             } else {
-                mCameraTwoPreview = new CameraPreviewNew(mContext, mCameraThread);
+                mCameraTwoPreview = new CameraPreview(mContext, mCameraThread);
                 mCameraViewFlipper.addView(mCameraTwoPreview);
             }
             setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
@@ -263,6 +262,14 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         }
     }
     
+    private void setModeIcon() {
+        if (mVideoEnabled) {
+            mSettingsButton.setImageResource(R.drawable.ic_action_camera);
+        } else {
+            mSettingsButton.setImageResource(R.drawable.ic_action_video);
+        }
+    }
+    
     private void reorganizeUI() {
         mControlLayout.bringToFront();
         mControlLayout.invalidate();
@@ -271,6 +278,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private void setShutterRetake() {
         mPictureTaken = true;
         configureUIElements();
+    }
+    
+    private void makeUIMessage(String message) {
+        Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
     }
     
     private void configureUIElements() {
@@ -348,7 +359,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
             @Override
             public void onClick(View v) {
                 mFlashEnabled = !mFlashEnabled;
-                mCameraThread.setCameraParameters(mFlashEnabled, getCurrentDeviceRotaion(), null);
+                mCameraThread.setCameraParameters(mFlashEnabled, null);
                 setFlashIcon();
             }
         };
@@ -387,7 +398,16 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
 
             @Override
             public void onClick(View v) {
-                // TODO
+                mVideoEnabled = !mVideoEnabled;
+                if (mVideoEnabled) {
+                    makeUIMessage(VIDEO_MODE);
+                    mCameraThread.setupVideo();
+                } else {
+                    makeUIMessage(CAMERA_MODE);
+                    mCameraThread.cancelVideoSetup();
+                }
+                
+                setModeIcon();
             }
           
         };
@@ -401,13 +421,24 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
                 @Override
                 public void onClick(View view) {
                     Log.d(TAG, "Shutter Button Clicked.");
-                    if (mPictureTaken) {
-                        retakePicture();
-                    } else if (mPreviewIsRunning.get()) {
-                        mCameraThread.takePicture();
-                        setShutterRetake();
-                        mPreviewIsRunning.set(false);
+                    if (mVideoEnabled) {  // Video mode
+                        if (mIsRecording) {
+                        	mIsRecording = false;
+                            mCameraThread.stopVideoRecording();
+                        } else {
+                        	mIsRecording = true;
+                            mCameraThread.startVideoRecording();
+                        }
+                    } else { // Camera mode
+                        if (mPictureTaken) {
+                            retakePicture();
+                        } else if (mPreviewIsRunning.get()) {
+                            mCameraThread.takePicture();
+                            setShutterRetake();
+                            mPreviewIsRunning.set(false);
+                        }
                     }
+                    
                 }
             };
         }

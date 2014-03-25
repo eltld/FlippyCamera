@@ -1018,13 +1018,14 @@ containing a value of this type.
         public static final int ic_action_picture=0x7f020061;
         public static final int ic_action_settings=0x7f020062;
         public static final int ic_action_switch_camera=0x7f020063;
-        public static final int ic_button_selector=0x7f020064;
-        public static final int ic_launcher=0x7f020065;
-        public static final int shutter_button=0x7f020066;
-        public static final int shutter_button_pressed=0x7f020067;
-        public static final int splash_screen_bg=0x7f020068;
-        public static final int wallpaper1=0x7f020069;
-        public static final int wallpaper2=0x7f02006a;
+        public static final int ic_action_video=0x7f020064;
+        public static final int ic_button_selector=0x7f020065;
+        public static final int ic_launcher=0x7f020066;
+        public static final int shutter_button=0x7f020067;
+        public static final int shutter_button_pressed=0x7f020068;
+        public static final int splash_screen_bg=0x7f020069;
+        public static final int wallpaper1=0x7f02006a;
+        public static final int wallpaper2=0x7f02006b;
     }
     public static final class id {
         public static final int accept_image=0x7f060042;

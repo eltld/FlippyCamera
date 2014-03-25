@@ -8,7 +8,6 @@ import org.sebbas.android.viewpager.DepthPageTransformer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -26,7 +25,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
     private static final int CAMERA_FRAGMENT_NUMBER = 0;
     
     private MainPagerAdapter mPagerAdapter;
-    private SplashScreenFragment mSplashScreenFragment;
     private FragmentManager mFragmentManager;
     private int mPosition;
     private ActionBar mActionBar;
@@ -47,10 +45,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(cameraFragment);
         fragmentList.add(galleryFragment);
-        
-        // Optional splash screen that stays as long as the camera initializes
-        // SplashScreenFragment splashScreenFragment = SplashScreenFragment.newInstance();
-        // mFragmentManager.beginTransaction().add(android.R.id.content, splashScreenFragment, SplashScreenFragment.TAG).commit();
         
         setContentView(R.layout.viewpager_layout);
         
@@ -117,16 +111,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
     
     private int getPageMargin() {
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
-    }
-    
-    @Override
-    public void startupComplete() {
-        Log.d(TAG, "startupComplete");
-        FragmentManager fm = getSupportFragmentManager();
-        mSplashScreenFragment = (SplashScreenFragment) fm.findFragmentByTag(SplashScreenFragment.TAG);
-        if (mSplashScreenFragment != null) {
-            fm.beginTransaction().remove(mSplashScreenFragment).commit();
-        }
     }
     
     @Override

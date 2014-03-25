@@ -14,13 +14,14 @@ import java.util.Locale;
 
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.listener.CameraThreadListener;
-import org.sebbas.android.views.CameraPreviewNew;
+import org.sebbas.android.views.CameraPreview;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
@@ -33,6 +34,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
 
@@ -51,6 +53,7 @@ public class CameraThread extends Thread {
     protected static final String SAVED_PICTURE_SUCCESSFULLY = "Picture saved successfully!";
     private static final String ALBUM_NAME = "FlickCam";
     public static int NUMBER_OF_COLOR_EFFECTS = 0;
+    private static String VIDEO_PATH_NAME = "/FlickCam.mp4";
     
     // Private instance variables
     private Context mContext;
@@ -201,8 +204,7 @@ public class CameraThread extends Thread {
     }
     
     // Parameters will be set when setCameraPreviewSize() is called, when zoom changes and in onResume() in the UI
-    public synchronized void setCameraParameters(final boolean flashEnabled, final int deviceRotation, 
-            final ArrayList<Camera.Area> focusList) {
+    public synchronized void setCameraParameters(final boolean flashEnabled, final ArrayList<Camera.Area> focusList) {
         getHandler().post(new Runnable() {
 
             @SuppressLint("NewApi")
@@ -242,13 +244,14 @@ public class CameraThread extends Thread {
                         parameters.setZoom(mZoomValue);
                     }
                     // TODO Set the picture size according to device capabilities
-                    parameters.setPictureSize(1280, 720);
-                    //parameters.setRotation(deviceRotation);
+                    parameters.setPictureSize(DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
+                    
+                    parameters.setRotation(90); // This makes the pictures stay full screen in gallery
                     if (mPreviewSize != null) {
                         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
-                    // Set the current effect of the camera preview
-                    if (mCurrentEffect != null) {
+                    // Set the current effect of the camera (the will be visible in the camera preview)
+                    if (mCurrentEffect != null && mZoomValue != mZoomMax) {
                         parameters.setColorEffect(mCurrentEffect);
                     }
                     
@@ -295,7 +298,7 @@ public class CameraThread extends Thread {
                     if (mSmoothZoomSupported) {
                         mCamera.startSmoothZoom(mZoomValue);
                     } else {
-                        setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList); // Just update the camera parameters. This will also set the new zoom level
+                        setCameraParameters(mFlashEnabled, mFocusList); // Just update the camera parameters. This will also set the new zoom level
                     }
                 }
             }
@@ -315,9 +318,9 @@ public class CameraThread extends Thread {
             
         });
     }
-    
+        
     // Overloaded method
-    public synchronized void startCameraPreview(final CameraPreviewNew cameraPreview) {
+    public synchronized void startCameraPreview(final CameraPreview cameraPreview) {
         getHandler().post(new Runnable() {
 
             @Override
@@ -352,7 +355,7 @@ public class CameraThread extends Thread {
                 
                 initializeCamera(mCurrentCameraID);
                 initializeCameraProperties();
-                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                setCameraParameters(mFlashEnabled, mFocusList);
                 setCameraDisplayOrientation();
             }
         });
@@ -436,7 +439,7 @@ public class CameraThread extends Thread {
                     if (mSupportedPreviewSizes != null) {
                         mPreviewSize = getOptimalPreviewSize(mSupportedPreviewSizes, width, height);
                     }
-                    setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                    setCameraParameters(mFlashEnabled, mFocusList);
                 }
             }
             
@@ -460,7 +463,7 @@ public class CameraThread extends Thread {
                 mFocusList = new ArrayList<Camera.Area>();
                 mFocusList.add(focusArea);
                 
-                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                setCameraParameters(mFlashEnabled, mFocusList);
                 mCameraThreadListener.setTouchFocusView(touchRect); // This is disabled 
             }
         });
@@ -472,7 +475,51 @@ public class CameraThread extends Thread {
             @Override
             public void run() {
                 mCurrentEffect = mSupportedColorEffects.get(location);
-                setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                setCameraParameters(mFlashEnabled, mFocusList);
+            }
+            
+        });
+    }
+    
+    public synchronized void setupVideo() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                prepareMediaRecorder();
+            }
+            
+        });
+    }
+    
+    public synchronized void cancelVideoSetup() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                releaseMediaRecorder();
+            }
+            
+        });
+    }
+    
+    public synchronized void startVideoRecording() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                startMediaRecorder();
+            }
+            
+        });
+    }
+    
+    public synchronized void stopVideoRecording() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                stopMediaRecorder();
             }
             
         });
@@ -542,24 +589,24 @@ public class CameraThread extends Thread {
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
         
         mMediaRecorder.setProfile(CamcorderProfile.get(mCurrentCameraID, CamcorderProfile.QUALITY_HIGH));
-        mMediaRecorder.setOutputFile(getPipeFD());
+        mMediaRecorder.setOutputFile(getFile().getAbsolutePath()/*getPipeFD()*/);
         
         try {
             mMediaRecorder.prepare();
             Log.d(TAG, "Prepare media recorder successful");
         } catch (IllegalStateException e) {
-            resetMediaRecorder();
+            releaseMediaRecorder();
             Log.d(TAG, "Failed to prepare media recorder- IllegalStateException");
         } catch (IOException e) {
-            resetMediaRecorder();
+            releaseMediaRecorder();
             Log.d(TAG, "Failed to prepare media recorder. IOException");
         }
     }
         
-    private void setPreviewDisplayForMediaRecorder(CameraPreviewNew cameraPreview) {
+    private void setPreviewDisplayForMediaRecorder(CameraPreview cameraPreview) {
         if (!DeviceInfo.supportsSDK(14)) {
             // We have to set the preview display for devices that use a SurfaceView
-            mMediaRecorder.setPreviewDisplay(((CameraPreviewNew)cameraPreview).getHolder().getSurface());
+            mMediaRecorder.setPreviewDisplay(((CameraPreview)cameraPreview).getHolder().getSurface());
         }
     }
     
@@ -572,6 +619,21 @@ public class CameraThread extends Thread {
                 Log.e(TAG, "Failed to start the media recorder");
             }
             
+        }
+    }
+    
+    private void stopMediaRecorder() {
+    	if (mMediaRecorder != null) {
+    		mMediaRecorder.stop();
+    	}
+    }
+    
+    private void releaseMediaRecorder() {
+        if (mMediaRecorder != null) {
+            mMediaRecorder.reset();
+            mMediaRecorder.release();
+            mMediaRecorder = null;
+            mCamera.lock();
         }
     }
     
@@ -618,7 +680,7 @@ public class CameraThread extends Thread {
                         deinitializeCamera();
                         initializeCamera(mCurrentCameraID);
                         initializeCameraProperties();
-                        setCameraParameters(mFlashEnabled, mCurrentCameraID, mFocusList);
+                        setCameraParameters(mFlashEnabled, mFocusList);
                         setCameraDisplayOrientation();
                     }
                 }
@@ -721,5 +783,28 @@ public class CameraThread extends Thread {
                 }
             }
         }
+    }
+    
+    private File getFile() {
+        File file = new File(Environment.getExternalStorageDirectory(), VIDEO_PATH_NAME);
+        // "touch" the file
+        if(!file.exists()) {
+            File parent = file.getParentFile();
+            if(parent != null) 
+                if(!parent.exists())
+                    if(!parent.mkdirs())
+                        try {
+                            throw new IOException("Cannot create " +
+                                    "parent directories for file: " + file);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+        }
+        return file;
     }
 }
