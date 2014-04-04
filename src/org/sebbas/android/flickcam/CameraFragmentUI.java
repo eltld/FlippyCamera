@@ -18,17 +18,16 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Rect;
 import android.hardware.SensorManager;
-import android.hardware.Camera.CameraInfo;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -73,9 +72,9 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private OrientationImageButton mSettingsButton;
     private ViewPager mViewPager;
     private ViewFlipper mCameraViewFlipper;
-    private CameraPreviewAdvanced mCameraOnePreviewAdvanced;
+    private View mCameraOnePreviewAdvanced;
     private CameraPreview mCameraOnePreview;
-    private CameraPreviewAdvanced mCameraTwoPreviewAdvanced;
+    private View mCameraTwoPreviewAdvanced;
     private CameraPreview mCameraTwoPreview;
     private DrawingView mDrawingView;
     
@@ -106,6 +105,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeInstanceVariables();
+        
         initHandler();
     }
 
@@ -113,6 +113,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         initializeViews(inflater, container);
+        removeUnsupportedViews();
         setViewListeners();
         return mRootView;
     }
@@ -135,7 +136,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mPictureTaken = false; // Delete pending picture
         mCameraThread.quitThread();
         waitForCameraThreadToFinish();
-        removeAllCameraPreviewViews();
+        removeCameraPreview(true);
         removeAllPostedRunnables();
     }
 
@@ -156,6 +157,12 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         ShakeDetector sd = new ShakeDetector(this);
         sd.start(sensorManager);
         
+    }
+    
+    private void removeUnsupportedViews() {
+    	if (!DeviceInfo.supportsFrontCamera(mContext)) {
+    		mSwitchCameraButton.setVisibility(View.GONE);
+    	}
     }
     
     private void initHandler() {
@@ -219,7 +226,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     }
     
     // Methods that make changes to the UI
-    @SuppressLint("NewApi")
+    /*@SuppressLint("NewApi")
     private void setupCameraPreviews(int cameraID) {
         // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
         if (cameraID == CameraThread.CAMERA_ID_BACK) {
@@ -243,6 +250,43 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
             setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
         }
         Log.d(TAG, "Instantiated camera preview");
+    }*/
+    
+    @SuppressLint("NewApi")
+    private void setupCameraPreviews(int cameraID) {
+        // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
+        if (DeviceInfo.supportsSDK(14)) {
+            setupTexturePreview(cameraID);
+        } else {
+            setupSurfacePreview(cameraID);
+        }
+        Log.d(TAG, "Instantiated camera preview");
+    }
+    
+    private void setupTexturePreview(int cameraID) {
+        if (cameraID == CameraThread.CAMERA_ID_BACK) {
+            mCameraOnePreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
+            mCameraViewFlipper.addView(mCameraOnePreviewAdvanced);
+            setCurrentPreviewID(CameraThread.CAMERA_ID_BACK); // Keep track of the current camera/ preview that is shown
+        } 
+        if (cameraID == CameraThread.CAMERA_ID_FRONT) {
+            mCameraTwoPreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
+            mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
+            setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
+        }
+    }
+    
+    private void setupSurfacePreview(int cameraID) {
+        if (cameraID == CameraThread.CAMERA_ID_BACK) {
+            mCameraOnePreview = new CameraPreview(mContext, mCameraThread);
+            mCameraViewFlipper.addView(mCameraOnePreview);
+            setCurrentPreviewID(CameraThread.CAMERA_ID_BACK); // Keep track of the current camera/ preview that is shown
+        } 
+        if (cameraID == CameraThread.CAMERA_ID_FRONT) {
+            mCameraTwoPreview = new CameraPreview(mContext, mCameraThread);
+            mCameraViewFlipper.addView(mCameraTwoPreview);
+            setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
+        }
     }
     
     private void waitForCameraThreadToFinish() {
@@ -286,12 +330,13 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     
     private void configureUIElements() {
         if (mPictureTaken) {
+            mSettingsButton.setVisibility(View.GONE);
+            mGalleryButton.setVisibility(View.GONE);
             mAcceptButton.setVisibility(View.VISIBLE);
             mCancelButton.setVisibility(View.VISIBLE);
             mAcceptButton.bringToFront();
             mCancelButton.bringToFront();
-            mSettingsButton.setVisibility(View.GONE);
-            mGalleryButton.setVisibility(View.GONE);
+            
         } else {
             mAcceptButton.setVisibility(View.GONE);
             mCancelButton.setVisibility(View.GONE);
@@ -310,11 +355,11 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         
         mCameraThread.stopCamera(); // Deinitialize camera
         postCameraInitializations(); // Reinitialize camera
-        removeAllCameraPreviewViews();
+        removeCameraPreview(true);
         
     }
-    
-    private synchronized void removeAllCameraPreviewViews() {
+    /*
+    private void removeAllCameraPreviewViews() {
         if(DeviceInfo.supportsSDK(14)) {
             mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
             mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
@@ -332,6 +377,44 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
             } else if (mCurrentPreviewID == CameraThread.CAMERA_ID_FRONT) {
                 mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
             }
+        } else {
+            if (mCurrentPreviewID == CameraThread.CAMERA_ID_BACK) {
+                mCameraViewFlipper.removeView(mCameraTwoPreview);
+            } else if (mCurrentPreviewID == CameraThread.CAMERA_ID_FRONT) {
+                mCameraViewFlipper.removeView(mCameraOnePreview);
+            }
+        }
+    }*/
+    
+    private void removeCameraPreview(boolean removeAll) {
+        if (DeviceInfo.supportsSDK(14)) {
+            removeTextureView(removeAll);
+        } else {
+            removeSurfaceView(removeAll);
+        }
+    }
+    
+    private void removeTextureView(boolean removeAll) {
+        // If requested then remove all preview views
+        if (removeAll) {
+            mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
+            mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
+        // otherwise we check the current camera id and remove the preview currently not used
+        } else {
+            if (mCurrentPreviewID == CameraThread.CAMERA_ID_BACK) {
+                mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
+            } else if (mCurrentPreviewID == CameraThread.CAMERA_ID_FRONT) {
+                mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
+            }
+        }
+    }
+    
+    private void removeSurfaceView(boolean removeAll) {
+        // If requested then remove all preview views
+        if (removeAll) {
+            mCameraViewFlipper.removeView(mCameraOnePreview);
+            mCameraViewFlipper.removeView(mCameraTwoPreview);
+        // otherwise we check the current camera id and remove the not used preview
         } else {
             if (mCurrentPreviewID == CameraThread.CAMERA_ID_BACK) {
                 mCameraViewFlipper.removeView(mCameraTwoPreview);
@@ -423,10 +506,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
                     Log.d(TAG, "Shutter Button Clicked.");
                     if (mVideoEnabled) {  // Video mode
                         if (mIsRecording) {
-                        	mIsRecording = false;
+                            mIsRecording = false;
                             mCameraThread.stopVideoRecording();
                         } else {
-                        	mIsRecording = true;
+                            mIsRecording = true;
                             mCameraThread.startVideoRecording();
                         }
                     } else { // Camera mode
@@ -526,7 +609,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
             reorganizeUI();
             if (mCameraWasSwapped) {
                 startAnimation();
-                removeHiddenCameraPreviewView(); // We remove the old preview so that the previews don't accumulate
+                removeCameraPreview(false); // We remove the old preview so that the previews don't accumulate
                 mCameraWasSwapped = false;
             }
             mPreviewIsRunning.set(true);

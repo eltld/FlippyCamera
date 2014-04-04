@@ -26,6 +26,7 @@ import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -214,13 +215,13 @@ public class CameraThread extends Thread {
                 if (mCamera != null) {
                     Parameters parameters = mCamera.getParameters();
                     // Adds continuous auto focus (only if API is high enough) to the parameters.
-                    if (mAutoFocusSupported) {
+                    /*if (mAutoFocusSupported) {
                         if (DeviceInfo.supportsSDK(14)) {
                             parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                         } else {
                             parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                         } 
-                    }
+                    }*/
                     
                     if (mWhiteBalanceSupported) {
                         parameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
@@ -244,21 +245,36 @@ public class CameraThread extends Thread {
                         parameters.setZoom(mZoomValue);
                     }
                     // TODO Set the picture size according to device capabilities
-                    parameters.setPictureSize(DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
+                    parameters.setPictureSize(1024, 768);//DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
                     
-                    parameters.setRotation(90); // This makes the pictures stay full screen in gallery
+                    String result = "[";
+                    List<Size> sizes = parameters.getSupportedPictureSizes();
+                    for (Size s : sizes) {
+                    	result += " (" + s.width + " / " + s.height + ") ";
+                    }
+                    result += "]";
+                    
+                    System.out.println(result);
+                    
+                    // This makes the pictures stay full screen in gallery
+                    if (mCurrentCameraID == CAMERA_ID_BACK) {
+                    	parameters.setRotation(90); 
+                    } else {
+                    	parameters.setRotation(270);
+                    }
+                    
                     if (mPreviewSize != null) {
-                        parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                        //parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
                     // Set the current effect of the camera (the will be visible in the camera preview)
                     if (mCurrentEffect != null && mZoomValue != mZoomMax) {
                         parameters.setColorEffect(mCurrentEffect);
                     }
                     
-                    if (mFocusList != null) {
+                    /*if (mFocusList != null) {
                         parameters.setFocusAreas(focusList);
                         parameters.setMeteringAreas(focusList);
-                    }
+                    }*/
                      
                     // Finally, add the parameters to the camera
                     mCamera.setParameters(parameters);
@@ -382,7 +398,7 @@ public class CameraThread extends Thread {
                 
                 if (!DeviceInfo.isExternalStorageWritable()) {
                     mCameraThreadListener.alertCameraThreadError(NO_STORAGE_AVAILABLE);
-                } else  if (mPictureData == null) {
+                } else if (mPictureData == null) {
                     mCameraThreadListener.alertCameraThreadError(FAILED_TO_SAVE_PICTURE);
                     Log.d(TAG, "Data Was Empty, Not Writing to File");
                 } else {

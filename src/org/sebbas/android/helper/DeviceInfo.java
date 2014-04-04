@@ -5,6 +5,7 @@ import java.util.List;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
@@ -165,5 +166,14 @@ public class DeviceInfo {
             return true;
         }
         return false;
+    }
+    
+    public static boolean supportsFrontCamera(Context context) {
+    	PackageManager pm = ((Activity) context).getPackageManager();
+    	boolean hasFrontCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+        if (!hasFrontCamera) {
+        	return false;
+        }
+        return true;
     }
 }

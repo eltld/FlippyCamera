@@ -2,10 +2,12 @@
 <FrameLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:flickcam="http://schemas.android.com/apk/res/org.sebbas.android.flickcam"
+    
     android:id="@+id/container"
     android:background="@android:color/black"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_gravity="center">
 
     <GridView
         android:id="@+id/grid_view"
@@ -13,6 +15,7 @@
         android:layout_height="match_parent"
         android:numColumns="auto_fit"
         android:gravity="center"
+        android:clipToPadding="false"
         android:stretchMode="columnWidth">
     </GridView>
 
@@ -30,10 +33,20 @@
         android:visibility="invisible"
         android:contentDescription="@string/description_zoom_touch_close" />
     
+    <ProgressBar
+        android:id="@+id/loading_image_spinner"
+        android:layout_gravity="center"
+        style="?android:attr/progressBarStyleLarge"
+        android:visibility="invisible"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <org.sebbas.android.views.DrawInsetsFrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/draw_insets_framelayout"
-        flickcam:insetBackground="#90000000" />
+        flickcam:insetBackground="#90000000" >
+
+    </org.sebbas.android.views.DrawInsetsFrameLayout>
 
 </FrameLayout>

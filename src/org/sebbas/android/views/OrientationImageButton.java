@@ -11,6 +11,7 @@ import android.hardware.SensorManager;
 import android.os.AsyncTask;
 import android.util.AttributeSet;
 import android.view.OrientationEventListener;
+import android.view.View;
 import android.widget.ImageButton;
 
 public class OrientationImageButton extends ImageButton {
@@ -21,6 +22,7 @@ public class OrientationImageButton extends ImageButton {
     private int mAnimationDuration;
     private OrientationEventListener mOrientationEventListener;
     private int mNewRotation;
+    private int mCurrentVisibility; // Current visibility of this view
     
     public OrientationImageButton(Context context) {
         super(context);
@@ -52,14 +54,28 @@ public class OrientationImageButton extends ImageButton {
             ObjectAnimator.ofFloat(this, "rotation", -oldRotation, -oldRotation + ROTATION_OFFSET)
                 .setDuration(mAnimationDuration)
                 .start();
+            //resetCurrentVisibility();
         } else {
             ObjectAnimator.ofFloat(this, "rotation", -oldRotation, -oldRotation - ROTATION_OFFSET)
                 .setDuration(mAnimationDuration)
                 .start();
+            //resetCurrentVisibility();
         }
     }
     
-    public void enableOrientationListener() {
+    private void resetCurrentVisibility() {
+    	if (mCurrentVisibility == View.GONE) {
+    		this.setVisibility(View.GONE);
+    	} else {
+    		this.setVisibility(View.VISIBLE);
+    	}
+    }
+    
+    private int getCurrentVisibility() {
+    	return this.getVisibility();
+    }
+
+	public void enableOrientationListener() {
         if (mOrientationEventListener.canDetectOrientation()) {
             mOrientationEventListener.enable();
         }
@@ -81,7 +97,8 @@ public class OrientationImageButton extends ImageButton {
                 @Override
                 public void onOrientationChanged(int currentOrientation) {
                     
-                    oldRotation = mNewRotation;;
+                    mCurrentVisibility = getCurrentVisibility();
+                    oldRotation = mNewRotation;
                     
                     if (currentOrientation < 45 || currentOrientation >= 315) {
                         mNewRotation = 0;

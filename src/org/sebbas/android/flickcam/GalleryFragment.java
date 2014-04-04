@@ -5,13 +5,16 @@ import java.util.ArrayList;
 
 import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
+import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.helper.Utils;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
+import com.nineoldandroids.animation.Animator;
+import com.nineoldandroids.animation.AnimatorListenerAdapter;
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.view.ViewHelper;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
@@ -19,8 +22,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -32,6 +39,8 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 
 public class GalleryFragment extends Fragment {
 
@@ -47,7 +56,10 @@ public class GalleryFragment extends Fragment {
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
     private FrameLayout mGridLayout;
+    private ProgressBar mLoadingImageSpinner;
+    private BitmapLoader mBitmapLoader;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
+    private boolean mIsLoadingBitmap;
     
     // Static factory method that returns a new fragment instance to the client
     public static GalleryFragment newInstance() {
@@ -68,6 +80,7 @@ public class GalleryFragment extends Fragment {
         //mGridLayout = (FrameLayout) mFrameLayout.findViewById(R.id.gridview_holder);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
         expandedImageView = (ImageView) mFrameLayout.findViewById(R.id.expanded_image);
+        mLoadingImageSpinner = (ProgressBar) mFrameLayout.findViewById(R.id.loading_image_spinner);
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
         
@@ -92,16 +105,15 @@ public class GalleryFragment extends Fragment {
                 System.out.println("Clicked on position " + position);
                 GalleryFragment.this.getActivity().startActivity(i);*/
                 
-                
-                File imgFile = new  File(mImagePaths.get(position));
-                if(imgFile.exists()){
-
-                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                    zoomImageFromThumb(new View(mContext), myBitmap);
-
-
+                if (!mIsLoadingBitmap) {
+                    mIsLoadingBitmap = true;
+                    mBitmapLoader = new BitmapLoader();
+                    mBitmapLoader.execute(position);
+                } else {
+                    mLoadingImageSpinner.setVisibility(View.INVISIBLE);
+                    mIsLoadingBitmap = false;
+                    mBitmapLoader.cancel(true);
                 }
-                
             }
         });
     }
@@ -118,7 +130,7 @@ public class GalleryFragment extends Fragment {
     }
     
     private void initializeGridLayout() {
-    	Log.d(TAG, "INITIALIZE GRIDLAYOUT");
+        Log.d(TAG, "INITIALIZE GRIDLAYOUT");
         Resources r = getResources();
         final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
  
@@ -127,20 +139,20 @@ public class GalleryFragment extends Fragment {
         mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS);
         mGridView.setColumnWidth(mColumnWidth);
         mGridView.setStretchMode(GridView.NO_STRETCH);
-        //mGridView.setPadding((int) padding, (int) padding, (int) padding, (int) padding);
         mGridView.setHorizontalSpacing((int) padding);
         mGridView.setVerticalSpacing((int) padding);
+        mGridView.setPadding((int) padding, 0, (int) padding, 0);
         
         mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
             @Override
             public void onInsetsChanged(Rect insets) {
                 // Update the padding
-            	mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
+                mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
             }
         });
     }
     
-	private Animator mCurrentAnimator;
+    private Animator mCurrentAnimator;
     private int mShortAnimationDuration;
     
     @SuppressLint("NewApi")
@@ -165,7 +177,7 @@ public class GalleryFragment extends Fragment {
         // view. Also set the container view's offset as the origin for the
         // bounds, since that's the origin for the positioning animation
         // properties (X, Y).
-        // TODO thumbView.getGlobalVisibleRect(startBounds);
+        thumbView.getGlobalVisibleRect(startBounds);
         mFrameLayout.getGlobalVisibleRect(finalBounds, globalOffset);
         startBounds.offset(-globalOffset.x, -globalOffset.y);
         finalBounds.offset(-globalOffset.x, -globalOffset.y);
@@ -195,26 +207,24 @@ public class GalleryFragment extends Fragment {
         // Hide the thumbnail and show the zoomed-in view. When the animation
         // begins, it will position the zoomed-in view in the place of the
         // thumbnail.
-        // TODO thumbView.setAlpha(0f);
+        ViewHelper.setAlpha(thumbView, 0f);
         expandedImageView.setVisibility(View.VISIBLE);
 
         // Set the pivot point for SCALE_X and SCALE_Y transformations
         // to the top-left corner of the zoomed-in view (the default
         // is the center of the view).
-        expandedImageView.setPivotX(0f);
-        expandedImageView.setPivotY(0f);
+        //expandedImageView.setPivotX(0f);
+        //expandedImageView.setPivotY(0f);
 
         // Construct and run the parallel animation of the four translation and
         // scale properties (X, Y, SCALE_X, and SCALE_Y).
         AnimatorSet set = new AnimatorSet();
         set
-                .play(ObjectAnimator.ofFloat(expandedImageView, View.X,
-                        startBounds.left, finalBounds.left))
-                .with(ObjectAnimator.ofFloat(expandedImageView, View.Y,
-                        startBounds.top, finalBounds.top))
-                .with(ObjectAnimator.ofFloat(expandedImageView, View.SCALE_X,
-                startScale, 1f)).with(ObjectAnimator.ofFloat(expandedImageView,
-                        View.SCALE_Y, startScale, 1f));
+            .play(ObjectAnimator.ofFloat(expandedImageView, "rotationX", startBounds.left, finalBounds.left))
+            .with(ObjectAnimator.ofFloat(expandedImageView, "rotationY", startBounds.top, finalBounds.top))
+            .with(ObjectAnimator.ofFloat(expandedImageView, "scaleX", startScale, 1f))
+            .with(ObjectAnimator.ofFloat(expandedImageView, "scaleY", startScale, 1f));
+        
         set.setDuration(mShortAnimationDuration);
         set.setInterpolator(new DecelerateInterpolator());
         set.addListener(new AnimatorListenerAdapter() {
@@ -246,29 +256,24 @@ public class GalleryFragment extends Fragment {
                 // back to their original values.
                 AnimatorSet set = new AnimatorSet();
                 set.play(ObjectAnimator
-                            .ofFloat(expandedImageView, View.X, startBounds.left))
-                            .with(ObjectAnimator
-                                    .ofFloat(expandedImageView, 
-                                            View.Y,startBounds.top))
-                            .with(ObjectAnimator
-                                    .ofFloat(expandedImageView, 
-                                            View.SCALE_X, startScaleFinal))
-                            .with(ObjectAnimator
-                                    .ofFloat(expandedImageView, 
-                                            View.SCALE_Y, startScaleFinal));
+                            .ofFloat(expandedImageView, "rotationX", startBounds.left))
+                            .with(ObjectAnimator.ofFloat(expandedImageView, "rotationY",startBounds.top))
+                            .with(ObjectAnimator.ofFloat(expandedImageView, "scaleX", startScaleFinal))
+                            .with(ObjectAnimator.ofFloat(expandedImageView, "scaleY", startScaleFinal));
+
                 set.setDuration(mShortAnimationDuration);
                 set.setInterpolator(new DecelerateInterpolator());
                 set.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        thumbView.setAlpha(1f);
+                        ViewHelper.setAlpha(thumbView, 1f);
                         expandedImageView.setVisibility(View.GONE);
                         mCurrentAnimator = null;
                     }
 
                     @Override
                     public void onAnimationCancel(Animator animation) {
-                        thumbView.setAlpha(1f);
+                        ViewHelper.setAlpha(thumbView, 1f);
                         expandedImageView.setVisibility(View.GONE);
                         mCurrentAnimator = null;
                     }
@@ -277,5 +282,90 @@ public class GalleryFragment extends Fragment {
                 mCurrentAnimator = set;
             }
         });
+    }
+    
+    private void zoomImageWithoutAnimation(final Bitmap bitmap) {
+        expandedImageView.setVisibility(View.VISIBLE);
+        expandedImageView.setImageBitmap(bitmap);
+        expandedImageView.setOnClickListener(new View.OnClickListener() {
+            
+            @Override
+            public void onClick(View v) {
+                expandedImageView.setImageBitmap(null);
+                expandedImageView.destroyDrawingCache();
+                bitmap.recycle();
+                expandedImageView.setVisibility(View.INVISIBLE);
+            }
+        });
+    }
+    
+    private class BitmapLoader extends AsyncTask<Integer, Void, Bitmap> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mLoadingImageSpinner.setVisibility(View.VISIBLE);
+        }
+
+        @Override
+        protected Bitmap doInBackground(Integer... params) {
+            int position = params[0];
+            Bitmap myBitmap = null;
+            File imgFile = new  File(mImagePaths.get(position));
+            if(imgFile.exists()) {
+            
+                DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+                myBitmap = decodeSampledBitmapFromResource(imgFile, metrics.widthPixels, metrics.heightPixels);
+
+            }
+            return myBitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap bitmap) {
+            super.onPostExecute(bitmap);
+            mLoadingImageSpinner.setVisibility(View.INVISIBLE);
+            if (DeviceInfo.supportsSDK(11)) {
+                zoomImageFromThumb(new View(mContext), bitmap);
+            } else {
+                zoomImageWithoutAnimation(bitmap);
+            }
+            mIsLoadingBitmap = false;
+        }
+
+    }
+    
+    public static int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
+        // Raw height and width of image
+        final int height = options.outHeight;
+        final int width = options.outWidth;
+        int inSampleSize = 1;
+
+        if (height > reqHeight || width > reqWidth) {
+
+            final int halfHeight = height / 2;
+            final int halfWidth = width / 2;
+
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width larger than the requested height and width.
+            while ((halfHeight / inSampleSize) > reqHeight && (halfWidth / inSampleSize) > reqWidth) {
+                inSampleSize *= 2;
+            }
+        }
+        return inSampleSize;
+    }
+    
+    public static Bitmap decodeSampledBitmapFromResource(File file, int reqWidth, int reqHeight) {
+        // First decode with inJustDecodeBounds=true to check dimensions
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+        BitmapFactory.decodeFile(file.getAbsolutePath(), options);
+
+        // Calculate inSampleSize
+        options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
+
+        // Decode bitmap with inSampleSize set
+        options.inJustDecodeBounds = false;
+        return BitmapFactory.decodeFile(file.getAbsolutePath(), options);
     }
 }

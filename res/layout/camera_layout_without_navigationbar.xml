@@ -25,6 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_margin="10dp"
+        android:layout_gravity="center"
         android:id="@+id/control_mask">
     
     <org.sebbas.android.views.OrientationImageButton

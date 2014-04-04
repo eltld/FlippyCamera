@@ -7,11 +7,11 @@
  
     <!-- ActionBar styles -->
     <style name="TranslucentActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="android:background">@null</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:background">@android:color/black</item>
         <item name="android:icon">@drawable/ic_launcher</item>
         
         <!-- Support library compatibility -->
+        <item name="background">@android:color/black</item>
         <item name="titleTextStyle">@style/MyActionBarTitleText</item>
     </style>
     

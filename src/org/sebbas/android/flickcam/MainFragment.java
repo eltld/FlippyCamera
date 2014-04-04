@@ -81,7 +81,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
             }
             
         });
-        mViewPager.setPageTransformer(true, new DepthPageTransformer());
+        //mViewPager.setPageTransformer(true, new DepthPageTransformer());
         mViewPager.setAdapter(mPagerAdapter);
     }
     
