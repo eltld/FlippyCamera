@@ -1,0 +1,17 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:flickcamera="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/share_image"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_action_share"
+        flickcamera:showAsAction="ifRoom"
+        android:title="@string/share_image"/>
+    
+    <item 
+        android:id="@+id/discard_image"
+        android:icon="@drawable/ic_action_discard"
+        flickcamera:showAsAction="always"
+        android:title="@string/discard_image"/>
+
+</menu>

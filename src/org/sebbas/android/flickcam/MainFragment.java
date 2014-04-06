@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
 import org.sebbas.android.interfaces.CameraFragmentListener;
-import org.sebbas.android.viewpager.DepthPageTransformer;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -40,7 +39,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         mActionBar.hide(); // Immediately hide ActionBar for startup
         
         CameraFragmentUI cameraFragment = CameraFragmentUI.newInstance();
-        GalleryFragment galleryFragment = GalleryFragment.newInstance();
+        final GalleryFragment galleryFragment = GalleryFragment.newInstance();
         
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(cameraFragment);
@@ -59,10 +58,13 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
             public void onPageScrollStateChanged(int state) {
                 switch(state) {
                 case ViewPager.SCROLL_STATE_IDLE:
-                    if(mPosition == 0) {
+                    if (mPosition == 0) {
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
                         mActionBar.hide();
+                        if (galleryFragment.getActionMode() != null) {
+                            galleryFragment.finishActionMode();
+                        }
                     } else {
                         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
                         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);

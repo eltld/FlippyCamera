@@ -5,6 +5,7 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
 import java.io.File;
 import java.util.ArrayList;
 
+import org.sebbas.android.flickcam.GalleryFragment;
 import org.sebbas.android.flickcam.R;
 import org.sebbas.android.views.SquaredImageView;
 
@@ -19,7 +20,7 @@ import android.widget.BaseAdapter;
 public class GridViewImageAdapter extends BaseAdapter {
  
     private Context mContext;
-    private ArrayList<String> mFilePaths = new ArrayList<String>();
+    public ArrayList<String> mFilePaths = new ArrayList<String>();
  
     public GridViewImageAdapter(Activity activity, ArrayList<String> filePaths,
             int imageWidth) {
@@ -52,7 +53,17 @@ public class GridViewImageAdapter extends BaseAdapter {
 
         // Get the image URL for the current position.
         String url = getItem(position);
-
+        
+        // Set a border for the view if it is in selected state
+        boolean isSelected = GalleryFragment.getSelectedItemsList().contains(position);
+        if (isSelected) {
+            view.setSelected(true);
+            view.setBackgroundResource(R.drawable.image_border);
+        } else {
+            view.setSelected(false);
+            view.setBackgroundColor(0);
+        }
+        
         // Trigger the download of the URL asynchronously into the image view.
         Picasso.with(mContext) //
             .load(new File(url)) 

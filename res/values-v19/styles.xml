@@ -6,6 +6,7 @@
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:background">@android:color/transparent</item>
+        <item name="android:actionModeBackground">@android:color/transparent</item>
     </style>
  
     <style name="TranslucentActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
