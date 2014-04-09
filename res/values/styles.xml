@@ -3,7 +3,7 @@
         <item name="actionBarStyle">@style/TranslucentActionBar</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:background">@android:color/transparent</item>
-        <item name="actionModeBackground">@android:color/transparent</item>
+        <item name="actionModeBackground">@color/transparent</item>
     </style>
  
     <!-- ActionBar styles -->

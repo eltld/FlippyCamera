@@ -8,8 +8,12 @@ import org.sebbas.android.listener.CameraThreadListener;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.DrawingView;
+import org.sebbas.android.views.Flasher;
 import org.sebbas.android.views.OrientationImageButton;
 
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
+import com.nineoldandroids.view.ViewHelper;
 import com.squareup.seismic.ShakeDetector;
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
@@ -25,8 +29,10 @@ import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.OrientationEventListener;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
@@ -86,6 +92,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private OnClickListener mShutterListener;
     private OnClickListener mAcceptListener;
     private OnClickListener mCancelListener;
+    private OnTouchListener mShutterHoldListener;
     protected AtomicBoolean mPreviewIsRunning;
     
     // Runnables
@@ -160,9 +167,9 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     }
     
     private void removeUnsupportedViews() {
-    	if (!DeviceInfo.supportsFrontCamera(mContext)) {
-    		mSwitchCameraButton.setVisibility(View.GONE);
-    	}
+        if (!DeviceInfo.supportsFrontCamera(mContext)) {
+            mSwitchCameraButton.setVisibility(View.GONE);
+        }
     }
     
     private void initHandler() {
@@ -209,7 +216,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     }
     
     private void setViewListeners() {
-        mShutterButton.setOnClickListener(getShutterListener());
+        mShutterButton.setOnTouchListener(getShutterHoldListener());
         mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
         mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
         mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
@@ -528,6 +535,28 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         return mShutterListener;
     }
     
+    private OnTouchListener getShutterHoldListener() {
+        if (mShutterHoldListener == null) {
+            mShutterHoldListener = new OnTouchListener() {
+
+                @Override
+                public boolean onTouch(View v, MotionEvent event) {
+                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                        mCameraThread.startCapturing();
+                        return true;
+                    }
+                    if (event.getAction() == MotionEvent.ACTION_UP) {
+                        mCameraThread.stopCapturing();
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            
+        }
+        return mShutterHoldListener;
+    }
+    
     private OnClickListener getAcceptListener() {
         if (mAcceptListener == null) {
             mAcceptListener = new OnClickListener() {
@@ -557,7 +586,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
 
     // Overridden methods from CameraThreadListener
     @Override
-    public synchronized void alertCameraThreadError(final String message) {
+    public synchronized void alertCameraThread(final String message) {
         mAlertCameraThreadError = new AlertCameraThreadError(message);
         getHandler().post(mAlertCameraThreadError);
     }
@@ -659,5 +688,17 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         if (mPictureTaken) {
             resetShutter();
         }
+    }
+
+    @Override
+    public void makeFlashAnimation() {
+        getHandler().postAtFrontOfQueue(new Runnable() {
+
+            @Override
+            public void run() {
+                Flasher flasher = new Flasher(mContext, mPreviewLayout);
+                flasher.flash(1);
+            }
+        });
     }
 }

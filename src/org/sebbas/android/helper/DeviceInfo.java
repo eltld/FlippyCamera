@@ -3,6 +3,7 @@ package org.sebbas.android.helper;
 import java.util.List;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -17,16 +18,6 @@ import android.view.ViewConfiguration;
 import android.view.WindowManager;
 
 public class DeviceInfo {
-
-    private Context mContext;
-    private Point mSize;
-    private Display mDisplay;
-
-    public DeviceInfo(Context context) {
-        mContext = context;
-        mSize = new Point();
-        mDisplay = ((Activity) context).getWindowManager().getDefaultDisplay();
-    }
     
     // Check to see if the device supports the indicated SDK
     public static boolean supportsSDK(int sdk) {
@@ -104,8 +95,8 @@ public class DeviceInfo {
         return false;
     }
     
-    @SuppressLint("NewApi")
-    public static int getRealScreenWidth(Context context) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+	public static int getRealScreenWidth(Context context) {
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         int width;
@@ -118,8 +109,8 @@ public class DeviceInfo {
         return width;
     }
     
-    @SuppressLint("NewApi")
-    public static int getRealScreenHeight(Context context) {
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
+	public static int getRealScreenHeight(Context context) {
         Display display = ((Activity) context).getWindowManager().getDefaultDisplay();
         Point size = new Point();
         int height;
@@ -169,10 +160,10 @@ public class DeviceInfo {
     }
     
     public static boolean supportsFrontCamera(Context context) {
-    	PackageManager pm = ((Activity) context).getPackageManager();
-    	boolean hasFrontCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
+        PackageManager pm = ((Activity) context).getPackageManager();
+        boolean hasFrontCamera = pm.hasSystemFeature(PackageManager.FEATURE_CAMERA_FRONT);
         if (!hasFrontCamera) {
-        	return false;
+            return false;
         }
         return true;
     }

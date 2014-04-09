@@ -11,13 +11,19 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.listener.CameraThreadListener;
 import org.sebbas.android.views.CameraPreview;
+import org.sebbas.android.views.Flasher;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
@@ -25,10 +31,13 @@ import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.PreviewCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
+import android.media.AudioManager;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
+import android.media.SoundPool;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -38,6 +47,7 @@ import android.util.Log;
 import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
+import android.widget.Toast;
 
 public class CameraThread extends Thread {
 
@@ -45,6 +55,7 @@ public class CameraThread extends Thread {
     private static final String TAG = "camera_thread";
     public static final int CAMERA_ID_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
     public static final int CAMERA_ID_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
+    
     protected static final String COULD_NOT_INITIALIZE_CAMERA = "Could not initialize camera";
     protected static final String NO_CAMERAS_FOUND = "No cameras found on device";
     protected static final String CANNOT_CONNECT_TO_CAMERA = "Cannot connect to camera";
@@ -53,7 +64,6 @@ public class CameraThread extends Thread {
     protected static final String IS_SAVING_PICTURE = "Saving your picture ...";
     protected static final String SAVED_PICTURE_SUCCESSFULLY = "Picture saved successfully!";
     private static final String ALBUM_NAME = "FlickCam";
-    public static int NUMBER_OF_COLOR_EFFECTS = 0;
     private static String VIDEO_PATH_NAME = "/FlickCam.mp4";
     
     // Private instance variables
@@ -85,12 +95,20 @@ public class CameraThread extends Thread {
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
     private PictureCallback mJpegCallback;
-
+    private PreviewCallback mPreviewCallback;
+    
+    private PictureTakerThread mPictureTakerThread;
+    private PictureWriterThread mPictureWriterThread;
+    
+    // Sound variables
+    private boolean mSoundLoaded;
+    private SoundPool mSoundPool;
+    private int mSoundId;
+    
     public CameraThread(CameraFragmentUI cameraFragment, Context context) {
         mContext = context;
         mCameraThreadListener = (CameraThreadListener) cameraFragment;
         mNumberOfCamerasSupported = Camera.getNumberOfCameras();
-        
     }
     
     @Override
@@ -156,19 +174,22 @@ public class CameraThread extends Thread {
                 try {
                     if (mNumberOfCamerasSupported == 0) {
                         Log.e(TAG, NO_CAMERAS_FOUND);
-                        mCameraThreadListener.alertCameraThreadError(NO_CAMERAS_FOUND);
+                        mCameraThreadListener.alertCameraThread(NO_CAMERAS_FOUND);
                     } else {
-                        mCamera = getCameraInstance(cameraID);
+                        mCamera = getCameraInstance(cameraID); // Setup camera object
+                        //setCameraSound(); // Initialize camera sound
+                        
+                        // If camera not null the set the camera id
                         if (mCamera == null) {
                             Log.e(TAG, CANNOT_CONNECT_TO_CAMERA);
-                            mCameraThreadListener.alertCameraThreadError(CANNOT_CONNECT_TO_CAMERA);
+                            mCameraThreadListener.alertCameraThread(CANNOT_CONNECT_TO_CAMERA);
                         } else {
                             mCurrentCameraID = cameraID;
                         }
                     }
                 } catch (Throwable t) {
                     Log.e(TAG, COULD_NOT_INITIALIZE_CAMERA, t);
-                    mCameraThreadListener.alertCameraThreadError(COULD_NOT_INITIALIZE_CAMERA);
+                    mCameraThreadListener.alertCameraThread(COULD_NOT_INITIALIZE_CAMERA);
                 }
             }
             
@@ -194,13 +215,14 @@ public class CameraThread extends Thread {
                     }
                     mSupportedColorEffects = parameters.getSupportedColorEffects(); // Filter out some effects (for specific devices only)
                     filterDeviceSpecificEffects();
-                    NUMBER_OF_COLOR_EFFECTS = mSupportedColorEffects.size();
+                    
+                    // Initialize the writer thread that writes picture data to the storage
+                    mPictureWriterThread = new PictureWriterThread(mCameraThreadListener, parameters.getPreviewSize().width, parameters.getPreviewSize().height);
+                    mPictureWriterThread.start();
                     
                     Log.d(TAG, "initializeCameraProperties finished");
                 }
-                
-            }
-            
+            } 
         });
     }
     
@@ -215,13 +237,13 @@ public class CameraThread extends Thread {
                 if (mCamera != null) {
                     Parameters parameters = mCamera.getParameters();
                     // Adds continuous auto focus (only if API is high enough) to the parameters.
-                    /*if (mAutoFocusSupported) {
+                    if (mAutoFocusSupported) {
                         if (DeviceInfo.supportsSDK(14)) {
                             parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
                         } else {
                             parameters.setFocusMode(Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                         } 
-                    }*/
+                    }
                     
                     if (mWhiteBalanceSupported) {
                         parameters.setWhiteBalance(Parameters.WHITE_BALANCE_AUTO);
@@ -245,29 +267,30 @@ public class CameraThread extends Thread {
                         parameters.setZoom(mZoomValue);
                     }
                     // TODO Set the picture size according to device capabilities
-                    parameters.setPictureSize(1024, 768);//DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
+                    parameters.setPictureSize(DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
                     
-                    String result = "[";
+                    /*String result = "[";
                     List<Size> sizes = parameters.getSupportedPictureSizes();
                     for (Size s : sizes) {
-                    	result += " (" + s.width + " / " + s.height + ") ";
+                        result += " (" + s.width + " / " + s.height + ") ";
                     }
                     result += "]";
                     
-                    System.out.println(result);
+                    System.out.println(result);*/
                     
                     // This makes the pictures stay full screen in gallery
                     if (mCurrentCameraID == CAMERA_ID_BACK) {
-                    	parameters.setRotation(90); 
+                        parameters.setRotation(90); 
                     } else {
-                    	parameters.setRotation(270);
+                        parameters.setRotation(270);
                     }
                     
                     if (mPreviewSize != null) {
-                        //parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
+                        System.out.println("in parameters size is: " + mPreviewSize.width + " / " + mPreviewSize.height);
+                        parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
                     // Set the current effect of the camera (the will be visible in the camera preview)
-                    if (mCurrentEffect != null && mZoomValue != mZoomMax) {
+                    if (mCurrentEffect != null && mZoomValue == 0) {
                         parameters.setColorEffect(mCurrentEffect);
                     }
                     
@@ -275,7 +298,12 @@ public class CameraThread extends Thread {
                         parameters.setFocusAreas(focusList);
                         parameters.setMeteringAreas(focusList);
                     }*/
-                     
+                    //parameters.setPreviewFormat(ImageFormat.NV21);
+                    /*List<Integer> list = parameters.getSupportedPreviewFormats();
+                    for (int i = 0; i < list.size(); i++) {
+                        System.out.println(list.get(i));
+                    }*/
+                    
                     // Finally, add the parameters to the camera
                     mCamera.setParameters(parameters);
                     
@@ -356,7 +384,6 @@ public class CameraThread extends Thread {
         });
     }
     
-    
     public synchronized void switchCamera() {
         getHandler().post(new Runnable() {
 
@@ -388,6 +415,40 @@ public class CameraThread extends Thread {
         });
     }
     
+    public synchronized void startCapturing() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                System.out.println("started capturing");
+                //mPictureTakerThread = new PictureTakerThread(mCamera);
+                //mPictureTakerThread.start();
+                
+                //mPictureTakerThread.allocateBufferForCamera();
+                
+                
+                //deinitializeFrameCallback();
+                //initializeFrameCallback();
+                //allocateNewFrameBuffer();
+                mCamera.takePicture(getShutterCallback(), getRawCallback(), getJpegCallback());
+            }
+            
+        });
+        
+    }
+    
+    public synchronized void stopCapturing() {
+        getHandler().postAtFrontOfQueue(new Runnable() {
+
+            @Override
+            public void run() {
+                //deinitializeFrameCallback();
+                System.out.println("Stopped capturing");
+            }
+            
+        });
+    }
+    
     public synchronized void writePictureData() {
         if (pictureDataIsAvailable())
         getHandler().post(new Runnable() {
@@ -397,21 +458,21 @@ public class CameraThread extends Thread {
                 String filename = getAlbumStorageDir() + "/" + getDefaultFilename();
                 
                 if (!DeviceInfo.isExternalStorageWritable()) {
-                    mCameraThreadListener.alertCameraThreadError(NO_STORAGE_AVAILABLE);
+                    mCameraThreadListener.alertCameraThread(NO_STORAGE_AVAILABLE);
                 } else if (mPictureData == null) {
-                    mCameraThreadListener.alertCameraThreadError(FAILED_TO_SAVE_PICTURE);
+                    mCameraThreadListener.alertCameraThread(FAILED_TO_SAVE_PICTURE);
                     Log.d(TAG, "Data Was Empty, Not Writing to File");
                 } else {
-                    mCameraThreadListener.alertCameraThreadError(IS_SAVING_PICTURE);
+                    mCameraThreadListener.alertCameraThread(IS_SAVING_PICTURE);
                     
                     try {
                         FileOutputStream output = new FileOutputStream(filename);
                         output.write(mPictureData);
                         output.close();
-                        mCameraThreadListener.alertCameraThreadError(SAVED_PICTURE_SUCCESSFULLY);
+                        mCameraThreadListener.alertCameraThread(SAVED_PICTURE_SUCCESSFULLY);
                         Log.d(TAG, "Image Saved Successfully");
                     } catch (IOException e) {
-                        mCameraThreadListener.alertCameraThreadError(FAILED_TO_SAVE_PICTURE);
+                        mCameraThreadListener.alertCameraThread(FAILED_TO_SAVE_PICTURE);
                         Log.d(TAG, "Saving Image Failed!");
                     } finally {
                         // We have to refresh the grid view UI to make the new photo show up
@@ -460,6 +521,32 @@ public class CameraThread extends Thread {
             }
             
         });
+    }
+    
+    public synchronized void setupFrameCallback() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                
+                mCamera.setPreviewCallbackWithBuffer(null);
+                mCamera.setPreviewCallbackWithBuffer(getPreviewCallback());
+            }
+            
+        });
+        
+    }
+    
+    private void initializeFrameCallback() {
+        mCamera.setPreviewCallbackWithBuffer(getPreviewCallback());
+    }
+    
+    private void deinitializeFrameCallback() {
+        mCamera.setPreviewCallbackWithBuffer(null);
+    }
+    
+    private void allocateNewFrameBuffer() {
+        mCamera.addCallbackBuffer(new byte[getFrameByteSize()]);
     }
     
     public synchronized void touchFocus(final Rect touchRect) {
@@ -639,9 +726,9 @@ public class CameraThread extends Thread {
     }
     
     private void stopMediaRecorder() {
-    	if (mMediaRecorder != null) {
-    		mMediaRecorder.stop();
-    	}
+        if (mMediaRecorder != null) {
+            mMediaRecorder.stop();
+        }
     }
     
     private void releaseMediaRecorder() {
@@ -686,7 +773,7 @@ public class CameraThread extends Thread {
     }
     
     // Callbacks
-    private Camera.ErrorCallback getErrorCallback() {
+    private ErrorCallback getErrorCallback() {
         if (mErrorCallback == null) {
             mErrorCallback = new Camera.ErrorCallback() {
                 
@@ -706,6 +793,16 @@ public class CameraThread extends Thread {
     }
     
     private ShutterCallback getShutterCallback() {
+        if (mShutterCallback == null) {
+            mShutterCallback = new ShutterCallback() {
+
+                @Override
+                public void onShutter() {
+                    mCameraThreadListener.makeFlashAnimation();
+                    //playCameraSound();
+                }
+            };
+        }
         return mShutterCallback;
     }
 
@@ -725,12 +822,28 @@ public class CameraThread extends Thread {
                 @Override
                 public void onPictureTaken(byte[] data, Camera camera) {
                     Log.d(TAG, "On picture taken");
-                    mPictureData = data;
-                    stopPreview();
+                    mPictureWriterThread.writeDataToFile(data);
+                    startPreview();
                 }
             };
         }
         return mJpegCallback;
+    }
+    
+    private PreviewCallback getPreviewCallback() {
+        if (mPreviewCallback == null) {
+            mPreviewCallback = new PreviewCallback() {
+
+                @Override
+                public synchronized void onPreviewFrame(byte[] data, Camera camera) {
+                    Log.d(TAG, "On preview frame");
+                    mPictureWriterThread.writeDataToFile(data);
+                    allocateNewFrameBuffer();
+                }
+                
+            };
+        }
+        return mPreviewCallback;
     }
     
     // Static methods
@@ -790,7 +903,7 @@ public class CameraThread extends Thread {
     
     // Seriously, Google?! How come that the Nexus 4 shows "whiteboard" and "blackboard" as supported effects even though those effects are not supported?
     private synchronized void filterDeviceSpecificEffects() {
-        if (DeviceInfo.isNexus4()) {
+        if (DeviceInfo.isNexus4() && mSupportedColorEffects != null) {
             Iterator<String> it = mSupportedColorEffects.iterator();
             while (it.hasNext()) {
                 String item = it.next();
@@ -822,5 +935,46 @@ public class CameraThread extends Thread {
                 }
         }
         return file;
+    }
+    
+    private int getFrameByteSize() {
+        Camera.Parameters parameters = mCamera.getParameters();
+        int previewFormat = parameters.getPreviewFormat();
+        int bitsPerPixel = ImageFormat.getBitsPerPixel(previewFormat);
+        float bytePerPixel = (float) bitsPerPixel / (float) 8.0;
+        Camera.Size camerasize = parameters.getPreviewSize();
+        int frameByteSize = (int) (((float)camerasize.width * (float)camerasize.height) * bytePerPixel);
+        return frameByteSize;
+    }
+    
+    private void setCameraSound() {
+    	SoundPool soundPool = new SoundPool(10, AudioManager.STREAM_NOTIFICATION, 0);
+		soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+			@Override
+			public void onLoadComplete(SoundPool soundPool, int sampleId,
+					int status) {
+				mSoundLoaded = true;
+			}
+		});
+		//mSoundId = soundPool.load(mContext, R.raw.camera_click, 1);
+    }
+    
+    private void playCameraSound() {
+    	AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+		float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+		float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+		float volume = actualVolume / maxVolume;
+		if (mSoundLoaded) {
+			mSoundPool.play(mSoundId, volume, volume, 1, 0, 1f);
+			Log.e("Test", "Played camera click sound");
+		}
+    }
+    
+    public int getNumberOfColorEffects() {
+    	return mSupportedColorEffects.size();
+    }
+    
+    public int getZoomValue() {
+    	return mZoomValue;
     }
 }

@@ -809,13 +809,14 @@ containing a value of this type.
         public static final int abc_split_action_bar_is_narrow=0x7f060002;
     }
     public static final class color {
-        public static final int abc_search_url_text_holo=0x7f070006;
+        public static final int abc_search_url_text_holo=0x7f070007;
         public static final int abc_search_url_text_normal=0x7f070000;
         public static final int abc_search_url_text_pressed=0x7f070002;
         public static final int abc_search_url_text_selected=0x7f070001;
         public static final int actionbar_color=0x7f070003;
         public static final int actionbar_text=0x7f070005;
         public static final int gallery_bg=0x7f070004;
+        public static final int transparent=0x7f070006;
     }
     public static final class dimen {
         /**  Default height of an action bar. 
@@ -1173,7 +1174,7 @@ containing a value of this type.
         public static final int viewpager_layout=0x7f03001e;
     }
     public static final class menu {
-        public static final int edit_images=0x7f0c0000;
+        public static final int actionmode=0x7f0c0000;
         public static final int main=0x7f0c0001;
     }
     public static final class string {
@@ -1232,6 +1233,8 @@ containing a value of this type.
     public static final class style {
         public static final int FlickCamera=0x7f0b0083;
         /**  ActionBar title text 
+ The textColor property is backward compatible with the Support Library 
+ ActionBar title text 
  The textColor property is backward compatible with the Support Library 
  ActionBar title text 
  The textColor property is backward compatible with the Support Library 
@@ -1331,6 +1334,7 @@ containing a value of this type.
          */
         public static final int Theme_Base_Light=0x7f0b007d;
         /**  ActionBar styles 
+ ActionBar styles 
          */
         public static final int TranslucentActionBar=0x7f0b0084;
         /**  Styles in here can be extended for customisation in your application. Each utilises

@@ -4,8 +4,9 @@ import android.graphics.Rect;
 
 public interface CameraThreadListener {
 
-	public void alertCameraThreadError(String message);
+	public void alertCameraThread(String message);
 	public void cameraSetupComplete(int cameraID);
 	public void newPictureAddedToGallery();
 	public void setTouchFocusView(Rect tFocusRect);
+	public void makeFlashAnimation();
 }

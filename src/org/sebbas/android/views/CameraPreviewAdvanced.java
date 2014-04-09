@@ -56,8 +56,10 @@ public class CameraPreviewAdvanced extends TextureView implements
         Log.d(TAG, "ON SURFACE TEXTURE AVAILABLE");
         if (mCameraThread.isAlive()) {
             mCameraThread.setPreviewTexture(surface);
-            mCameraThread.startCameraPreview();
             mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
+            
+            mCameraThread.startCameraPreview();
+            mCameraThread.setupFrameCallback();
         }
     }
 

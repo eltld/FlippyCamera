@@ -10,6 +10,9 @@ import android.view.MotionEvent;
 
 public class PreviewGestureListener implements OnGestureListener {
     
+    private static final int FLING_EFFECT_SENSITIVITY_Y = 4000;
+    private static final int FLING_EFFECT_SENSITIVITY_X = 500;
+    
     private CameraThread mCameraThread;
     private CameraPreview mCameraPreview;
     private CameraPreviewAdvanced mCameraPreviewAdvanced;
@@ -34,23 +37,25 @@ public class PreviewGestureListener implements OnGestureListener {
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
             float velocityY) {
-        if (velocityY < 0) {
-            mCurrentEffectNumber = (mCurrentEffectNumber+1) % mCameraThread.NUMBER_OF_COLOR_EFFECTS;
-        } else if (velocityY > 0) {
-            if (mCurrentEffectNumber == 0) {
-            	mCurrentEffectNumber = mCameraThread.NUMBER_OF_COLOR_EFFECTS-1;
-            } else {
-            	mCurrentEffectNumber--;
+        System.out.println("velocity is " + velocityY);
+        if (mCameraThread.getZoomValue() == 0 && velocityX < FLING_EFFECT_SENSITIVITY_X) {
+            if (velocityY < FLING_EFFECT_SENSITIVITY_Y) {
+                mCurrentEffectNumber = (mCurrentEffectNumber+1) % mCameraThread.getNumberOfColorEffects();
+            } else if (velocityY > FLING_EFFECT_SENSITIVITY_Y) {
+                if (mCurrentEffectNumber == 0) {
+                    mCurrentEffectNumber = mCameraThread.getNumberOfColorEffects()-1;
+                } else {
+                    mCurrentEffectNumber--;
+                }
             }
+            mCameraThread.setCameraEffect(mCurrentEffectNumber);
         }
-        mCameraThread.setCameraEffect(mCurrentEffectNumber);
-        return false;
+        return true;
     }
 
     @Override
     public void onLongPress(MotionEvent e) {
         // TODO Auto-generated method stub
-        
     }
 
     @Override
