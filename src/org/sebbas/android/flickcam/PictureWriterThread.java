@@ -1,8 +1,6 @@
 package org.sebbas.android.flickcam;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -10,12 +8,8 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.listener.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraThreadListener;
 
-import android.graphics.ImageFormat;
-import android.graphics.Rect;
-import android.graphics.YuvImage;
-import android.hardware.Camera;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
@@ -37,7 +31,7 @@ public class PictureWriterThread extends Thread {
     
     
     public PictureWriterThread(CameraThreadListener cameraThreadListener, int frameWidth, int frameHeight) {
-        mCameraThreadListener = cameraThreadListener;
+        mCameraThreadListener = cameraThreadListener; // For communication with the UI
         mFrameWidth = frameWidth;
         mFrameHeight = frameHeight;;
     }
@@ -63,13 +57,16 @@ public class PictureWriterThread extends Thread {
         return mHandler;
     }
     
+    public void removeAllCallbacks() {
+    	mHandler.removeCallbacks(null);
+    }
+    
     public synchronized void writeDataToFile(final byte[] data) {
         getHandler().post(new Runnable() {
 
             @Override
             public void run() {
                 String filename = getAlbumStorageDir() + "/" + getDefaultFilename();
-                System.out.println("picture size is "+ mFrameWidth + " / " + mFrameHeight);
                 if (!DeviceInfo.isExternalStorageWritable()) {
                     mCameraThreadListener.alertCameraThread(NO_STORAGE_AVAILABLE);
                 } else if (data == null) {

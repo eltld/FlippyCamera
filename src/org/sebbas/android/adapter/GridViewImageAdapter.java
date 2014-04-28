@@ -13,6 +13,7 @@ import com.squareup.picasso.Picasso;
  
 import android.app.Activity;
 import android.content.Context;
+import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -75,4 +76,5 @@ public class GridViewImageAdapter extends BaseAdapter {
             .into(view);
         return view;
     }
+    
 }

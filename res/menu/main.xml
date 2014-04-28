@@ -2,6 +2,11 @@
     xmlns:flickcamera="http://schemas.android.com/apk/res-auto">
 
     <item 
+        android:id="@+id/spinner_icon"
+        flickcamera:showAsAction="always"
+        android:enabled="false"/>
+    
+    <item 
         android:id="@+id/camera_icon"
         android:icon="@drawable/ic_action_camera"
         flickcamera:showAsAction="always"
@@ -10,8 +15,18 @@
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_action_overflow"
-        flickcamera:showAsAction="always"
+        flickcamera:showAsAction="never"
         android:title="@string/action_settings"/>
+    
+    <item
+        android:id="@+id/show_hidden"
+        flickcamera:showAsAction="never"
+        android:title="@string/show_hidden"/>
+    
+    <item
+        android:id="@+id/hide_hidden"
+        flickcamera:showAsAction="never"
+        android:title="@string/hide_hidden"/>
     
 
 </menu>

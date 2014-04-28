@@ -1,8 +1,11 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <style name="FlickCamera" parent="Theme.AppCompat">
         <item name="actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:background">@android:color/transparent</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        
         <item name="actionModeBackground">@color/transparent</item>
     </style>
  
@@ -20,5 +23,10 @@
     <style name="MyActionBarTitleText" parent="@style/TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="android:textColor">@color/actionbar_text</item>
         <!-- The textColor property is backward compatible with the Support Library -->
+    </style>
+    
+    <!-- Actionbar Overflow -->
+    <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
+        <item name="android:src">@drawable/ic_action_overflow</item>
     </style>
 </resources>

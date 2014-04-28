@@ -1,25 +1,14 @@
 package org.sebbas.android.flickcam;
 
 import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
-import java.util.Locale;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.listener.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraThreadListener;
 import org.sebbas.android.views.CameraPreview;
-import org.sebbas.android.views.Flasher;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,27 +16,14 @@ import android.graphics.ImageFormat;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.hardware.Camera;
-import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
-import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.PreviewCallback;
-import android.hardware.Camera.ShutterCallback;
-import android.hardware.Camera.Size;
-import android.media.AudioManager;
-import android.media.CamcorderProfile;
-import android.media.MediaRecorder;
-import android.media.SoundPool;
-import android.os.Build;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.ParcelFileDescriptor;
 import android.util.Log;
-import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 public class CameraThread extends Thread {
 
@@ -56,15 +32,9 @@ public class CameraThread extends Thread {
     public static final int CAMERA_ID_BACK = Camera.CameraInfo.CAMERA_FACING_BACK;
     public static final int CAMERA_ID_FRONT = Camera.CameraInfo.CAMERA_FACING_FRONT;
     
-    protected static final String COULD_NOT_INITIALIZE_CAMERA = "Could not initialize camera";
-    protected static final String NO_CAMERAS_FOUND = "No cameras found on device";
-    protected static final String CANNOT_CONNECT_TO_CAMERA = "Cannot connect to camera";
-    protected static final String NO_STORAGE_AVAILABLE = "No storage available on this device";
-    protected static final String FAILED_TO_SAVE_PICTURE = "Failed to save picture";
-    protected static final String IS_SAVING_PICTURE = "Saving your picture ...";
-    protected static final String SAVED_PICTURE_SUCCESSFULLY = "Picture saved successfully!";
-    private static final String ALBUM_NAME = "FlickCam";
-    private static String VIDEO_PATH_NAME = "/FlickCam.mp4";
+    private static final String COULD_NOT_INITIALIZE_CAMERA = "Could not initialize camera";
+    private static final String NO_CAMERAS_FOUND = "No cameras found on device";
+    private static final String CANNOT_CONNECT_TO_CAMERA = "Cannot connect to camera";
     
     // Private instance variables
     private Context mContext;
@@ -81,7 +51,6 @@ public class CameraThread extends Thread {
     protected int mZoomMax;
     private int mZoomValue;
     protected boolean mFlashEnabled;
-    private MediaRecorder mMediaRecorder;
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera.Size mPreviewSize;
     protected byte[] mPictureData;
@@ -91,19 +60,10 @@ public class CameraThread extends Thread {
     
     // Callbacks
     private ErrorCallback mErrorCallback;
-    private ShutterCallback mShutterCallback;
-    private PictureCallback mRawCallback;
-    private PictureCallback mPostViewCallback;
-    private PictureCallback mJpegCallback;
     private PreviewCallback mPreviewCallback;
     
     private PictureTakerThread mPictureTakerThread;
     private PictureWriterThread mPictureWriterThread;
-    
-    // Sound variables
-    private boolean mSoundLoaded;
-    private SoundPool mSoundPool;
-    private int mSoundId;
     
     public CameraThread(CameraFragmentUI cameraFragment, Context context) {
         mContext = context;
@@ -146,7 +106,6 @@ public class CameraThread extends Thread {
             @Override
             public void run() {
                 Log.i(TAG, "Camera thread loop quitting by request");
-                //releasePreview(); // Is this really needed
                 deinitializeCamera();
                 
                 Looper.myLooper().quit();
@@ -166,7 +125,14 @@ public class CameraThread extends Thread {
         });
     }
     
-    public synchronized void initializeCamera(final int cameraID) {
+    public void initializeCamera() {
+        initializeCameraObject(mCurrentCameraID);
+        initializeCameraProperties();
+        setCameraParameters(mFlashEnabled, mFocusList);
+        setCameraDisplayOrientation();
+    }
+    
+    public synchronized void initializeCameraObject(final int cameraID) {
         getHandler().post(new Runnable() {
 
             @Override
@@ -177,7 +143,6 @@ public class CameraThread extends Thread {
                         mCameraThreadListener.alertCameraThread(NO_CAMERAS_FOUND);
                     } else {
                         mCamera = getCameraInstance(cameraID); // Setup camera object
-                        //setCameraSound(); // Initialize camera sound
                         
                         // If camera not null the set the camera id
                         if (mCamera == null) {
@@ -215,10 +180,6 @@ public class CameraThread extends Thread {
                     }
                     mSupportedColorEffects = parameters.getSupportedColorEffects(); // Filter out some effects (for specific devices only)
                     filterDeviceSpecificEffects();
-                    
-                    // Initialize the writer thread that writes picture data to the storage
-                    mPictureWriterThread = new PictureWriterThread(mCameraThreadListener, parameters.getPreviewSize().width, parameters.getPreviewSize().height);
-                    mPictureWriterThread.start();
                     
                     Log.d(TAG, "initializeCameraProperties finished");
                 }
@@ -276,8 +237,8 @@ public class CameraThread extends Thread {
                     }
                     result += "]";
                     
-                    System.out.println(result);*/
-                    
+                    System.out.println(result);
+                    */
                     // This makes the pictures stay full screen in gallery
                     if (mCurrentCameraID == CAMERA_ID_BACK) {
                         parameters.setRotation(90); 
@@ -289,15 +250,16 @@ public class CameraThread extends Thread {
                         System.out.println("in parameters size is: " + mPreviewSize.width + " / " + mPreviewSize.height);
                         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
+                    
                     // Set the current effect of the camera (the will be visible in the camera preview)
-                    if (mCurrentEffect != null && mZoomValue == 0) {
+                    if (mCurrentEffect != null) {
                         parameters.setColorEffect(mCurrentEffect);
                     }
                     
-                    /*if (mFocusList != null) {
+                    if (mFocusList != null) {
                         parameters.setFocusAreas(focusList);
                         parameters.setMeteringAreas(focusList);
-                    }*/
+                    }
                     //parameters.setPreviewFormat(ImageFormat.NV21);
                     /*List<Integer> list = parameters.getSupportedPreviewFormats();
                     for (int i = 0; i < list.size(); i++) {
@@ -314,6 +276,23 @@ public class CameraThread extends Thread {
             }
             
         });
+    }
+    
+    public synchronized void initializeHelperThreads() {
+        getHandler().post(new Runnable() {
+
+            @Override
+            public void run() {
+                // Initialize the writer thread that writes picture data to the storage
+                mPictureWriterThread = new PictureWriterThread(mCameraThreadListener, mPreviewSize.width, mPreviewSize.height);
+                mPictureWriterThread.start();
+                
+                mPictureTakerThread = new PictureTakerThread(mCamera, mPictureWriterThread, mCameraThreadListener, CameraThread.this);
+                mPictureTakerThread.start();
+            }
+            
+        });
+        
     }
     
     public synchronized void setCameraDisplayOrientation() {
@@ -354,9 +333,6 @@ public class CameraThread extends Thread {
             
             @Override
             public void run() {
-                //prepareMediaRecorder();
-                //startMediaRecorder();
-                //resetMediaRecorder();
                 startPreview();
             }
             
@@ -369,10 +345,6 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                //prepareMediaRecorder();
-                //setPreviewDisplayForMediaRecorder(cameraPreview);
-                //startMediaRecorder();
-                //resetMediaRecorder();*/
                 try {
                     mCamera.setPreviewDisplay(cameraPreview.getHolder());
                 } catch (IOException e) {
@@ -396,22 +368,8 @@ public class CameraThread extends Thread {
                     mCurrentCameraID = CAMERA_ID_BACK;
                 }
                 
-                initializeCamera(mCurrentCameraID);
-                initializeCameraProperties();
-                setCameraParameters(mFlashEnabled, mFocusList);
-                setCameraDisplayOrientation();
+                initializeCamera();
             }
-        });
-    }
-    
-    public synchronized void takePicture() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                mCamera.takePicture(getShutterCallback(), getRawCallback(), getPostViewCallback(), getJpegCallback());
-            }
-            
         });
     }
     
@@ -420,17 +378,8 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                System.out.println("started capturing");
-                //mPictureTakerThread = new PictureTakerThread(mCamera);
-                //mPictureTakerThread.start();
-                
-                //mPictureTakerThread.allocateBufferForCamera();
-                
-                
-                //deinitializeFrameCallback();
-                //initializeFrameCallback();
-                //allocateNewFrameBuffer();
-                mCamera.takePicture(getShutterCallback(), getRawCallback(), getJpegCallback());
+                Log.d(TAG, "Started taking picture");
+                mPictureTakerThread.takePicture();
             }
             
         });
@@ -442,43 +391,7 @@ public class CameraThread extends Thread {
 
             @Override
             public void run() {
-                //deinitializeFrameCallback();
-                System.out.println("Stopped capturing");
-            }
-            
-        });
-    }
-    
-    public synchronized void writePictureData() {
-        if (pictureDataIsAvailable())
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                String filename = getAlbumStorageDir() + "/" + getDefaultFilename();
-                
-                if (!DeviceInfo.isExternalStorageWritable()) {
-                    mCameraThreadListener.alertCameraThread(NO_STORAGE_AVAILABLE);
-                } else if (mPictureData == null) {
-                    mCameraThreadListener.alertCameraThread(FAILED_TO_SAVE_PICTURE);
-                    Log.d(TAG, "Data Was Empty, Not Writing to File");
-                } else {
-                    mCameraThreadListener.alertCameraThread(IS_SAVING_PICTURE);
-                    
-                    try {
-                        FileOutputStream output = new FileOutputStream(filename);
-                        output.write(mPictureData);
-                        output.close();
-                        mCameraThreadListener.alertCameraThread(SAVED_PICTURE_SUCCESSFULLY);
-                        Log.d(TAG, "Image Saved Successfully");
-                    } catch (IOException e) {
-                        mCameraThreadListener.alertCameraThread(FAILED_TO_SAVE_PICTURE);
-                        Log.d(TAG, "Saving Image Failed!");
-                    } finally {
-                        // We have to refresh the grid view UI to make the new photo show up
-                        mCameraThreadListener.newPictureAddedToGallery();
-                    }
-                }
+                Log.d(TAG, "Stopped taking picture");
             }
             
         });
@@ -505,7 +418,7 @@ public class CameraThread extends Thread {
         });
     }
     
-    // This is called from onMeasure in the Camera Preview View class
+    // This is called from onMeasure/ onSurfaceTextureAvailable in the Camera Preview View class
     public synchronized void setCameraPreviewSize(final int width, final int height) {
         getHandler().post(new Runnable() {
 
@@ -584,50 +497,6 @@ public class CameraThread extends Thread {
         });
     }
     
-    public synchronized void setupVideo() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                prepareMediaRecorder();
-            }
-            
-        });
-    }
-    
-    public synchronized void cancelVideoSetup() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                releaseMediaRecorder();
-            }
-            
-        });
-    }
-    
-    public synchronized void startVideoRecording() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                startMediaRecorder();
-            }
-            
-        });
-    }
-    
-    public synchronized void stopVideoRecording() {
-        getHandler().post(new Runnable() {
-
-            @Override
-            public void run() {
-                stopMediaRecorder();
-            }
-            
-        });
-    }
-    
     // Private methods
     private Camera getCameraInstance(int cameraID) {
         Camera camera = null;
@@ -668,108 +537,9 @@ public class CameraThread extends Thread {
         }
     }
     
-    private void releasePreview() {
-        if (mCamera != null) {
-            mCamera.setPreviewCallback(null);
-        }
-    }
-    
     private void clearPictureData() {
         mPictureData = null;
         mCurrentEffect = null;
-    }
-    
-    private boolean pictureDataIsAvailable() {
-        return (mPictureData != null);
-    }
-
-    private void prepareMediaRecorder() {
-        mMediaRecorder = new MediaRecorder();
-        mCamera.unlock();
-        mMediaRecorder.setCamera(mCamera);
-        
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-        
-        mMediaRecorder.setProfile(CamcorderProfile.get(mCurrentCameraID, CamcorderProfile.QUALITY_HIGH));
-        mMediaRecorder.setOutputFile(getFile().getAbsolutePath()/*getPipeFD()*/);
-        
-        try {
-            mMediaRecorder.prepare();
-            Log.d(TAG, "Prepare media recorder successful");
-        } catch (IllegalStateException e) {
-            releaseMediaRecorder();
-            Log.d(TAG, "Failed to prepare media recorder- IllegalStateException");
-        } catch (IOException e) {
-            releaseMediaRecorder();
-            Log.d(TAG, "Failed to prepare media recorder. IOException");
-        }
-    }
-        
-    private void setPreviewDisplayForMediaRecorder(CameraPreview cameraPreview) {
-        if (!DeviceInfo.supportsSDK(14)) {
-            // We have to set the preview display for devices that use a SurfaceView
-            mMediaRecorder.setPreviewDisplay(((CameraPreview)cameraPreview).getHolder().getSurface());
-        }
-    }
-    
-    private void startMediaRecorder() {
-        if (mMediaRecorder != null) {
-            try {
-                mMediaRecorder.start();
-                Log.d(TAG, "Start media recorder successful");
-            } catch (RuntimeException ie){
-                Log.e(TAG, "Failed to start the media recorder");
-            }
-            
-        }
-    }
-    
-    private void stopMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.stop();
-        }
-    }
-    
-    private void releaseMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.reset();
-            mMediaRecorder.release();
-            mMediaRecorder = null;
-            mCamera.lock();
-        }
-    }
-    
-    private void resetMediaRecorder() {
-        if (mMediaRecorder != null) {
-            mMediaRecorder.reset();
-        }
-    }
-    
-    private FileDescriptor getPipeFD() {
-        FileDescriptor outputPipe = null;
-        try {
-            ParcelFileDescriptor[] pipe = ParcelFileDescriptor.createPipe();
-            outputPipe = pipe[1].getFileDescriptor();
-        } catch (IOException e) {
-            Log.e(TAG, e.getMessage());
-        }
-        return outputPipe;
-    }
-    
-    private String getDefaultFilename() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
-        return "IMG_" + timeStamp + ".jpeg";
-    }
-    
-    private File getAlbumStorageDir() {
-        // Get the directory for the user's public pictures directory.
-        File file = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), ALBUM_NAME);
-        if (!file.mkdirs()) {
-            Log.e(TAG, "Directory not created");
-        }
-        return file;
     }
     
     // Callbacks
@@ -781,53 +551,14 @@ public class CameraThread extends Thread {
                 public void onError(int error, Camera camera) {
                     if (error == Camera.CAMERA_ERROR_SERVER_DIED) {
                         deinitializeCamera();
-                        initializeCamera(mCurrentCameraID);
-                        initializeCameraProperties();
-                        setCameraParameters(mFlashEnabled, mFocusList);
-                        setCameraDisplayOrientation();
+                        mPictureTakerThread.removeAllCallbacks();
+                        mPictureWriterThread.removeAllCallbacks();
+                        initializeCamera();
                     }
                 }
             };
         }
         return mErrorCallback;
-    }
-    
-    private ShutterCallback getShutterCallback() {
-        if (mShutterCallback == null) {
-            mShutterCallback = new ShutterCallback() {
-
-                @Override
-                public void onShutter() {
-                    mCameraThreadListener.makeFlashAnimation();
-                    //playCameraSound();
-                }
-            };
-        }
-        return mShutterCallback;
-    }
-
-    private PictureCallback getRawCallback() {
-        return mRawCallback;
-    }
-
-    private PictureCallback getPostViewCallback() {
-        return mPostViewCallback;
-    }
-
-    private PictureCallback getJpegCallback() {
-        Log.d(TAG, "JPEG Callback");
-        if (mJpegCallback == null) {
-            mJpegCallback = new PictureCallback() {
-
-                @Override
-                public void onPictureTaken(byte[] data, Camera camera) {
-                    Log.d(TAG, "On picture taken");
-                    mPictureWriterThread.writeDataToFile(data);
-                    startPreview();
-                }
-            };
-        }
-        return mJpegCallback;
     }
     
     private PreviewCallback getPreviewCallback() {
@@ -869,18 +600,19 @@ public class CameraThread extends Thread {
         camera.setDisplayOrientation(result);
     }
     
-    private static Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {
+    private static Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int width, int height) {
         final double ASPECT_TOLERANCE = 0.1;
-        double targetRatio=(double)h / w;
+        double targetRatio = (double) height / width;
 
         if (sizes == null) return null;
 
         Camera.Size optimalSize = null;
         double minDiff = Double.MAX_VALUE;
 
-        int targetHeight = h;
+        int targetHeight = height;
 
         for (Camera.Size size : sizes) {
+        	Log.d(TAG, "The size is: " + size.width + "/" + size.height);
             double ratio = (double) size.width / size.height;
             if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) continue;
             if (Math.abs(size.height - targetHeight) < minDiff) {
@@ -914,29 +646,6 @@ public class CameraThread extends Thread {
         }
     }
     
-    private File getFile() {
-        File file = new File(Environment.getExternalStorageDirectory(), VIDEO_PATH_NAME);
-        // "touch" the file
-        if(!file.exists()) {
-            File parent = file.getParentFile();
-            if(parent != null) 
-                if(!parent.exists())
-                    if(!parent.mkdirs())
-                        try {
-                            throw new IOException("Cannot create " +
-                                    "parent directories for file: " + file);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-        }
-        return file;
-    }
-    
     private int getFrameByteSize() {
         Camera.Parameters parameters = mCamera.getParameters();
         int previewFormat = parameters.getPreviewFormat();
@@ -947,34 +656,12 @@ public class CameraThread extends Thread {
         return frameByteSize;
     }
     
-    private void setCameraSound() {
-    	SoundPool soundPool = new SoundPool(10, AudioManager.STREAM_NOTIFICATION, 0);
-		soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
-			@Override
-			public void onLoadComplete(SoundPool soundPool, int sampleId,
-					int status) {
-				mSoundLoaded = true;
-			}
-		});
-		//mSoundId = soundPool.load(mContext, R.raw.camera_click, 1);
-    }
-    
-    private void playCameraSound() {
-    	AudioManager audioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-		float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-		float maxVolume = (float) audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		float volume = actualVolume / maxVolume;
-		if (mSoundLoaded) {
-			mSoundPool.play(mSoundId, volume, volume, 1, 0, 1f);
-			Log.e("Test", "Played camera click sound");
-		}
-    }
     
     public int getNumberOfColorEffects() {
-    	return mSupportedColorEffects.size();
+        return mSupportedColorEffects.size();
     }
     
     public int getZoomValue() {
-    	return mZoomValue;
+        return mZoomValue;
     }
 }

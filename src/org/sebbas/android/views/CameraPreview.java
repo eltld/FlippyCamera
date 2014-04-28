@@ -2,7 +2,7 @@ package org.sebbas.android.views;
 
 import org.sebbas.android.flickcam.CameraThread;
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.listener.ScaleListener;
+import org.sebbas.android.interfaces.ScaleListener;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -80,6 +80,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         setMeasuredDimension(mScreenWidth, mScreenHeight);
         if (mCameraThread.isAlive()) {
             mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
+            mCameraThread.initializeHelperThreads();
         }
     }
 }

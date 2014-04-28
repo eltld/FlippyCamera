@@ -51,32 +51,6 @@
         orientationButton:animationDuration="300" />
     
     <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/accept_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_gravity="bottom|right"
-        android:layout_marginBottom="48dp"
-        android:contentDescription="@string/accept_image"
-        android:background="@drawable/ic_button_selector"
-        android:visibility="gone"
-        android:src="@drawable/ic_action_accept" 
-        orientationButton:animationDuration="300" />
-    
-    <org.sebbas.android.views.OrientationImageButton
-        android:id="@+id/discard_image"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:layout_gravity="bottom|left"
-        android:layout_marginBottom="48dp"
-        android:contentDescription="@string/discard_image"
-        android:background="@drawable/ic_button_selector"
-        android:visibility="gone"
-        android:src="@drawable/ic_action_discard" 
-        orientationButton:animationDuration="300" />
-    
-    <org.sebbas.android.views.OrientationImageButton
         android:id="@+id/settings_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

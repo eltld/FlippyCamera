@@ -347,6 +347,16 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int homeLayout=0x7f01002f;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int horizontal_spacing=0x7f01006b;
         /**  Specifies the drawable used for the application icon. 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -381,7 +391,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 <p>May be a color value, in the form of "<code>#<i>rgb</i></code>", "<code>#<i>argb</i></code>",
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
          */
-        public static final int insetBackground=0x7f01006b;
+        public static final int insetBackground=0x7f01006e;
         /**  Specifies whether the theme is light, otherwise it is dark. 
          <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
@@ -403,6 +413,16 @@ theme attribute (in the form
 containing a value of this type.
          */
         public static final int itemPadding=0x7f010033;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int layout_vertical_spacing=0x7f01006d;
         /**  Drawable used as a background for selected list items. 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
@@ -764,6 +784,16 @@ containing a value of this type.
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
          */
         public static final int titleTextStyle=0x7f010026;
+        /** <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+         */
+        public static final int vertical_spacing=0x7f01006c;
         /** <p>Must be a boolean value, either "<code>true</code>" or "<code>false</code>".
 <p>This may also be a reference to a resource (in the form
 "<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
@@ -815,7 +845,7 @@ containing a value of this type.
         public static final int abc_search_url_text_selected=0x7f070001;
         public static final int actionbar_color=0x7f070003;
         public static final int actionbar_text=0x7f070005;
-        public static final int gallery_bg=0x7f070004;
+        public static final int app_background=0x7f070004;
         public static final int transparent=0x7f070006;
     }
     public static final class dimen {
@@ -910,123 +940,129 @@ containing a value of this type.
          */
         public static final int activity_horizontal_margin=0x7f080011;
         public static final int activity_vertical_margin=0x7f080012;
+        /**  Default spacing in Cascade Layout 
+         */
+        public static final int cascade_horizontal_spacing=0x7f080013;
+        public static final int cascade_vertical_spacing=0x7f080014;
     }
     public static final class drawable {
-        public static final int ab_solid_actionbar9=0x7f020000;
-        public static final int abc_ab_bottom_solid_dark_holo=0x7f020001;
-        public static final int abc_ab_bottom_solid_light_holo=0x7f020002;
-        public static final int abc_ab_bottom_transparent_dark_holo=0x7f020003;
-        public static final int abc_ab_bottom_transparent_light_holo=0x7f020004;
-        public static final int abc_ab_share_pack_holo_dark=0x7f020005;
-        public static final int abc_ab_share_pack_holo_light=0x7f020006;
-        public static final int abc_ab_solid_dark_holo=0x7f020007;
-        public static final int abc_ab_solid_light_holo=0x7f020008;
-        public static final int abc_ab_stacked_solid_dark_holo=0x7f020009;
-        public static final int abc_ab_stacked_solid_light_holo=0x7f02000a;
-        public static final int abc_ab_stacked_transparent_dark_holo=0x7f02000b;
-        public static final int abc_ab_stacked_transparent_light_holo=0x7f02000c;
-        public static final int abc_ab_transparent_dark_holo=0x7f02000d;
-        public static final int abc_ab_transparent_light_holo=0x7f02000e;
-        public static final int abc_cab_background_bottom_holo_dark=0x7f02000f;
-        public static final int abc_cab_background_bottom_holo_light=0x7f020010;
-        public static final int abc_cab_background_top_holo_dark=0x7f020011;
-        public static final int abc_cab_background_top_holo_light=0x7f020012;
-        public static final int abc_ic_ab_back_holo_dark=0x7f020013;
-        public static final int abc_ic_ab_back_holo_light=0x7f020014;
-        public static final int abc_ic_cab_done_holo_dark=0x7f020015;
-        public static final int abc_ic_cab_done_holo_light=0x7f020016;
-        public static final int abc_ic_clear=0x7f020017;
-        public static final int abc_ic_clear_disabled=0x7f020018;
-        public static final int abc_ic_clear_holo_light=0x7f020019;
-        public static final int abc_ic_clear_normal=0x7f02001a;
-        public static final int abc_ic_clear_search_api_disabled_holo_light=0x7f02001b;
-        public static final int abc_ic_clear_search_api_holo_light=0x7f02001c;
-        public static final int abc_ic_commit_search_api_holo_dark=0x7f02001d;
-        public static final int abc_ic_commit_search_api_holo_light=0x7f02001e;
-        public static final int abc_ic_go=0x7f02001f;
-        public static final int abc_ic_go_search_api_holo_light=0x7f020020;
-        public static final int abc_ic_menu_moreoverflow_normal_holo_dark=0x7f020021;
-        public static final int abc_ic_menu_moreoverflow_normal_holo_light=0x7f020022;
-        public static final int abc_ic_menu_share_holo_dark=0x7f020023;
-        public static final int abc_ic_menu_share_holo_light=0x7f020024;
-        public static final int abc_ic_search=0x7f020025;
-        public static final int abc_ic_search_api_holo_light=0x7f020026;
-        public static final int abc_ic_voice_search=0x7f020027;
-        public static final int abc_ic_voice_search_api_holo_light=0x7f020028;
-        public static final int abc_item_background_holo_dark=0x7f020029;
-        public static final int abc_item_background_holo_light=0x7f02002a;
-        public static final int abc_list_divider_holo_dark=0x7f02002b;
-        public static final int abc_list_divider_holo_light=0x7f02002c;
-        public static final int abc_list_focused_holo=0x7f02002d;
-        public static final int abc_list_longpressed_holo=0x7f02002e;
-        public static final int abc_list_pressed_holo_dark=0x7f02002f;
-        public static final int abc_list_pressed_holo_light=0x7f020030;
-        public static final int abc_list_selector_background_transition_holo_dark=0x7f020031;
-        public static final int abc_list_selector_background_transition_holo_light=0x7f020032;
-        public static final int abc_list_selector_disabled_holo_dark=0x7f020033;
-        public static final int abc_list_selector_disabled_holo_light=0x7f020034;
-        public static final int abc_list_selector_holo_dark=0x7f020035;
-        public static final int abc_list_selector_holo_light=0x7f020036;
-        public static final int abc_menu_dropdown_panel_holo_dark=0x7f020037;
-        public static final int abc_menu_dropdown_panel_holo_light=0x7f020038;
-        public static final int abc_menu_hardkey_panel_holo_dark=0x7f020039;
-        public static final int abc_menu_hardkey_panel_holo_light=0x7f02003a;
-        public static final int abc_search_dropdown_dark=0x7f02003b;
-        public static final int abc_search_dropdown_light=0x7f02003c;
-        public static final int abc_spinner_ab_default_holo_dark=0x7f02003d;
-        public static final int abc_spinner_ab_default_holo_light=0x7f02003e;
-        public static final int abc_spinner_ab_disabled_holo_dark=0x7f02003f;
-        public static final int abc_spinner_ab_disabled_holo_light=0x7f020040;
-        public static final int abc_spinner_ab_focused_holo_dark=0x7f020041;
-        public static final int abc_spinner_ab_focused_holo_light=0x7f020042;
-        public static final int abc_spinner_ab_holo_dark=0x7f020043;
-        public static final int abc_spinner_ab_holo_light=0x7f020044;
-        public static final int abc_spinner_ab_pressed_holo_dark=0x7f020045;
-        public static final int abc_spinner_ab_pressed_holo_light=0x7f020046;
-        public static final int abc_tab_indicator_ab_holo=0x7f020047;
-        public static final int abc_tab_selected_focused_holo=0x7f020048;
-        public static final int abc_tab_selected_holo=0x7f020049;
-        public static final int abc_tab_selected_pressed_holo=0x7f02004a;
-        public static final int abc_tab_unselected_pressed_holo=0x7f02004b;
-        public static final int abc_textfield_search_default_holo_dark=0x7f02004c;
-        public static final int abc_textfield_search_default_holo_light=0x7f02004d;
-        public static final int abc_textfield_search_right_default_holo_dark=0x7f02004e;
-        public static final int abc_textfield_search_right_default_holo_light=0x7f02004f;
-        public static final int abc_textfield_search_right_selected_holo_dark=0x7f020050;
-        public static final int abc_textfield_search_right_selected_holo_light=0x7f020051;
-        public static final int abc_textfield_search_selected_holo_dark=0x7f020052;
-        public static final int abc_textfield_search_selected_holo_light=0x7f020053;
-        public static final int abc_textfield_searchview_holo_dark=0x7f020054;
-        public static final int abc_textfield_searchview_holo_light=0x7f020055;
-        public static final int abc_textfield_searchview_right_holo_dark=0x7f020056;
-        public static final int abc_textfield_searchview_right_holo_light=0x7f020057;
-        public static final int actionbar_bg=0x7f020058;
-        public static final int btn_shutter=0x7f020059;
-        public static final int button_background=0x7f02005a;
-        public static final int button_border=0x7f02005b;
-        public static final int ic_action_accept=0x7f02005c;
-        public static final int ic_action_camera=0x7f02005d;
-        public static final int ic_action_discard=0x7f02005e;
-        public static final int ic_action_flash_off=0x7f02005f;
-        public static final int ic_action_flash_on=0x7f020060;
-        public static final int ic_action_overflow=0x7f020061;
-        public static final int ic_action_picture=0x7f020062;
-        public static final int ic_action_settings=0x7f020063;
-        public static final int ic_action_share=0x7f020064;
-        public static final int ic_action_switch_camera=0x7f020065;
-        public static final int ic_action_video=0x7f020066;
-        public static final int ic_button_selector=0x7f020067;
-        public static final int ic_launcher=0x7f020068;
-        public static final int image_border=0x7f020069;
-        public static final int shutter_button=0x7f02006a;
-        public static final int shutter_button_pressed=0x7f02006b;
-        public static final int splash_screen_bg=0x7f02006c;
-        public static final int square_image_selector=0x7f02006d;
-        public static final int wallpaper1=0x7f02006e;
-        public static final int wallpaper2=0x7f02006f;
+        public static final int abc_ab_bottom_solid_dark_holo=0x7f020000;
+        public static final int abc_ab_bottom_solid_light_holo=0x7f020001;
+        public static final int abc_ab_bottom_transparent_dark_holo=0x7f020002;
+        public static final int abc_ab_bottom_transparent_light_holo=0x7f020003;
+        public static final int abc_ab_share_pack_holo_dark=0x7f020004;
+        public static final int abc_ab_share_pack_holo_light=0x7f020005;
+        public static final int abc_ab_solid_dark_holo=0x7f020006;
+        public static final int abc_ab_solid_light_holo=0x7f020007;
+        public static final int abc_ab_stacked_solid_dark_holo=0x7f020008;
+        public static final int abc_ab_stacked_solid_light_holo=0x7f020009;
+        public static final int abc_ab_stacked_transparent_dark_holo=0x7f02000a;
+        public static final int abc_ab_stacked_transparent_light_holo=0x7f02000b;
+        public static final int abc_ab_transparent_dark_holo=0x7f02000c;
+        public static final int abc_ab_transparent_light_holo=0x7f02000d;
+        public static final int abc_cab_background_bottom_holo_dark=0x7f02000e;
+        public static final int abc_cab_background_bottom_holo_light=0x7f02000f;
+        public static final int abc_cab_background_top_holo_dark=0x7f020010;
+        public static final int abc_cab_background_top_holo_light=0x7f020011;
+        public static final int abc_ic_ab_back_holo_dark=0x7f020012;
+        public static final int abc_ic_ab_back_holo_light=0x7f020013;
+        public static final int abc_ic_cab_done_holo_dark=0x7f020014;
+        public static final int abc_ic_cab_done_holo_light=0x7f020015;
+        public static final int abc_ic_clear=0x7f020016;
+        public static final int abc_ic_clear_disabled=0x7f020017;
+        public static final int abc_ic_clear_holo_light=0x7f020018;
+        public static final int abc_ic_clear_normal=0x7f020019;
+        public static final int abc_ic_clear_search_api_disabled_holo_light=0x7f02001a;
+        public static final int abc_ic_clear_search_api_holo_light=0x7f02001b;
+        public static final int abc_ic_commit_search_api_holo_dark=0x7f02001c;
+        public static final int abc_ic_commit_search_api_holo_light=0x7f02001d;
+        public static final int abc_ic_go=0x7f02001e;
+        public static final int abc_ic_go_search_api_holo_light=0x7f02001f;
+        public static final int abc_ic_menu_moreoverflow_normal_holo_dark=0x7f020020;
+        public static final int abc_ic_menu_moreoverflow_normal_holo_light=0x7f020021;
+        public static final int abc_ic_menu_share_holo_dark=0x7f020022;
+        public static final int abc_ic_menu_share_holo_light=0x7f020023;
+        public static final int abc_ic_search=0x7f020024;
+        public static final int abc_ic_search_api_holo_light=0x7f020025;
+        public static final int abc_ic_voice_search=0x7f020026;
+        public static final int abc_ic_voice_search_api_holo_light=0x7f020027;
+        public static final int abc_item_background_holo_dark=0x7f020028;
+        public static final int abc_item_background_holo_light=0x7f020029;
+        public static final int abc_list_divider_holo_dark=0x7f02002a;
+        public static final int abc_list_divider_holo_light=0x7f02002b;
+        public static final int abc_list_focused_holo=0x7f02002c;
+        public static final int abc_list_longpressed_holo=0x7f02002d;
+        public static final int abc_list_pressed_holo_dark=0x7f02002e;
+        public static final int abc_list_pressed_holo_light=0x7f02002f;
+        public static final int abc_list_selector_background_transition_holo_dark=0x7f020030;
+        public static final int abc_list_selector_background_transition_holo_light=0x7f020031;
+        public static final int abc_list_selector_disabled_holo_dark=0x7f020032;
+        public static final int abc_list_selector_disabled_holo_light=0x7f020033;
+        public static final int abc_list_selector_holo_dark=0x7f020034;
+        public static final int abc_list_selector_holo_light=0x7f020035;
+        public static final int abc_menu_dropdown_panel_holo_dark=0x7f020036;
+        public static final int abc_menu_dropdown_panel_holo_light=0x7f020037;
+        public static final int abc_menu_hardkey_panel_holo_dark=0x7f020038;
+        public static final int abc_menu_hardkey_panel_holo_light=0x7f020039;
+        public static final int abc_search_dropdown_dark=0x7f02003a;
+        public static final int abc_search_dropdown_light=0x7f02003b;
+        public static final int abc_spinner_ab_default_holo_dark=0x7f02003c;
+        public static final int abc_spinner_ab_default_holo_light=0x7f02003d;
+        public static final int abc_spinner_ab_disabled_holo_dark=0x7f02003e;
+        public static final int abc_spinner_ab_disabled_holo_light=0x7f02003f;
+        public static final int abc_spinner_ab_focused_holo_dark=0x7f020040;
+        public static final int abc_spinner_ab_focused_holo_light=0x7f020041;
+        public static final int abc_spinner_ab_holo_dark=0x7f020042;
+        public static final int abc_spinner_ab_holo_light=0x7f020043;
+        public static final int abc_spinner_ab_pressed_holo_dark=0x7f020044;
+        public static final int abc_spinner_ab_pressed_holo_light=0x7f020045;
+        public static final int abc_tab_indicator_ab_holo=0x7f020046;
+        public static final int abc_tab_selected_focused_holo=0x7f020047;
+        public static final int abc_tab_selected_holo=0x7f020048;
+        public static final int abc_tab_selected_pressed_holo=0x7f020049;
+        public static final int abc_tab_unselected_pressed_holo=0x7f02004a;
+        public static final int abc_textfield_search_default_holo_dark=0x7f02004b;
+        public static final int abc_textfield_search_default_holo_light=0x7f02004c;
+        public static final int abc_textfield_search_right_default_holo_dark=0x7f02004d;
+        public static final int abc_textfield_search_right_default_holo_light=0x7f02004e;
+        public static final int abc_textfield_search_right_selected_holo_dark=0x7f02004f;
+        public static final int abc_textfield_search_right_selected_holo_light=0x7f020050;
+        public static final int abc_textfield_search_selected_holo_dark=0x7f020051;
+        public static final int abc_textfield_search_selected_holo_light=0x7f020052;
+        public static final int abc_textfield_searchview_holo_dark=0x7f020053;
+        public static final int abc_textfield_searchview_holo_light=0x7f020054;
+        public static final int abc_textfield_searchview_right_holo_dark=0x7f020055;
+        public static final int abc_textfield_searchview_right_holo_light=0x7f020056;
+        public static final int btn_shutter=0x7f020057;
+        public static final int button_background=0x7f020058;
+        public static final int button_border=0x7f020059;
+        public static final int camera_new=0x7f02005a;
+        public static final int camera_new2=0x7f02005b;
+        public static final int drop_shadow=0x7f02005c;
+        public static final int ic_action_accept=0x7f02005d;
+        public static final int ic_action_camera=0x7f02005e;
+        public static final int ic_action_discard=0x7f02005f;
+        public static final int ic_action_flash_off=0x7f020060;
+        public static final int ic_action_flash_on=0x7f020061;
+        public static final int ic_action_overflow=0x7f020062;
+        public static final int ic_action_picture=0x7f020063;
+        public static final int ic_action_settings=0x7f020064;
+        public static final int ic_action_share=0x7f020065;
+        public static final int ic_action_switch_camera=0x7f020066;
+        public static final int ic_action_video=0x7f020067;
+        public static final int ic_button_selector=0x7f020068;
+        public static final int ic_launcher=0x7f020069;
+        public static final int icon_flickcamera=0x7f02006a;
+        public static final int image_border=0x7f02006b;
+        public static final int shadow_black=0x7f02006c;
+        public static final int shutter_button=0x7f02006d;
+        public static final int shutter_button_pressed=0x7f02006e;
+        public static final int splash_screen_bg=0x7f02006f;
+        public static final int square_image_selector=0x7f020070;
+        public static final int wallpaper1=0x7f020071;
+        public static final int wallpaper2=0x7f020072;
     }
     public static final class id {
-        public static final int accept_image=0x7f050042;
         public static final int action_bar=0x7f05001c;
         public static final int action_bar_activity_content=0x7f050015;
         public static final int action_bar_container=0x7f05001b;
@@ -1038,48 +1074,57 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f050054;
+        public static final int action_settings=0x7f05005c;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
-        public static final int btnClose=0x7f05004f;
-        public static final int camera_icon=0x7f050053;
+        public static final int btnClose=0x7f050055;
+        public static final int camera_icon=0x7f05005b;
         public static final int camera_preview_layout=0x7f05003c;
         public static final int camera_view_flipper=0x7f05003e;
+        public static final int cascadeLayout1=0x7f050046;
         public static final int checkbox=0x7f05002d;
         public static final int collapseActionView=0x7f05000d;
-        public static final int container=0x7f050048;
+        public static final int container=0x7f05004f;
         public static final int control_mask=0x7f05003f;
         public static final int default_activity_button=0x7f050028;
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
-        public static final int discard_image=0x7f050043;
-        public static final int draw_insets_framelayout=0x7f05004c;
+        public static final int discard_image=0x7f050059;
+        public static final int draw_insets_framelayout=0x7f05004e;
         public static final int dropdown=0x7f05000f;
         public static final int edit_query=0x7f050030;
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f050026;
-        public static final int expanded_image=0x7f05004a;
+        public static final int expanded_image=0x7f050051;
         public static final int expanded_menu=0x7f05002c;
-        public static final int goto_gallery=0x7f050046;
-        public static final int grid_view=0x7f050049;
+        public static final int folder_grid_view=0x7f05004d;
+        public static final int folder_image_1=0x7f05004a;
+        public static final int folder_image_2=0x7f050049;
+        public static final int folder_image_3=0x7f050048;
+        public static final int folder_image_4=0x7f050047;
+        public static final int folder_name=0x7f05004b;
+        public static final int folder_size=0x7f05004c;
+        public static final int goto_gallery=0x7f050044;
+        public static final int grid_view=0x7f050050;
+        public static final int hide_hidden=0x7f05005e;
         public static final int home=0x7f050014;
         public static final int homeAsUp=0x7f050005;
         public static final int icon=0x7f05002a;
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f050027;
-        public static final int imgDisplay=0x7f05004e;
+        public static final int imgDisplay=0x7f050054;
         public static final int listMode=0x7f050001;
         public static final int list_item=0x7f050029;
-        public static final int loading_image_spinner=0x7f05004b;
+        public static final int loading_image_spinner=0x7f050052;
         public static final int middle=0x7f050012;
-        public static final int navigationbar_filler_view=0x7f050047;
+        public static final int navigationbar_filler_view=0x7f050045;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
         public static final int normal=0x7f050000;
-        public static final int pager=0x7f05004d;
+        public static final int pager=0x7f050053;
         public static final int preview_mask=0x7f05003d;
-        public static final int progressBar1=0x7f050051;
+        public static final int progressBar1=0x7f050057;
         public static final int progress_circular=0x7f050018;
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f05002f;
@@ -1093,14 +1138,16 @@ containing a value of this type.
         public static final int search_plate=0x7f050036;
         public static final int search_src_text=0x7f050037;
         public static final int search_voice_btn=0x7f05003b;
-        public static final int settings_button=0x7f050044;
-        public static final int share_image=0x7f050052;
+        public static final int settings_button=0x7f050042;
+        public static final int share_image=0x7f050058;
         public static final int shortcut=0x7f05002e;
         public static final int showCustom=0x7f050007;
         public static final int showHome=0x7f050004;
         public static final int showTitle=0x7f050006;
-        public static final int shutter_button=0x7f050045;
-        public static final int splash_icon=0x7f050050;
+        public static final int show_hidden=0x7f05005d;
+        public static final int shutter_button=0x7f050043;
+        public static final int spinner_icon=0x7f05005a;
+        public static final int splash_icon=0x7f050056;
         public static final int split_action_bar=0x7f05001e;
         public static final int submit_area=0x7f050039;
         public static final int switch_camera=0x7f050041;
@@ -1137,8 +1184,6 @@ containing a value of this type.
          showAsAction="ifRoom" items can fit. "always" items can override this. 
          */
         public static final int abc_max_action_buttons=0x7f090000;
-        public static final int card_flip_time_full=0x7f090001;
-        public static final int card_flip_time_half=0x7f090002;
     }
     public static final class layout {
         public static final int abc_action_bar_decor=0x7f030000;
@@ -1164,14 +1209,17 @@ containing a value of this type.
         public static final int abc_popup_menu_item_layout=0x7f030014;
         public static final int abc_search_dropdown_item_icons_2line=0x7f030015;
         public static final int abc_search_view=0x7f030016;
-        public static final int camera_layout_with_navigationbar=0x7f030017;
-        public static final int camera_layout_without_navigationbar=0x7f030018;
-        public static final int gallery_grid_view=0x7f030019;
-        public static final int image_fullscreen_view=0x7f03001a;
-        public static final int layout_fullscreen_image=0x7f03001b;
-        public static final int splash_screen=0x7f03001c;
-        public static final int support_simple_spinner_dropdown_item=0x7f03001d;
-        public static final int viewpager_layout=0x7f03001e;
+        public static final int actionbar_indeterminate_progress=0x7f030017;
+        public static final int camera_layout_with_navigationbar=0x7f030018;
+        public static final int camera_layout_without_navigationbar=0x7f030019;
+        public static final int folder_view=0x7f03001a;
+        public static final int gallery_folders=0x7f03001b;
+        public static final int gallery_grid_view=0x7f03001c;
+        public static final int image_fullscreen_view=0x7f03001d;
+        public static final int layout_fullscreen_image=0x7f03001e;
+        public static final int splash_screen=0x7f03001f;
+        public static final int support_simple_spinner_dropdown_item=0x7f030020;
+        public static final int viewpager_layout=0x7f030021;
     }
     public static final class menu {
         public static final int actionmode=0x7f0c0000;
@@ -1218,17 +1266,25 @@ containing a value of this type.
         /**  Description of a share target (both in the list of such or the default share button) in a ShareActionProvider (share UI). [CHAR LIMIT=NONE] 
          */
         public static final int abc_shareactionprovider_share_with_application=0x7f0a000b;
-        public static final int accept_image=0x7f0a0013;
+        /**  Actionbar items 
+         */
         public static final int action_settings=0x7f0a000e;
         public static final int app_name=0x7f0a000d;
-        public static final int camera=0x7f0a0017;
-        public static final int description_zoom_touch_close=0x7f0a0016;
-        public static final int discard_image=0x7f0a0014;
-        public static final int hello_world=0x7f0a000f;
-        public static final int share_image=0x7f0a0015;
-        public static final int shutter_button=0x7f0a0010;
-        public static final int switch_camera=0x7f0a0011;
-        public static final int switch_flash=0x7f0a0012;
+        public static final int camera=0x7f0a0018;
+        public static final int description_zoom_touch_close=0x7f0a0017;
+        /**  Action mode 
+         */
+        public static final int discard_image=0x7f0a0015;
+        public static final int folder_preview=0x7f0a0019;
+        public static final int hide_hidden=0x7f0a0010;
+        public static final int share_image=0x7f0a0016;
+        public static final int show_hidden=0x7f0a000f;
+        /**  Camera UI 
+         */
+        public static final int shutter_button=0x7f0a0012;
+        public static final int spinner=0x7f0a0011;
+        public static final int switch_camera=0x7f0a0013;
+        public static final int switch_flash=0x7f0a0014;
     }
     public static final class style {
         public static final int FlickCamera=0x7f0b0083;
@@ -1240,6 +1296,11 @@ containing a value of this type.
  The textColor property is backward compatible with the Support Library 
          */
         public static final int MyActionBarTitleText=0x7f0b0085;
+        /**  Actionbar Overflow 
+ Actionbar Overflow 
+ Actionbar Overflow 
+         */
+        public static final int MyActionButtonOverflow=0x7f0b0086;
         /**  Mimic text appearance in select_dialog_item.xml 
          */
         public static final int TextAppearance_AppCompat_Base_CompactMenu_Dialog=0x7f0b0063;
@@ -2015,6 +2076,82 @@ containing a value of this type.
           @attr name org.sebbas.android.flickcam:initialActivityCount
         */
         public static final int ActivityChooserView_initialActivityCount = 0;
+        /** Attributes that can be used with a CascadeLayout.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #CascadeLayout_horizontal_spacing org.sebbas.android.flickcam:horizontal_spacing}</code></td><td></td></tr>
+           <tr><td><code>{@link #CascadeLayout_vertical_spacing org.sebbas.android.flickcam:vertical_spacing}</code></td><td></td></tr>
+           </table>
+           @see #CascadeLayout_horizontal_spacing
+           @see #CascadeLayout_vertical_spacing
+         */
+        public static final int[] CascadeLayout = {
+            0x7f01006b, 0x7f01006c
+        };
+        /**
+          <p>This symbol is the offset where the {@link org.sebbas.android.flickcam.R.attr#horizontal_spacing}
+          attribute's value can be found in the {@link #CascadeLayout} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name org.sebbas.android.flickcam:horizontal_spacing
+        */
+        public static final int CascadeLayout_horizontal_spacing = 0;
+        /**
+          <p>This symbol is the offset where the {@link org.sebbas.android.flickcam.R.attr#vertical_spacing}
+          attribute's value can be found in the {@link #CascadeLayout} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name org.sebbas.android.flickcam:vertical_spacing
+        */
+        public static final int CascadeLayout_vertical_spacing = 1;
+        /** Attributes that can be used with a CascadeLayout_LayoutParams.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #CascadeLayout_LayoutParams_layout_vertical_spacing org.sebbas.android.flickcam:layout_vertical_spacing}</code></td><td></td></tr>
+           </table>
+           @see #CascadeLayout_LayoutParams_layout_vertical_spacing
+         */
+        public static final int[] CascadeLayout_LayoutParams = {
+            0x7f01006d
+        };
+        /**
+          <p>This symbol is the offset where the {@link org.sebbas.android.flickcam.R.attr#layout_vertical_spacing}
+          attribute's value can be found in the {@link #CascadeLayout_LayoutParams} array.
+
+
+          <p>Must be a dimension value, which is a floating point number appended with a unit such as "<code>14.5sp</code>".
+Available units are: px (pixels), dp (density-independent pixels), sp (scaled pixels based on preferred font size),
+in (inches), mm (millimeters).
+<p>This may also be a reference to a resource (in the form
+"<code>@[<i>package</i>:]<i>type</i>:<i>name</i></code>") or
+theme attribute (in the form
+"<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>")
+containing a value of this type.
+          @attr name org.sebbas.android.flickcam:layout_vertical_spacing
+        */
+        public static final int CascadeLayout_LayoutParams_layout_vertical_spacing = 0;
         /** Attributes that can be used with a CompatTextView.
            <p>Includes the following attributes:</p>
            <table>
@@ -2052,7 +2189,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
            @see #DrawInsetsFrameLayout_insetBackground
          */
         public static final int[] DrawInsetsFrameLayout = {
-            0x7f01006b
+            0x7f01006e
         };
         /**
           <p>This symbol is the offset where the {@link org.sebbas.android.flickcam.R.attr#insetBackground}

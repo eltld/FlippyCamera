@@ -4,16 +4,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.CameraFragmentListener;
-import org.sebbas.android.listener.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraThreadListener;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.DrawingView;
 import org.sebbas.android.views.Flasher;
 import org.sebbas.android.views.OrientationImageButton;
 
-import com.nineoldandroids.animation.AnimatorSet;
-import com.nineoldandroids.animation.ObjectAnimator;
-import com.nineoldandroids.view.ViewHelper;
 import com.squareup.seismic.ShakeDetector;
 import com.tekle.oss.android.animation.AnimationFactory;
 import com.tekle.oss.android.animation.AnimationFactory.FlipDirection;
@@ -30,10 +27,8 @@ import android.support.v4.view.ViewPager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
@@ -61,9 +56,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
 
     // Instance variables for the camera
     private boolean mFlashEnabled;
-    protected boolean mPictureTaken;
     private boolean mVideoEnabled;
-    private boolean mIsRecording;
     
     // Instance variables for the UI
     private View mRootView;
@@ -72,8 +65,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private ImageButton mShutterButton;
     private OrientationImageButton mSwitchCameraButton;
     private OrientationImageButton mSwitchFlashButton;
-    private OrientationImageButton mAcceptButton;
-    private OrientationImageButton mCancelButton;
     private OrientationImageButton mGalleryButton;
     private OrientationImageButton mSettingsButton;
     private ViewPager mViewPager;
@@ -89,9 +80,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private OnClickListener mSwitchCameraListener;
     private OnClickListener mGalleryListener;
     private OnClickListener mSettingsListener;
-    private OnClickListener mShutterListener;
-    private OnClickListener mAcceptListener;
-    private OnClickListener mCancelListener;
     private OnTouchListener mShutterHoldListener;
     protected AtomicBoolean mPreviewIsRunning;
     
@@ -100,8 +88,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private Runnable mCameraSetupComplete;
     private Runnable mNewPictureAddedToGallery;
     private Runnable mSetTouchFocusView;
-    
-    private OrientationEventListener mOrientationEventListener;
     
     public static CameraFragmentUI newInstance() {
         CameraFragmentUI cameraFragment = new CameraFragmentUI();
@@ -117,8 +103,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         initializeViews(inflater, container);
         removeUnsupportedViews();
         setViewListeners();
@@ -131,16 +116,13 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mCameraThread = new CameraThread(this, mContext);
         mCameraThread.start();
 
-        configureUIElements();
-        postCameraInitializations();
-        
+        mCameraThread.initializeCamera();
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mPreviewIsRunning.set(false);
-        mPictureTaken = false; // Delete pending picture
         mCameraThread.quitThread();
         waitForCameraThreadToFinish();
         removeCameraPreview(true);
@@ -203,13 +185,12 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mShutterButton = (ImageButton) mRootView.findViewById(R.id.shutter_button);
         mSwitchCameraButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_camera);
         mSwitchFlashButton = (OrientationImageButton) mRootView.findViewById(R.id.switch_flash);
-        mAcceptButton = (OrientationImageButton) mRootView.findViewById(R.id.accept_image);
-        mCancelButton = (OrientationImageButton) mRootView.findViewById(R.id.discard_image);
         mGalleryButton = (OrientationImageButton) mRootView.findViewById(R.id.goto_gallery);
         mSettingsButton = (OrientationImageButton) mRootView.findViewById(R.id.settings_button);
         mViewPager = (ViewPager) getActivity().findViewById(R.id.viewpager);
         mCameraViewFlipper = (ViewFlipper) mRootView.findViewById(R.id.camera_view_flipper);
         
+        // This is for the touch to focus mode
         mDrawingView = new DrawingView(mContext);
         LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mPreviewLayout.addView(mDrawingView, params);
@@ -220,44 +201,8 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mSwitchCameraButton.setOnClickListener(getSwitchCameraListener());
         mSwitchFlashButton.setOnClickListener(getSwitchFlashListener());
         mGalleryButton.setOnClickListener(getSwitchToGalleryListener());
-        mAcceptButton.setOnClickListener(getAcceptListener());
-        mCancelButton.setOnClickListener(getCancelListener());
         mSettingsButton.setOnClickListener(getSettingsListener());
     }
-    
-    private void postCameraInitializations() {
-        mCameraThread.initializeCamera(mCurrentPreviewID); // Default id setup
-        mCameraThread.initializeCameraProperties();
-        mCameraThread.setCameraParameters(mFlashEnabled, null); 
-        mCameraThread.setCameraDisplayOrientation();
-    }
-    
-    // Methods that make changes to the UI
-    /*@SuppressLint("NewApi")
-    private void setupCameraPreviews(int cameraID) {
-        // If device supports API 14 then add a TextureView (better performance) to the RL, else add a SurfaceView (no other choice)
-        if (cameraID == CameraThread.CAMERA_ID_BACK) {
-            if (DeviceInfo.supportsSDK(14)) {
-                mCameraOnePreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
-                mCameraViewFlipper.addView(mCameraOnePreviewAdvanced);
-            } else {
-                mCameraOnePreview = new CameraPreview(mContext, mCameraThread);
-                mCameraViewFlipper.addView(mCameraOnePreview);
-            }
-            setCurrentPreviewID(CameraThread.CAMERA_ID_BACK); // Keep track of the current camera/ preview that is shown
-        }
-        if (cameraID == CameraThread.CAMERA_ID_FRONT) {
-            if (DeviceInfo.supportsSDK(14)) {
-                mCameraTwoPreviewAdvanced = new CameraPreviewAdvanced(mContext, mCameraThread);
-                mCameraViewFlipper.addView(mCameraTwoPreviewAdvanced);
-            } else {
-                mCameraTwoPreview = new CameraPreview(mContext, mCameraThread);
-                mCameraViewFlipper.addView(mCameraTwoPreview);
-            }
-            setCurrentPreviewID(CameraThread.CAMERA_ID_FRONT); // Keep track of the current camera/ preview that is shown
-        }
-        Log.d(TAG, "Instantiated camera preview");
-    }*/
     
     @SuppressLint("NewApi")
     private void setupCameraPreviews(int cameraID) {
@@ -326,72 +271,9 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mControlLayout.invalidate();
     }
     
-    private void setShutterRetake() {
-        mPictureTaken = true;
-        configureUIElements();
-    }
-    
     private void makeUIMessage(String message) {
         Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
     }
-    
-    private void configureUIElements() {
-        if (mPictureTaken) {
-            mSettingsButton.setVisibility(View.GONE);
-            mGalleryButton.setVisibility(View.GONE);
-            mAcceptButton.setVisibility(View.VISIBLE);
-            mCancelButton.setVisibility(View.VISIBLE);
-            mAcceptButton.bringToFront();
-            mCancelButton.bringToFront();
-            
-        } else {
-            mAcceptButton.setVisibility(View.GONE);
-            mCancelButton.setVisibility(View.GONE);
-            mSettingsButton.setVisibility(View.VISIBLE);
-            mGalleryButton.setVisibility(View.VISIBLE);
-        }
-    }
-    
-    private void retakePicture() {
-        resetShutter();
-    }
-    
-    private void resetShutter() {
-        mPictureTaken = false;
-        configureUIElements();
-        
-        mCameraThread.stopCamera(); // Deinitialize camera
-        postCameraInitializations(); // Reinitialize camera
-        removeCameraPreview(true);
-        
-    }
-    /*
-    private void removeAllCameraPreviewViews() {
-        if(DeviceInfo.supportsSDK(14)) {
-            mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
-            mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
-        } else {
-            mCameraViewFlipper.removeView(mCameraOnePreview);
-            mCameraViewFlipper.removeView(mCameraTwoPreview);
-        }
-        Log.d(TAG, "Removed all camera preview views");
-    }
-    
-    private void removeHiddenCameraPreviewView() {
-        if(DeviceInfo.supportsSDK(14)) {
-            if (mCurrentPreviewID == CameraThread.CAMERA_ID_BACK) {
-                mCameraViewFlipper.removeView(mCameraTwoPreviewAdvanced);
-            } else if (mCurrentPreviewID == CameraThread.CAMERA_ID_FRONT) {
-                mCameraViewFlipper.removeView(mCameraOnePreviewAdvanced);
-            }
-        } else {
-            if (mCurrentPreviewID == CameraThread.CAMERA_ID_BACK) {
-                mCameraViewFlipper.removeView(mCameraTwoPreview);
-            } else if (mCurrentPreviewID == CameraThread.CAMERA_ID_FRONT) {
-                mCameraViewFlipper.removeView(mCameraOnePreview);
-            }
-        }
-    }*/
     
     private void removeCameraPreview(boolean removeAll) {
         if (DeviceInfo.supportsSDK(14)) {
@@ -491,10 +373,8 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
                 mVideoEnabled = !mVideoEnabled;
                 if (mVideoEnabled) {
                     makeUIMessage(VIDEO_MODE);
-                    mCameraThread.setupVideo();
                 } else {
                     makeUIMessage(CAMERA_MODE);
-                    mCameraThread.cancelVideoSetup();
                 }
                 
                 setModeIcon();
@@ -503,37 +383,6 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         };
         return mSettingsListener;
     }
-   
-    private OnClickListener getShutterListener() {
-        if (mShutterListener == null) {
-            mShutterListener = new OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    Log.d(TAG, "Shutter Button Clicked.");
-                    if (mVideoEnabled) {  // Video mode
-                        if (mIsRecording) {
-                            mIsRecording = false;
-                            mCameraThread.stopVideoRecording();
-                        } else {
-                            mIsRecording = true;
-                            mCameraThread.startVideoRecording();
-                        }
-                    } else { // Camera mode
-                        if (mPictureTaken) {
-                            retakePicture();
-                        } else if (mPreviewIsRunning.get()) {
-                            mCameraThread.takePicture();
-                            setShutterRetake();
-                            mPreviewIsRunning.set(false);
-                        }
-                    }
-                    
-                }
-            };
-        }
-        return mShutterListener;
-    }
     
     private OnTouchListener getShutterHoldListener() {
         if (mShutterHoldListener == null) {
@@ -541,47 +390,23 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
 
                 @Override
                 public boolean onTouch(View v, MotionEvent event) {
-                    if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                        mCameraThread.startCapturing();
-                        return true;
+                    if (!PictureTakerThread.cameraIsBusy()) {
+                        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                            mCameraThread.startCapturing();
+                            return true;
+                        }
+                        if (event.getAction() == MotionEvent.ACTION_UP) {
+                            mCameraThread.stopCapturing();
+                            return true;
+                        }
                     }
-                    if (event.getAction() == MotionEvent.ACTION_UP) {
-                        mCameraThread.stopCapturing();
-                        return true;
-                    }
+                    
                     return false;
                 }
             };
             
         }
         return mShutterHoldListener;
-    }
-    
-    private OnClickListener getAcceptListener() {
-        if (mAcceptListener == null) {
-            mAcceptListener = new OnClickListener() {
-
-                @Override
-                public void onClick(View view) {
-                    mCameraThread.writePictureData();
-                    resetShutter();
-                }
-            };
-        }
-        return mAcceptListener;
-    }
-    
-    private OnClickListener getCancelListener() {
-        if (mCancelListener == null) {
-            mCancelListener = new OnClickListener() {
-
-                @Override
-                public void onClick(View v) {
-                    resetShutter();
-                }
-            };
-        }
-        return mCancelListener;
     }
 
     // Overridden methods from CameraThreadListener
@@ -674,20 +499,10 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         mCurrentPreviewID = previewID;
     }
     
-    private int getCurrentCameraID() {
-        return mCurrentPreviewID;
-    }
-    
-    private int getCurrentDeviceRotaion() {
-        return DeviceInfo.getDeviceRotation(mContext);
-    }
-
     // When device is shaken the preview is discarded
     @Override
     public void hearShake() {
-        if (mPictureTaken) {
-            resetShutter();
-        }
+        // TODO Change the camera filter on device shaken
     }
 
     @Override

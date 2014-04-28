@@ -2,8 +2,8 @@ package org.sebbas.android.views;
 
 import org.sebbas.android.flickcam.CameraThread;
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.listener.PreviewGestureListener;
-import org.sebbas.android.listener.ScaleListener;
+import org.sebbas.android.interfaces.PreviewGestureListener;
+import org.sebbas.android.interfaces.ScaleListener;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -60,6 +60,7 @@ public class CameraPreviewAdvanced extends TextureView implements
             
             mCameraThread.startCameraPreview();
             mCameraThread.setupFrameCallback();
+            mCameraThread.initializeHelperThreads();
         }
     }
 
