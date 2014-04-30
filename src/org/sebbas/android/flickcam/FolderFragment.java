@@ -7,6 +7,7 @@ import java.util.List;
 import org.sebbas.android.adapter.FolderViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
+import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
 import android.content.Context;
@@ -31,7 +32,7 @@ import android.widget.GridView;
 import android.widget.Toast;
 import android.support.v7.app.ActionBarActivity;
 
-public class FolderFragment extends Fragment {
+public class FolderFragment extends Fragment implements AdapterCallback {
 
     public static final String TAG = "gallery_fragment";
     private static final String SELECT_FOLDERS = "Select folders";
@@ -138,10 +139,10 @@ public class FolderFragment extends Fragment {
         } else {
             mSelectedItemsList.add(itemPosition);
         }
-        mAdapter.notifyDataSetChanged();
+        refreshAdapter();
         
         // Show the number of selected items in the subtitle of the action mode
-        mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mImagePaths.size());
+        mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mAdapter.getCount());
         
         // Remove action mode bar if no image is selected
         if (mSelectedItemsList.size() == 0) {
@@ -217,7 +218,7 @@ public class FolderFragment extends Fragment {
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear();
             mActionMode = null;
-            mAdapter.notifyDataSetChanged();
+            refreshAdapter();
         }
     };
     
@@ -226,7 +227,7 @@ public class FolderFragment extends Fragment {
         int unsuccessfulDelete = 0;
         
         for (int folderPosition : mSelectedItemsList) {
-        	String folderPath = (new File(mImagePaths.get(folderPosition).get(0))).getParentFile().getAbsolutePath();
+            String folderPath = (new File(mImagePaths.get(folderPosition).get(0))).getParentFile().getAbsolutePath();
             File file = new File(folderPath);
             if (file.delete()) {
                 successfulDelete++;
@@ -241,13 +242,9 @@ public class FolderFragment extends Fragment {
         }
         
         // Update filepaths in adapter and notify the adapter to refresh
-        updateAdapter(mHiddenFolders);
+        reloadAdapterContent(mHiddenFolders);
         
         mSelectedItemsList.clear();
-    }
-
-    public void updateAdapter(boolean hiddenFolders) {
-        mAdapter.loadAdapterContent(hiddenFolders);
     }
     
     public ActionMode getActionMode() {
@@ -256,5 +253,15 @@ public class FolderFragment extends Fragment {
     
     public void finishActionMode() {
         mActionMode.finish();
+    }
+
+    @Override
+    public void refreshAdapter() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void reloadAdapterContent(boolean hiddenFolders) {
+        mAdapter.loadAdapterContent(hiddenFolders);
     }
 }

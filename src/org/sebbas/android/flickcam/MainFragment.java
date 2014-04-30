@@ -3,7 +3,7 @@ package org.sebbas.android.flickcam;
 import java.util.ArrayList;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
-import org.sebbas.android.interfaces.CameraFragmentListener;
+import org.sebbas.android.interfaces.AdapterCallback;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -20,7 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-public class MainFragment extends ActionBarActivity implements CameraFragmentListener {
+public class MainFragment extends ActionBarActivity implements AdapterCallback {
 
     private static final String TAG = "main_fragment";
     private static final int SETTINGS_FRAGMENT_NUMBER = 0;
@@ -99,6 +99,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         });
         //mViewPager.setPageTransformer(true, new DepthPageTransformer());
         mViewPager.setAdapter(mPagerAdapter);
+        mViewPager.setCurrentItem(CAMERA_FRAGMENT_NUMBER);
     }
     
     @Override
@@ -125,7 +126,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
             case R.id.hide_hidden:
                 mHideFolders = !mHideFolders;
                 setMenuItemVisibility();
-                mFolderFragment.updateAdapter(mHideFolders);
+                mFolderFragment.reloadAdapterContent(mHideFolders);
                 return true;
                 
             default: 
@@ -151,10 +152,6 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
         return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
     
-    @Override
-    public void refreshAdapter() {
-        mPagerAdapter.notifyDataSetChanged();
-    }
     
     private void restoreSharedPreferences() {
         // Restore preferences
@@ -196,7 +193,7 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
     }
     
     private void setActionItems() {
-    	if (mPosition == CAMERA_FRAGMENT_NUMBER) {
+        if (mPosition == CAMERA_FRAGMENT_NUMBER) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.hide();
@@ -214,5 +211,15 @@ public class MainFragment extends ActionBarActivity implements CameraFragmentLis
             mActionBar.show();
             mActionBar.setTitle(SETTINGS_TITLE);
         }
+    }
+    
+    @Override
+    public void refreshAdapter() {
+        mPagerAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void reloadAdapterContent(boolean hiddenFolders) {
+        // Not needed here, hence not implemented
     }
 }

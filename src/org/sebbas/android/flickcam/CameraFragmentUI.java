@@ -3,7 +3,7 @@ package org.sebbas.android.flickcam;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.interfaces.CameraFragmentListener;
+import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.interfaces.CameraThreadListener;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreview;
@@ -50,7 +50,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private Context mContext;
     private Handler mHandler;
     private int mCurrentPreviewID;
-    private CameraFragmentListener mCameraFragmentListener;
+    private AdapterCallback mCameraFragmentListener;
     private CameraThread mCameraThread;
     private boolean mCameraWasSwapped;
 
@@ -137,7 +137,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private void initializeInstanceVariables() {
         mContext = this.getActivity();
         
-        mCameraFragmentListener = (CameraFragmentListener) mContext;
+        mCameraFragmentListener = (AdapterCallback) mContext;
         mFlashEnabled = false;
         mPreviewIsRunning = new AtomicBoolean(false);
         

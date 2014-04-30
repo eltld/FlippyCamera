@@ -117,7 +117,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         previewImage.setImageDrawable(colorDrawable);
     }
     
-    public void loadAdapterContent(final boolean alsoHiddenImages) {
+    public void loadAdapterContent(boolean alsoHiddenImages) {
         ImagePathLoader loader = new ImagePathLoader();
         loader.execute(alsoHiddenImages);
     }

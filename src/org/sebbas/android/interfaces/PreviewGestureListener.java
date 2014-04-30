@@ -1,10 +1,7 @@
 package org.sebbas.android.interfaces;
 
 import org.sebbas.android.flickcam.CameraThread;
-import org.sebbas.android.views.CameraPreviewAdvanced;
-import org.sebbas.android.views.CameraPreview;
 
-import android.hardware.Camera.Parameters;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.MotionEvent;
 
@@ -12,26 +9,16 @@ public class PreviewGestureListener implements OnGestureListener {
     
     private static final int FLING_EFFECT_SENSITIVITY_Y_POS = 3000;
     private static final int FLING_EFFECT_SENSITIVITY_Y_NEG = -3000;
-    private static final int FLING_EFFECT_SENSITIVITY_X = 00;
     
     private CameraThread mCameraThread;
-    private CameraPreview mCameraPreview;
-    private CameraPreviewAdvanced mCameraPreviewAdvanced;
     private int mCurrentEffectNumber = 0;
     
-    public PreviewGestureListener(CameraPreview cameraPreview, CameraThread cameraThread) {
-       mCameraPreview = cameraPreview;
-       mCameraThread = cameraThread;
-    }
-        
-    public PreviewGestureListener(CameraPreviewAdvanced cameraPreviewAdvanced, CameraThread cameraThread) {
-        mCameraPreviewAdvanced = cameraPreviewAdvanced;
+    public PreviewGestureListener(CameraThread cameraThread) {
         mCameraThread = cameraThread;
     }
 
     @Override
     public boolean onDown(MotionEvent e) {
-        // TODO Auto-generated method stub
         return false;
     }
 
@@ -56,26 +43,19 @@ public class PreviewGestureListener implements OnGestureListener {
 
     @Override
     public void onLongPress(MotionEvent e) {
-        // TODO Auto-generated method stub
     }
 
     @Override
-    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-            float distanceY) {
-        // TODO Auto-generated method stub
+    public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
         return false;
     }
 
     @Override
     public void onShowPress(MotionEvent e) {
-        // TODO Auto-generated method stub
-        
     }
 
     @Override
     public boolean onSingleTapUp(MotionEvent e) {
-        // TODO Auto-generated method stub
         return false;
     }
-
 }

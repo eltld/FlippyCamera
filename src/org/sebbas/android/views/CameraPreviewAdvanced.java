@@ -6,7 +6,6 @@ import org.sebbas.android.interfaces.PreviewGestureListener;
 import org.sebbas.android.interfaces.ScaleListener;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
@@ -47,7 +46,7 @@ public class CameraPreviewAdvanced extends TextureView implements
         mScreenHeight = DeviceInfo.getRealScreenHeight(context);
         mCameraThread = cameraThread;
         mScaleDetector = new ScaleGestureDetector(context, new ScaleListener(this, cameraThread));
-        mGestureDetector = new GestureDetectorCompat(context, new PreviewGestureListener(this, cameraThread));
+        mGestureDetector = new GestureDetectorCompat(context, new PreviewGestureListener(cameraThread));
         setSurfaceTextureListener(this);
     }
 
