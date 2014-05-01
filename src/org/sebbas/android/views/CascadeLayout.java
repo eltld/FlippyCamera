@@ -15,7 +15,7 @@ public class CascadeLayout extends ViewGroup {
 
     public CascadeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        this.setBackgroundResource(R.drawable.square_image_selector);
+        //this.setBackgroundResource(R.drawable.square_image_selector);
 
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CascadeLayout);
 

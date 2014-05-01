@@ -17,6 +17,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnFocusChangeListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
@@ -64,6 +65,8 @@ public class FolderViewImageAdapter extends BaseAdapter {
         } else {
             folderView = convertView;
         }
+        folderView.setBackgroundResource(R.drawable.square_image_selector);
+        
 
         // Get the image URL for the current position.
         List<String> imagePaths = getItem(position);
@@ -75,14 +78,13 @@ public class FolderViewImageAdapter extends BaseAdapter {
             folderView.setBackgroundResource(R.drawable.image_border);
         } else {
             folderView.setSelected(false);
-            folderView.setBackgroundColor(0);
         }
-        
+
         for (int i = 0; i < 4; i++) {
             if (i < imagePaths.size()) {
                 loadImageIntoView(i, folderView, imagePaths.get(imagePaths.size() - 1 - i));
             } else {
-                setImageViewBackground(i, folderView);
+                hideImageView(i, folderView);
             }
         }
         
@@ -110,11 +112,10 @@ public class FolderViewImageAdapter extends BaseAdapter {
         
     }
     
-    private void setImageViewBackground(int viewPosition, View parentView) {
+    private void hideImageView(int viewPosition, View parentView) {
         // Set the background color of the image view to the same color as the app background -> makes it invisible 
         ImageView previewImage = (ImageView)parentView.findViewById(previewIds[viewPosition]);
-        ColorDrawable colorDrawable = new ColorDrawable(R.color.app_background);
-        previewImage.setImageDrawable(colorDrawable);
+        previewImage.setVisibility(View.GONE);
     }
     
     public void loadAdapterContent(boolean alsoHiddenImages) {
