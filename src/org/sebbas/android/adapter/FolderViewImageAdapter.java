@@ -29,11 +29,13 @@ public class FolderViewImageAdapter extends BaseAdapter {
     private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
     private Utils mUtils;
     private MainFragment mMainFragment;
+    private FolderFragment mFolderFragment;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
  
     public FolderViewImageAdapter(FolderFragment folderFragment, boolean alsoHiddenImages) {
         mContext = folderFragment.getActivity();
         mMainFragment = (MainFragment) folderFragment.getActivity();
+        mFolderFragment = folderFragment;
         mUtils = new Utils(mContext);
         
         // Start loading the image paths
@@ -55,6 +57,10 @@ public class FolderViewImageAdapter extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
+    
+    public ArrayList<List<String>> getImagePaths() {
+        return mImagePaths;
+    }
  
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -72,7 +78,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         List<String> imagePaths = getItem(position);
         
         // Set a border for the view if it is in selected state
-        boolean isSelected = FolderFragment.getSelectedItemsList().contains(position);
+        boolean isSelected = mFolderFragment.getSelectedItemsList().contains(position);
         if (isSelected) {
             folderView.setSelected(true);
             folderView.setBackgroundResource(R.drawable.image_border);

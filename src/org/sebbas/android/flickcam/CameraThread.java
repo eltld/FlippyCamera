@@ -490,6 +490,9 @@ public class CameraThread extends Thread {
             @Override
             public void run() {
                 mCurrentEffect = mSupportedColorEffects.get(location);
+                
+                // Set camera parameters twice because sometimes changing the camera effect makes other parameters not work
+                setCameraParameters(mFlashEnabled, mFocusList);
                 setCameraParameters(mFlashEnabled, mFocusList);
             }
             
@@ -662,5 +665,9 @@ public class CameraThread extends Thread {
     
     public int getZoomValue() {
         return mZoomValue;
+    }
+    
+    public PictureWriterThread getPictureWriterThread() {
+        return getPictureWriterThread();
     }
 }

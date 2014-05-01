@@ -107,8 +107,7 @@ public class PictureWriterThread extends Thread {
     
     private File getAlbumStorageDir() {
         // Get the directory for the user's public pictures directory.
-        File file = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), ALBUM_NAME);
+        File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), ALBUM_NAME);
         if (!file.mkdirs()) {
             Log.e(TAG, "Directory not created");
         }

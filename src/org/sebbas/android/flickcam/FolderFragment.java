@@ -1,6 +1,5 @@
 package org.sebbas.android.flickcam;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +35,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
 
     public static final String TAG = "gallery_fragment";
     private static final String SELECT_FOLDERS = "Select folders";
-    private static volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
+    private volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
     
     private Utils mUtils;
     private FolderViewImageAdapter mAdapter;
@@ -127,7 +126,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         
     }
     
-    public static ArrayList<Integer> getSelectedItemsList() {
+    public ArrayList<Integer> getSelectedItemsList() {
         return mSelectedItemsList;
     }
     
@@ -205,7 +204,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard_image:
-                    deleteSelectedFolders();
+                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, mSelectedItemsList, mAdapter, 0);
+                    deleter.execute();
+                    
+                    // Update filepaths in adapter and notify the adapter to refresh
+                    reloadAdapterContent(mHiddenFolders);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
@@ -221,31 +224,6 @@ public class FolderFragment extends Fragment implements AdapterCallback {
             refreshAdapter();
         }
     };
-    
-    private void deleteSelectedFolders() {
-        int successfulDelete = 0;
-        int unsuccessfulDelete = 0;
-        
-        for (int folderPosition : mSelectedItemsList) {
-            String folderPath = (new File(mImagePaths.get(folderPosition).get(0))).getParentFile().getAbsolutePath();
-            File file = new File(folderPath);
-            if (file.delete()) {
-                successfulDelete++;
-            } else {
-                unsuccessfulDelete++;
-            }
-        }
-        
-        Toast.makeText(mContext, "Deleted " + successfulDelete + " folders successfully", Toast.LENGTH_SHORT).show();
-        if (unsuccessfulDelete != 0) {
-            Toast.makeText(mContext, "Could not delete " + unsuccessfulDelete + " folders", Toast.LENGTH_SHORT).show();
-        }
-        
-        // Update filepaths in adapter and notify the adapter to refresh
-        reloadAdapterContent(mHiddenFolders);
-        
-        mSelectedItemsList.clear();
-    }
     
     public ActionMode getActionMode() {
         return mActionMode;

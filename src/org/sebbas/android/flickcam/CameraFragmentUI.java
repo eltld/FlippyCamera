@@ -50,7 +50,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private Context mContext;
     private Handler mHandler;
     private int mCurrentPreviewID;
-    private AdapterCallback mCameraFragmentListener;
+    private AdapterCallback mAdapterCallback;
     private CameraThread mCameraThread;
     private boolean mCameraWasSwapped;
 
@@ -137,7 +137,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
     private void initializeInstanceVariables() {
         mContext = this.getActivity();
         
-        mCameraFragmentListener = (AdapterCallback) mContext;
+        mAdapterCallback = (AdapterCallback) mContext;
         mFlashEnabled = false;
         mPreviewIsRunning = new AtomicBoolean(false);
         
@@ -475,7 +475,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         
         @Override
         public void run() {
-            mCameraFragmentListener.refreshAdapter();
+            mAdapterCallback.refreshAdapter();
         }
     }
     
