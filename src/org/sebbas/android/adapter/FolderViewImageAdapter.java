@@ -101,6 +101,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
     
     private void loadImageIntoView(int viewPosition, View parentView, String imagePath) {
         ImageView previewImage = (ImageView)parentView.findViewById(previewIds[viewPosition]);
+        previewImage.setVisibility(View.VISIBLE);
         Picasso.with(mContext)
             .load(new File(imagePath)) 
             .noFade()
