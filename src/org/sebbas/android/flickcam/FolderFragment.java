@@ -1,7 +1,6 @@
 package org.sebbas.android.flickcam;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
@@ -14,6 +13,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.util.TypedValue;
@@ -28,7 +28,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.widget.Toast;
 import android.support.v7.app.ActionBarActivity;
 
 public class FolderFragment extends Fragment implements AdapterCallback {
@@ -43,8 +42,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     private int mColumnWidth;
     
     private Context mContext;
+    private MainFragment mMainFragment;
     private FrameLayout mFrameLayout;
-    private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
     private boolean mHiddenFolders;
@@ -64,9 +63,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
+        mMainFragment = (MainFragment) this.getActivity();
         mHiddenFolders = this.getArguments().getBoolean("hiddenFolders");
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     
         mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_folders, container, false);
@@ -74,11 +75,15 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
         
+        // Turn off the "up" back navigation option
+        mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
+        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        
         setupGridView();
         return mFrameLayout;
     }
     
-    public void setupGridView() {
+    private void setupGridView() {
         initializeGridLayout();
         setGridViewAdapter(mHiddenFolders);
         setGridViewClickListener();
@@ -95,7 +100,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
             
                 // Only enlarge the image if we are not in action mode
                 if (mActionMode == null) {
-                    // TODO Enter gallery mode
+                	FragmentTransaction transaction = mMainFragment.getSupportFragmentManager().beginTransaction();
+                	transaction.replace(R.id.root_frame, GalleryFragment.newInstance((ArrayList<String>) mAdapter.getImagePaths().get(position)));
+                	transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                	transaction.addToBackStack(null);
+                	transaction.commit();
                 } else {
                     // Keep track of which items are selected. Then notify the adapter
                     manageSelectedItemsList(position); 
@@ -114,7 +123,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                 }
 
                 // Start the CAB using the ActionMode.Callback defined above
-                mActionMode = ((ActionBarActivity) mContext).startSupportActionMode(mActionModeCallback);
+                mActionMode = mMainFragment.startSupportActionMode(mActionModeCallback);
                 
                 // Keep track of which items are selected. Then notify the adapter
                 manageSelectedItemsList(position); 
@@ -126,9 +135,6 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         
     }
     
-    public ArrayList<Integer> getSelectedItemsList() {
-        return mSelectedItemsList;
-    }
     
     private void manageSelectedItemsList(int itemPosition) {
         // If the item was already added then the item is in selected state. We remove the item since the item is deselected now
@@ -149,9 +155,9 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         }
     }
 
-    public void setGridViewAdapter(boolean hiddenFolders) {
+    private void setGridViewAdapter(boolean hiddenFolders) {
         // Grid View adapter
-        mAdapter = new FolderViewImageAdapter(this, hiddenFolders);
+        if (mAdapter == null) mAdapter = new FolderViewImageAdapter(this, hiddenFolders);
  
         // Setting grid view adapter
         mGridView.setAdapter(mAdapter);
@@ -162,9 +168,9 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         Resources r = getResources();
         final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
  
-        mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS + 1) * padding)) / AppConstant.NUM_OF_COLUMNS);
+        mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_FOLDERVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
  
-        mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS);
+        mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
         mGridView.setColumnWidth(mColumnWidth);
         mGridView.setStretchMode(GridView.NO_STRETCH);
         mGridView.setHorizontalSpacing((int) padding);
@@ -181,7 +187,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
     
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
-
+    
         // Called when the action mode is created; startActionMode() was called
         @Override
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
@@ -204,10 +210,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard_image:
-                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, mSelectedItemsList, mAdapter, 0);
+                	MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 0);
                     deleter.execute();
-                    
-                    // Update filepaths in adapter and notify the adapter to refresh
                     reloadAdapterContent(mHiddenFolders);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
@@ -221,12 +225,17 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear();
             mActionMode = null;
+            
             refreshAdapter();
         }
     };
     
     public ActionMode getActionMode() {
         return mActionMode;
+    }
+    
+    public ArrayList<Integer> getSelectedItemsList() {
+    	return mSelectedItemsList;
     }
     
     public void finishActionMode() {

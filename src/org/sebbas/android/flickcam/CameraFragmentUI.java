@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.AdapterCallback;
-import org.sebbas.android.interfaces.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraUICommunicator;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreview;
 import org.sebbas.android.views.DrawingView;
@@ -37,7 +37,7 @@ import android.widget.ImageButton;
 import android.widget.Toast;
 import android.widget.ViewFlipper;
 
-public class CameraFragmentUI extends Fragment implements CameraThreadListener, ShakeDetector.Listener {
+public class CameraFragmentUI extends Fragment implements CameraUICommunicator, ShakeDetector.Listener {
 
     // Private constants
     protected static final int GALLERY_FRAGMENT_NUMBER = 2;
@@ -409,7 +409,7 @@ public class CameraFragmentUI extends Fragment implements CameraThreadListener, 
         return mShutterHoldListener;
     }
 
-    // Overridden methods from CameraThreadListener
+    // Overridden methods from CameraUICommunicator interface
     @Override
     public synchronized void alertCameraThread(final String message) {
         mAlertCameraThreadError = new AlertCameraThreadError(message);

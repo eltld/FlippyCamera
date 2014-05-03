@@ -2,7 +2,7 @@ package org.sebbas.android.flickcam;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.sebbas.android.interfaces.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraUICommunicator;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
@@ -28,10 +28,10 @@ public class PictureTakerThread extends Thread {
     
     private PictureWriterThread mPictureWriterThread;
     private CameraThread mCameraThread;
-    private CameraThreadListener mCameraThreadListener;
+    private CameraUICommunicator mCameraThreadListener;
     private static AtomicBoolean mCameraIsBusy;
     
-    public PictureTakerThread(Camera camera, PictureWriterThread pictureWriterThread, CameraThreadListener cameraThreadListener, CameraThread cameraThread) {
+    public PictureTakerThread(Camera camera, PictureWriterThread pictureWriterThread, CameraUICommunicator cameraThreadListener, CameraThread cameraThread) {
         mCamera = camera;
         mFrameByteSize = getFrameByteSize();
         mPictureWriterThread = pictureWriterThread;

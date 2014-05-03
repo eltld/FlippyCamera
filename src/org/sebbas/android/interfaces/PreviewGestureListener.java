@@ -26,7 +26,7 @@ public class PreviewGestureListener implements OnGestureListener {
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
             float velocityY) {
         System.out.println("velocity is " + velocityY);
-        if (mCameraThread.getZoomValue() == 0) {
+        if (mCameraThread.getZoomValue() == 0) { // Switching effect on zoom not supported on some devices
             if (velocityY < FLING_EFFECT_SENSITIVITY_Y_NEG) {
                 mCurrentEffectNumber = (mCurrentEffectNumber+1) % mCameraThread.getNumberOfColorEffects();
             } else if (velocityY > FLING_EFFECT_SENSITIVITY_Y_POS) {

@@ -2,7 +2,7 @@ package org.sebbas.android.interfaces;
 
 import android.graphics.Rect;
 
-public interface CameraThreadListener {
+public interface CameraUICommunicator {
 
 	public void alertCameraThread(String message);
 	public void cameraSetupComplete(int cameraID);

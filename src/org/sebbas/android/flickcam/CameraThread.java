@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.sebbas.android.helper.DeviceInfo;
-import org.sebbas.android.interfaces.CameraThreadListener;
+import org.sebbas.android.interfaces.CameraUICommunicator;
 import org.sebbas.android.views.CameraPreview;
 
 import android.annotation.SuppressLint;
@@ -18,6 +18,7 @@ import android.hardware.Camera;
 import android.hardware.Camera.ErrorCallback;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PreviewCallback;
+import android.hardware.Camera.Size;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
@@ -39,7 +40,7 @@ public class CameraThread extends Thread {
     private Context mContext;
     private Handler mHandler;
     private Camera mCamera;
-    private CameraThreadListener mCameraThreadListener;
+    private CameraUICommunicator mCameraUICommunicator;
     protected int mNumberOfCamerasSupported;
     protected int mCurrentCameraID;
     private boolean mVideoStabilizationSupported;
@@ -66,7 +67,7 @@ public class CameraThread extends Thread {
     
     public CameraThread(CameraFragmentUI cameraFragment, Context context) {
         mContext = context;
-        mCameraThreadListener = (CameraThreadListener) cameraFragment;
+        mCameraUICommunicator = (CameraUICommunicator) cameraFragment;
         mNumberOfCamerasSupported = Camera.getNumberOfCameras();
     }
     
@@ -139,21 +140,21 @@ public class CameraThread extends Thread {
                 try {
                     if (mNumberOfCamerasSupported == 0) {
                         Log.e(TAG, NO_CAMERAS_FOUND);
-                        mCameraThreadListener.alertCameraThread(NO_CAMERAS_FOUND);
+                        mCameraUICommunicator.alertCameraThread(NO_CAMERAS_FOUND);
                     } else {
                         mCamera = getCameraInstance(cameraID); // Setup camera object
                         
                         // If camera not null the set the camera id
                         if (mCamera == null) {
                             Log.e(TAG, CANNOT_CONNECT_TO_CAMERA);
-                            mCameraThreadListener.alertCameraThread(CANNOT_CONNECT_TO_CAMERA);
+                            mCameraUICommunicator.alertCameraThread(CANNOT_CONNECT_TO_CAMERA);
                         } else {
                             mCurrentCameraID = cameraID;
                         }
                     }
                 } catch (Throwable t) {
                     Log.e(TAG, COULD_NOT_INITIALIZE_CAMERA, t);
-                    mCameraThreadListener.alertCameraThread(COULD_NOT_INITIALIZE_CAMERA);
+                    mCameraUICommunicator.alertCameraThread(COULD_NOT_INITIALIZE_CAMERA);
                 }
             }
             
@@ -227,9 +228,9 @@ public class CameraThread extends Thread {
                         parameters.setZoom(mZoomValue);
                     }
                     // TODO Set the picture size according to device capabilities
-                    parameters.setPictureSize(DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
+                    parameters.setPictureSize(1280, 720);//DeviceInfo.getRealScreenHeight(mContext), DeviceInfo.getRealScreenWidth(mContext));
                     
-                    /*String result = "[";
+                    String result = "[";
                     List<Size> sizes = parameters.getSupportedPictureSizes();
                     for (Size s : sizes) {
                         result += " (" + s.width + " / " + s.height + ") ";
@@ -237,7 +238,7 @@ public class CameraThread extends Thread {
                     result += "]";
                     
                     System.out.println(result);
-                    */
+                    
                     // This makes the pictures stay full screen in gallery
                     if (mCurrentCameraID == CAMERA_ID_BACK) {
                         parameters.setRotation(90); 
@@ -255,10 +256,10 @@ public class CameraThread extends Thread {
                         parameters.setColorEffect(mCurrentEffect);
                     }
                     
-                    if (mFocusList != null) {
+                    /*if (mFocusList != null) {
                         parameters.setFocusAreas(focusList);
                         parameters.setMeteringAreas(focusList);
-                    }
+                    }*/
                     //parameters.setPreviewFormat(ImageFormat.NV21);
                     /*List<Integer> list = parameters.getSupportedPreviewFormats();
                     for (int i = 0; i < list.size(); i++) {
@@ -266,6 +267,7 @@ public class CameraThread extends Thread {
                     }*/
                     
                     // Finally, add the parameters to the camera
+                    parameters.flatten();
                     mCamera.setParameters(parameters);
                     
                     mFlashEnabled = flashEnabled; // Keep track of the flash settings
@@ -283,10 +285,10 @@ public class CameraThread extends Thread {
             @Override
             public void run() {
                 // Initialize the writer thread that writes picture data to the storage
-                mPictureWriterThread = new PictureWriterThread(mCameraThreadListener, mPreviewSize.width, mPreviewSize.height);
+                mPictureWriterThread = new PictureWriterThread(mContext, mCameraUICommunicator);
                 mPictureWriterThread.start();
                 
-                mPictureTakerThread = new PictureTakerThread(mCamera, mPictureWriterThread, mCameraThreadListener, CameraThread.this);
+                mPictureTakerThread = new PictureTakerThread(mCamera, mPictureWriterThread, mCameraUICommunicator, CameraThread.this);
                 mPictureTakerThread.start();
             }
             
@@ -301,7 +303,7 @@ public class CameraThread extends Thread {
             public void run() {
                 if (mCamera != null) {
                     setCameraDisplayOrientation(mContext, mCurrentCameraID, mCamera);
-                    mCameraThreadListener.cameraSetupComplete(mCurrentCameraID);
+                    mCameraUICommunicator.cameraSetupComplete(mCurrentCameraID);
                     Log.d(TAG, "setCameraDisplayOrientation finished");
                 }
                 
@@ -479,7 +481,7 @@ public class CameraThread extends Thread {
                 mFocusList.add(focusArea);
                 
                 setCameraParameters(mFlashEnabled, mFocusList);
-                mCameraThreadListener.setTouchFocusView(touchRect); // This is disabled 
+                mCameraUICommunicator.setTouchFocusView(touchRect); // This is disabled 
             }
         });
     }
@@ -665,6 +667,18 @@ public class CameraThread extends Thread {
     
     public int getZoomValue() {
         return mZoomValue;
+    }
+    
+    public int getMaxZoomValue() {
+    	return mZoomMax;
+    }
+    
+    public ArrayList<Camera.Area> getFocusList() {
+    	return mFocusList;
+    }
+    
+    public boolean getFlashEnabled() {
+    	return mFlashEnabled;
     }
     
     public PictureWriterThread getPictureWriterThread() {

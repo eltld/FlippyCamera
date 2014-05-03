@@ -58,6 +58,7 @@ public class GalleryFragment extends Fragment {
     private int mColumnWidth;
     
     private Context mContext;
+    private MainFragment mMainFragment;
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
     private ProgressBar mLoadingImageSpinner;
@@ -70,9 +71,14 @@ public class GalleryFragment extends Fragment {
     private ActionMode mActionMode;
     
     // Static factory method that returns a new fragment instance to the client
-    public static GalleryFragment newInstance() {
-        GalleryFragment gf = new GalleryFragment();
-        return gf;
+    public static GalleryFragment newInstance(ArrayList<String> imagePaths) {
+        GalleryFragment galleryFragment = new GalleryFragment();
+        
+        Bundle args = new Bundle();
+        args.putStringArrayList("imagePaths", imagePaths);
+        galleryFragment.setArguments(args);
+        
+        return galleryFragment;
     }
     
     @Override
@@ -80,8 +86,11 @@ public class GalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
+        mMainFragment = (MainFragment) this.getActivity();
+        mImagePaths = this.getArguments().getStringArrayList("imagePaths");
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     
         mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_grid_view, container, false);
@@ -90,6 +99,10 @@ public class GalleryFragment extends Fragment {
         mLoadingImageSpinner = (ProgressBar) mFrameLayout.findViewById(R.id.loading_image_spinner);
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
+        
+        // Turn on the "up" back navigation option
+        mMainFragment.getSupportActionBar().setHomeButtonEnabled(true);
+        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
         setupGridView();
         return mFrameLayout;
@@ -139,7 +152,7 @@ public class GalleryFragment extends Fragment {
                 }
 
                 // Start the CAB using the ActionMode.Callback defined above
-                mActionMode = ((ActionBarActivity) mContext).startSupportActionMode(mActionModeCallback);
+                mActionMode = mMainFragment.startSupportActionMode(mActionModeCallback);
                 
                 // Keep track of which items are selected. Then notify the adapter
                 manageSelectedItemsList(position); 
@@ -174,9 +187,6 @@ public class GalleryFragment extends Fragment {
     }
 
     private void setGridViewAdapter() {
-        // loading all image paths from SD card
-        mImagePaths = mUtils.getFilePaths();
- 
         // Gridview adapter
         mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
  
@@ -189,9 +199,9 @@ public class GalleryFragment extends Fragment {
         Resources r = getResources();
         final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
  
-        mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS + 1) * padding)) / AppConstant.NUM_OF_COLUMNS);
+        mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_GALLERYVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_GALLERYVIEW);
  
-        mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS);
+        mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS_GALLERYVIEW);
         mGridView.setColumnWidth(mColumnWidth);
         mGridView.setStretchMode(GridView.NO_STRETCH);
         mGridView.setHorizontalSpacing((int) padding);

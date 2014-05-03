@@ -17,7 +17,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     private int successfulDeleteImage = 0;
     private int unsuccessfulDeleteImage = 0;
     private Context mContext;
-    private ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
+    private ArrayList<Integer> mSelectedItemsList;
     private FolderViewImageAdapter mAdapter;
     private int mDeleteModeId; // 0 -> delete folders; 1 -> delete image only
     
@@ -50,6 +50,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     }
 
     private void deleteSelectedFolders() {
+    	System.out.println("List is " + mSelectedItemsList);
         for (int folderPosition : mSelectedItemsList) {
             File folderToDelete = new File(mAdapter.getImagePaths().get(folderPosition).get(0)).getParentFile();
             List<String> imagePathsFromFolder = mAdapter.getImagePaths().get(folderPosition);

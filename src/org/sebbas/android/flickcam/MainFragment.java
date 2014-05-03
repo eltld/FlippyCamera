@@ -40,6 +40,7 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     private SettingsFragment mSettingsFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
+    private GalleryRootFragment mGalleryRootFragment;
     
     // Overflow items
     private MenuItem showHidden;
@@ -64,15 +65,17 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
         mSettingsFragment = SettingsFragment.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
         mFolderFragment = FolderFragment.newInstance(mHideFolders);
+        mGalleryRootFragment = GalleryRootFragment.newInstance(mHideFolders);
         
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(mSettingsFragment);
         fragmentList.add(mCameraFragment);
-        fragmentList.add(mFolderFragment);
+        //fragmentList.add(mFolderFragment);
+        fragmentList.add(mGalleryRootFragment);
         
         setContentView(R.layout.viewpager_layout);
         
-        mPagerAdapter = new MainPagerAdapter(mFragmentManager, fragmentList);
+        mPagerAdapter = new MainPagerAdapter(this, mFragmentManager, fragmentList);
         mViewPager = (ViewPager)super.findViewById(R.id.viewpager);
         
         // This fixes the overlapping fragments inside the viewpager
@@ -147,11 +150,17 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
         super.onStop();
         saveSharePreferences();
     }
+    
+    @Override
+    public boolean onSupportNavigateUp() {
+        //This method is called when the up button is pressed. Just the pop back stack.
+        getSupportFragmentManager().popBackStack();
+        return true;
+    }
 
     private int getPageMargin() {
-        return (int)TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
+        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
-    
     
     private void restoreSharedPreferences() {
         // Restore preferences
@@ -179,18 +188,6 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
         hideHidden.setVisible(mHideFolders);
     }
     
-    public void setSpinnerIconInProgress(boolean refreshing) {
-        if (spinnerIcon == null) {
-            mIsRefreshing = refreshing;
-        } else {
-            if (refreshing) {
-                MenuItemCompat.setActionView(spinnerIcon, R.layout.actionbar_indeterminate_progress);
-            } else {
-                MenuItemCompat.setActionView(spinnerIcon, null);
-            }
-        }
-        
-    }
     
     private void setActionItems() {
         if (mPosition == CAMERA_FRAGMENT_NUMBER) {
@@ -213,6 +210,30 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
         }
     }
     
+    public void setSpinnerIconInProgress(boolean refreshing) {
+        if (spinnerIcon == null) {
+            mIsRefreshing = refreshing;
+        } else {
+            if (refreshing) {
+                MenuItemCompat.setActionView(spinnerIcon, R.layout.actionbar_indeterminate_progress);
+            } else {
+                MenuItemCompat.setActionView(spinnerIcon, null);
+            }
+        }
+    }
+    
+    // Allows other threads to request the folderfragment to reload
+    public void reloadFolderGallery() {
+        this.runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                mFolderFragment.reloadAdapterContent(mHideFolders);
+            }
+            
+        });
+    }
+    
     @Override
     public void refreshAdapter() {
         mPagerAdapter.notifyDataSetChanged();
@@ -221,5 +242,9 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     @Override
     public void reloadAdapterContent(boolean hiddenFolders) {
         // Not needed here, hence not implemented
+    }
+    
+    public MainPagerAdapter getAdapter() {
+    	return mPagerAdapter;
     }
 }
