@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.flickcam.FolderFragment;
-import org.sebbas.android.flickcam.MainFragment;
+import org.sebbas.android.flickcam.MainFragmentActivity;
 import org.sebbas.android.flickcam.R;
 import org.sebbas.android.helper.Utils;
 
@@ -26,13 +26,13 @@ public class FolderViewImageAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
     private Utils mUtils;
-    private MainFragment mMainFragment;
+    private MainFragmentActivity mMainFragment;
     private FolderFragment mFolderFragment;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
  
     public FolderViewImageAdapter(FolderFragment folderFragment, boolean alsoHiddenImages) {
         mContext = folderFragment.getActivity();
-        mMainFragment = (MainFragment) folderFragment.getActivity();
+        mMainFragment = (MainFragmentActivity) folderFragment.getActivity();
         mFolderFragment = folderFragment;
         mUtils = new Utils(mContext);
         
@@ -70,7 +70,6 @@ public class FolderViewImageAdapter extends BaseAdapter {
             folderView = convertView;
         }
         folderView.setBackgroundResource(R.drawable.square_image_selector);
-        
 
         // Get the image URL for the current position.
         List<String> imagePaths = getItem(position);
@@ -86,7 +85,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
 
         for (int i = 0; i < 4; i++) {
             if (i < imagePaths.size()) {
-                loadImageIntoView(i, folderView, imagePaths.get(imagePaths.size() - 1 - i));
+                loadImageIntoView(i, folderView, imagePaths.get(i));
             } else {
                 hideImageView(i, folderView);
             }
@@ -133,7 +132,6 @@ public class FolderViewImageAdapter extends BaseAdapter {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            
             mMainFragment.setSpinnerIconInProgress(true);
         }
 

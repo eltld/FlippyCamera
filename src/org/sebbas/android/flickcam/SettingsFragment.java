@@ -5,6 +5,7 @@ import org.sebbas.android.helper.Utils;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
 import android.content.Context;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -23,6 +24,7 @@ public class SettingsFragment extends Fragment {
     private GridView mGridView;
     
     private Context mContext;
+    private MainFragmentActivity mMainFragment;
     private FrameLayout mFrameLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     
@@ -36,6 +38,7 @@ public class SettingsFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
+        mMainFragment = (MainFragmentActivity) this.getActivity();
     }
 
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,6 +47,18 @@ public class SettingsFragment extends Fragment {
         mGridView = (GridView) mFrameLayout.findViewById(R.id.grid_view);
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
+        
+        // Turn on the "up" back navigation option
+        mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
+        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        
+        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
+            @Override
+            public void onInsetsChanged(Rect insets) {
+                // Update the padding
+                mGridView.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            }
+        });
         
         return mFrameLayout;
     }

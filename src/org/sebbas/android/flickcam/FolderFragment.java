@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
@@ -28,7 +29,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.FrameLayout;
 import android.widget.GridView;
-import android.support.v7.app.ActionBarActivity;
 
 public class FolderFragment extends Fragment implements AdapterCallback {
 
@@ -42,11 +42,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     private int mColumnWidth;
     
     private Context mContext;
-    private MainFragment mMainFragment;
+    private MainFragmentActivity mMainFragment;
     private FrameLayout mFrameLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
-    private boolean mHiddenFolders;
+    private boolean mHiddenFoldersMode;
     
     // Static factory method that returns a new fragment instance to the client
     public static FolderFragment newInstance(boolean hiddenFolders) {
@@ -63,8 +63,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
-        mMainFragment = (MainFragment) this.getActivity();
-        mHiddenFolders = this.getArguments().getBoolean("hiddenFolders");
+        mMainFragment = (MainFragmentActivity) this.getActivity();
+        mHiddenFoldersMode = this.getArguments().getBoolean("hiddenFolders");
     }
 
     @Override
@@ -74,24 +74,27 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         mGridView = (GridView) mFrameLayout.findViewById(R.id.folder_grid_view);
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
-        
-        // Turn off the "up" back navigation option
-        mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
-        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        
         setupGridView();
         return mFrameLayout;
     }
     
-    private void setupGridView() {
+    @Override
+    public void onPause() {
+        super.onPause();
+        // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
+        mMainFragment.getSupportFragmentManager().popBackStack();
+        mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
+        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+    }
+
+	private void setupGridView() {
         initializeGridLayout();
-        setGridViewAdapter(mHiddenFolders);
+        setGridViewAdapter(mHiddenFoldersMode);
         setGridViewClickListener();
     }
 
     private void setGridViewClickListener() {
     
-        
         mGridView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
@@ -100,11 +103,13 @@ public class FolderFragment extends Fragment implements AdapterCallback {
             
                 // Only enlarge the image if we are not in action mode
                 if (mActionMode == null) {
-                	FragmentTransaction transaction = mMainFragment.getSupportFragmentManager().beginTransaction();
-                	transaction.replace(R.id.root_frame, GalleryFragment.newInstance((ArrayList<String>) mAdapter.getImagePaths().get(position)));
-                	transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                	transaction.addToBackStack(null);
-                	transaction.commit();
+                	FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
+                    FragmentTransaction transaction = manager.beginTransaction();
+                    Fragment galleryFragment = GalleryFragment.newInstance((ArrayList<String>) mAdapter.getImagePaths().get(position));
+                    transaction.replace(R.id.folder_layout, galleryFragment);
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.addToBackStack("gallery_fragment");
+                    transaction.commit();
                 } else {
                     // Keep track of which items are selected. Then notify the adapter
                     manageSelectedItemsList(position); 
@@ -135,9 +140,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         
     }
     
-    
     private void manageSelectedItemsList(int itemPosition) {
-        // If the item was already added then the item is in selected state. We remove the item since the item is deselected now
+        // If the item was already added then the item is in selected state. We remove the item since the item is not selected now
         if (mSelectedItemsList.contains(itemPosition)) {
             mSelectedItemsList.remove(Integer.valueOf(itemPosition));
         // else we add it to our list since it just got selected
@@ -210,9 +214,9 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard_image:
-                	MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 0);
+                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 0);
                     deleter.execute();
-                    reloadAdapterContent(mHiddenFolders);
+                    reloadAdapterContent(mHiddenFoldersMode);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
@@ -225,8 +229,6 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear();
             mActionMode = null;
-            
-            refreshAdapter();
         }
     };
     
@@ -235,7 +237,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
     
     public ArrayList<Integer> getSelectedItemsList() {
-    	return mSelectedItemsList;
+        return mSelectedItemsList;
+    }
+    
+    public boolean getHiddenFoldersMode() {
+        return mHiddenFoldersMode;
     }
     
     public void finishActionMode() {
@@ -251,4 +257,10 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     public void reloadAdapterContent(boolean hiddenFolders) {
         mAdapter.loadAdapterContent(hiddenFolders);
     }
+
+	@Override
+	public void updateAdapterInstanceVariables() {
+		// TODO Auto-generated method stub
+		
+	}
 }

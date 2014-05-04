@@ -5,27 +5,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
+import org.sebbas.android.adapter.GridViewImageAdapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
 
-    private int successfulDeleteFolder = 0;
-    private int unsuccessfulDeleteFolder = 0;
-    private int successfulDeleteImage = 0;
-    private int unsuccessfulDeleteImage = 0;
+    private int successfulDeleteFolder;
+    private int unsuccessfulDeleteFolder;
+    private int successfulDeleteImage;
+    private int unsuccessfulDeleteImage;
     private Context mContext;
     private ArrayList<Integer> mSelectedItemsList;
-    private FolderViewImageAdapter mAdapter;
+    private BaseAdapter mAdapter;
     private int mDeleteModeId; // 0 -> delete folders; 1 -> delete image only
     
-    public MediaDeleterThread(Context context, ArrayList<Integer> selectedItemsList, FolderViewImageAdapter adapter, int deleteModeId) {
+    public MediaDeleterThread(Context context, ArrayList<Integer> selectedItemsList, BaseAdapter adapter, int deleteModeId) {
         mContext = context;
         mSelectedItemsList = selectedItemsList;
         mAdapter = adapter;
         mDeleteModeId = deleteModeId;
+        successfulDeleteFolder = 0;
+        unsuccessfulDeleteFolder = 0;
+        successfulDeleteImage = 0;
+        unsuccessfulDeleteImage = 0;
     }
     
     @Override
@@ -34,7 +40,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
         if (mDeleteModeId == 0) {
             deleteSelectedFolders();
         } else if (mDeleteModeId == 1) {
-            // TODO
+            deleteSelectedImages();
         }
         return null;
     }
@@ -43,17 +49,16 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void result) {
         super.onPostExecute(result);
         if (mDeleteModeId == 0) {
-            notifyDeletedFolders();
+            toastDeletedFolders();
         } else if (mDeleteModeId == 1) {
-            // TODO
+            toastDeletedImages();
         }
     }
 
     private void deleteSelectedFolders() {
-    	System.out.println("List is " + mSelectedItemsList);
         for (int folderPosition : mSelectedItemsList) {
-            File folderToDelete = new File(mAdapter.getImagePaths().get(folderPosition).get(0)).getParentFile();
-            List<String> imagePathsFromFolder = mAdapter.getImagePaths().get(folderPosition);
+            File folderToDelete = new File(((FolderViewImageAdapter) mAdapter).getImagePaths().get(folderPosition).get(0)).getParentFile();
+            List<String> imagePathsFromFolder = ((FolderViewImageAdapter) mAdapter).getImagePaths().get(folderPosition);
             for (int i = 0; i < imagePathsFromFolder.size(); i++) {
                 boolean deleteSuccess = new File(imagePathsFromFolder.get(i)).delete();
                 if (deleteSuccess) {
@@ -71,15 +76,30 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
         }
     }
     
-    private void notifyDeletedFolders() {
-    	String messageNumberImages;
+
+
+
+	private void deleteSelectedImages() {
+        for (int imagePosition : mSelectedItemsList) {
+            File imageToDelete = new File(((GridViewImageAdapter) mAdapter).getImagePaths().get(imagePosition));
+            boolean deleteSuccess = imageToDelete.delete();
+            if (deleteSuccess) {
+                successfulDeleteImage++;
+            } else {
+                unsuccessfulDeleteImage++;
+            }
+        }
+    }
+    
+    private void toastDeletedFolders() {
+        String messageNumberImages;
         String messageSuccess;
         String messageFail;
         
         if (successfulDeleteImage == 1) {
-        	messageNumberImages = "(" + successfulDeleteImage + " image)";
+            messageNumberImages = "(" + successfulDeleteImage + " image)";
         } else {
-        	messageNumberImages = "(" + successfulDeleteImage + " images)";
+            messageNumberImages = "(" + successfulDeleteImage + " images)";
         }
         if (successfulDeleteFolder == 1) {
             messageSuccess = "Deleted " + successfulDeleteFolder + " folder " + messageNumberImages + " successfully";
@@ -92,6 +112,25 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
         // Finally show the constructed strings in a toast
         Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
         if (unsuccessfulDeleteFolder != 0) {
+            Toast.makeText(mContext, messageFail, Toast.LENGTH_LONG).show();
+        }
+    }
+    
+    private void toastDeletedImages() {
+        String messageSuccess;
+        String messageFail;
+
+        if (successfulDeleteFolder == 1) {
+            messageSuccess = "Deleted " + successfulDeleteImage + " image successfully";
+            messageFail = "Could not delete " + unsuccessfulDeleteImage + " image";
+        } else {
+            messageSuccess = "Deleted " + successfulDeleteImage + " images successfully";
+            messageFail = "Could not delete " + unsuccessfulDeleteImage + " images";
+        }
+        
+        // Finally show the constructed strings in a toast
+        Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
+        if (unsuccessfulDeleteImage != 0) {
             Toast.makeText(mContext, messageFail, Toast.LENGTH_LONG).show();
         }
     }

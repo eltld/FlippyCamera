@@ -2,6 +2,7 @@ package org.sebbas.android.helper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
  
@@ -125,6 +126,7 @@ public class Utils {
                     
                 }
                 if (imagePaths.size() != 0) {
+                	Collections.reverse(imagePaths);
                     fileList.add(imagePaths);
                 }
             }

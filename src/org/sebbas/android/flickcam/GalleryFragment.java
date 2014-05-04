@@ -7,6 +7,7 @@ import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.helper.Utils;
+import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
 import com.nineoldandroids.animation.Animator;
@@ -43,14 +44,12 @@ import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
-import android.support.v7.app.ActionBarActivity;
 
-public class GalleryFragment extends Fragment {
+public class GalleryFragment extends Fragment implements AdapterCallback {
 
     public static final String TAG = "gallery_fragment";
     private static final String SELECT_IMAGES = "Select images";
-    private static volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
+    private volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
     
     private Utils mUtils;
     private GridViewImageAdapter mAdapter;
@@ -58,7 +57,7 @@ public class GalleryFragment extends Fragment {
     private int mColumnWidth;
     
     private Context mContext;
-    private MainFragment mMainFragment;
+    private MainFragmentActivity mMainFragment;
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
     private ProgressBar mLoadingImageSpinner;
@@ -86,7 +85,7 @@ public class GalleryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
-        mMainFragment = (MainFragment) this.getActivity();
+        mMainFragment = (MainFragmentActivity) this.getActivity();
         mImagePaths = this.getArguments().getStringArrayList("imagePaths");
     }
 
@@ -104,8 +103,18 @@ public class GalleryFragment extends Fragment {
         mMainFragment.getSupportActionBar().setHomeButtonEnabled(true);
         mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         
+        
         setupGridView();
         return mFrameLayout;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
+        mMainFragment.getSupportFragmentManager().popBackStack();
+        mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
+        mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
     
     public void setupGridView() {
@@ -116,7 +125,6 @@ public class GalleryFragment extends Fragment {
 
     private void setGridViewClickListener() {
     
-        
         mGridView.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
@@ -150,7 +158,6 @@ public class GalleryFragment extends Fragment {
                 if (mActionMode != null) {
                     return false;
                 }
-
                 // Start the CAB using the ActionMode.Callback defined above
                 mActionMode = mMainFragment.startSupportActionMode(mActionModeCallback);
                 
@@ -163,22 +170,18 @@ public class GalleryFragment extends Fragment {
         });
     }
     
-    public static ArrayList<Integer> getSelectedItemsList() {
-        return mSelectedItemsList;
-    }
-    
     private void manageSelectedItemsList(int itemPosition) {
-        // If the item was already added then the item is in selected state. We remove the item since the item is deselected now
+        // If the item was already added then the item is in selected state. We remove the item since the item is not selected now
         if (mSelectedItemsList.contains(itemPosition)) {
-            mSelectedItemsList.remove(new Integer(itemPosition));
+            mSelectedItemsList.remove(Integer.valueOf(itemPosition));
         // else we add it to our list since it just got selected
         } else {
             mSelectedItemsList.add(itemPosition);
         }
-        mAdapter.notifyDataSetChanged();
+        refreshAdapter();
         
         // Show the number of selected items in the subtitle of the action mode
-        mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mImagePaths.size());
+        mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mAdapter.getCount());
         
         // Remove action mode bar if no image is selected
         if (mSelectedItemsList.size() == 0) {
@@ -188,7 +191,7 @@ public class GalleryFragment extends Fragment {
 
     private void setGridViewAdapter() {
         // Gridview adapter
-        mAdapter = new GridViewImageAdapter(this.getActivity(), mImagePaths, mColumnWidth);
+        mAdapter = new GridViewImageAdapter(this, mImagePaths);
  
         // setting grid view adapter
         mGridView.setAdapter(mAdapter);
@@ -455,7 +458,8 @@ public class GalleryFragment extends Fragment {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard_image:
-                    deleteSelectedImages();
+                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 1);
+                    deleter.execute();
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
@@ -468,35 +472,8 @@ public class GalleryFragment extends Fragment {
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear();
             mActionMode = null;
-            mAdapter.notifyDataSetChanged();
         }
     };
-    
-    private void deleteSelectedImages() {
-        int successfulDelete = 0;
-        int unsuccessfulDelete = 0;
-        
-        for (int imagePosition : mSelectedItemsList) {
-            File file = new File(mImagePaths.get(imagePosition));
-            if (file.delete()) {
-                successfulDelete++;
-            } else {
-                unsuccessfulDelete++;
-            }
-        }
-        
-        Toast.makeText(mContext, "Deleted " + successfulDelete + " images successfully", Toast.LENGTH_SHORT).show();
-        if (unsuccessfulDelete != 0) {
-            Toast.makeText(mContext, "Could not delete " + unsuccessfulDelete + " images", Toast.LENGTH_SHORT).show();
-        }
-        
-        // Update filepaths in adapter and notify the adapter to refresh
-        mImagePaths = mUtils.getFilePaths();
-        mAdapter.mFilePaths = mImagePaths;
-        mAdapter.notifyDataSetChanged();
-        
-        mSelectedItemsList.clear();
-    }
     
     public ActionMode getActionMode() {
         return mActionMode;
@@ -504,5 +481,24 @@ public class GalleryFragment extends Fragment {
     
     public void finishActionMode() {
         mActionMode.finish();
+    }
+    
+    public ArrayList<Integer> getSelectedItemsList() {
+        return mSelectedItemsList;
+    }
+
+    @Override
+    public void refreshAdapter() {
+        mAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void reloadAdapterContent(boolean hiddenFolders) {
+        // Not needed in this Fragment
+    }
+
+    @Override
+    public void updateAdapterInstanceVariables() {
+        mAdapter.updateImagePaths(mImagePaths);
     }
 }

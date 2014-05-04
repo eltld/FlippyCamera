@@ -4,8 +4,10 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.sebbas.android.flickcam.GalleryFragment;
+import org.sebbas.android.flickcam.MainFragmentActivity;
 import org.sebbas.android.flickcam.R;
 import org.sebbas.android.views.SquaredImageView;
 
@@ -21,48 +23,57 @@ import android.widget.BaseAdapter;
 public class GridViewImageAdapter extends BaseAdapter {
  
     private Context mContext;
-    public ArrayList<String> mFilePaths = new ArrayList<String>();
+    public ArrayList<String> mImagePaths = new ArrayList<String>();
+    private MainFragmentActivity mMainFragment;
+    private GalleryFragment mGalleryFragment;
  
-    public GridViewImageAdapter(Activity activity, ArrayList<String> filePaths,
-            int imageWidth) {
-        mContext = activity;
-        mFilePaths = filePaths;
+    public GridViewImageAdapter(GalleryFragment galleryFragment, ArrayList<String> filePaths) {
+        mContext = galleryFragment.getActivity();
+        mMainFragment = (MainFragmentActivity) galleryFragment.getActivity();
+        mGalleryFragment = galleryFragment;
+        mImagePaths = filePaths;
     }
  
     @Override
     public int getCount() {
-        return mFilePaths.size();
+        return mImagePaths.size();
     }
  
     @Override
     public String getItem(int position) {
-        return mFilePaths.get(position);
+        return mImagePaths.get(position);
     }
  
     @Override
     public long getItemId(int position) {
         return position;
     }
+    
+    public ArrayList<String> getImagePaths() {
+        return mImagePaths;
+    }
  
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        SquaredImageView view = (SquaredImageView) convertView;
-        if (view == null) {
-            view = new SquaredImageView(mContext);
-            view.setScaleType(CENTER_CROP);
+        SquaredImageView squaredView = (SquaredImageView) convertView;
+        if (squaredView == null) {
+            squaredView = new SquaredImageView(mContext);
+            squaredView.setScaleType(CENTER_CROP);
+        } else {
+        	//squaredView = (SquaredImageView) convertView;
         }
-
+        squaredView.setBackgroundResource(R.drawable.square_image_selector);
+        
         // Get the image URL for the current position.
         String url = getItem(position);
         
         // Set a border for the view if it is in selected state
-        boolean isSelected = GalleryFragment.getSelectedItemsList().contains(position);
+        boolean isSelected = mGalleryFragment.getSelectedItemsList().contains(position);
         if (isSelected) {
-            view.setSelected(true);
-            view.setBackgroundResource(R.drawable.image_border);
+            squaredView.setSelected(true);
+            squaredView.setBackgroundResource(R.drawable.image_border);
         } else {
-            view.setSelected(false);
-            view.setBackgroundColor(0);
+            squaredView.setSelected(false);
         }
         
         // Trigger the download of the URL asynchronously into the image view.
@@ -73,8 +84,12 @@ public class GridViewImageAdapter extends BaseAdapter {
             .placeholder(R.drawable.ic_action_camera) //
             .error(R.drawable.ic_action_camera) //
             .fit() //
-            .into(view);
-        return view;
+            .into(squaredView);
+        return squaredView;
     }
     
+    
+    public void updateImagePaths(ArrayList<String> imagePaths) {
+        mImagePaths = imagePaths;
+    }
 }

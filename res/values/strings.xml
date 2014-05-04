@@ -13,6 +13,8 @@
     <string name="shutter_button">Shutter Button</string>
     <string name="switch_camera">Switch Camera</string>
     <string name="switch_flash">Switch Flash</string>
+    <string name="goto_gallery">Go to Gallery</string>
+    <string name="goto_settings">Go to Settings</string>
     
     
     <!-- Action mode -->

@@ -28,11 +28,11 @@ public class PictureWriterThread extends Thread {
     private Handler mHandler;
     private CameraUICommunicator mCameraUICommunicator;
     private Context mContext;
-    private MainFragment mMainFragment;
+    private MainFragmentActivity mMainFragment;
     
     public PictureWriterThread(Context context, CameraUICommunicator cameraThreadListener) {
         mContext = context;
-        mMainFragment = (MainFragment) context;
+        mMainFragment = (MainFragmentActivity) context;
         mCameraUICommunicator = cameraThreadListener; // For communication with the UI
     }
     

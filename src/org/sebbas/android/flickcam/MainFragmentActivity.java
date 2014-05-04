@@ -20,7 +20,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-public class MainFragment extends ActionBarActivity implements AdapterCallback {
+public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback {
 
     private static final String TAG = "main_fragment";
     private static final int SETTINGS_FRAGMENT_NUMBER = 0;
@@ -40,7 +40,6 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     private SettingsFragment mSettingsFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
-    private GalleryRootFragment mGalleryRootFragment;
     
     // Overflow items
     private MenuItem showHidden;
@@ -65,13 +64,12 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
         mSettingsFragment = SettingsFragment.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
         mFolderFragment = FolderFragment.newInstance(mHideFolders);
-        mGalleryRootFragment = GalleryRootFragment.newInstance(mHideFolders);
+        //mGalleryRootFragment = GalleryRootFragment.newInstance(mHideFolders);
         
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(mSettingsFragment);
         fragmentList.add(mCameraFragment);
-        //fragmentList.add(mFolderFragment);
-        fragmentList.add(mGalleryRootFragment);
+        fragmentList.add(mFolderFragment);
         
         setContentView(R.layout.viewpager_layout);
         
@@ -87,6 +85,7 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
                 switch(state) {
                 case ViewPager.SCROLL_STATE_IDLE:
                     setActionItems();
+                    handleHomeUpNavigation();
                 }
             }
 
@@ -154,11 +153,32 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     @Override
     public boolean onSupportNavigateUp() {
         //This method is called when the up button is pressed. Just the pop back stack.
-        getSupportFragmentManager().popBackStack();
+        getSupportFragmentManager().popBackStackImmediate();
+        handleHomeUpNavigation();
         return true;
     }
 
-    private int getPageMargin() {
+    @Override
+	public void onBackPressed() {
+		super.onBackPressed();
+		//This method is called when the up button is pressed. Just the pop back stack.
+        getSupportFragmentManager().popBackStackImmediate();
+        handleHomeUpNavigation();
+	}
+    
+    private void handleHomeUpNavigation() {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+        	// Turn on the "off" back navigation option
+            getSupportActionBar().setHomeButtonEnabled(false);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        } else {
+        	// Turn on the "on" back navigation option
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+	private int getPageMargin() {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
     
@@ -190,6 +210,7 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     
     
     private void setActionItems() {
+    	System.out.println("count is " + getSupportFragmentManager().getBackStackEntryCount());
         if (mPosition == CAMERA_FRAGMENT_NUMBER) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -202,6 +223,7 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.show();
             mActionBar.setTitle(APP_TITLE);
+           
         } else if (mPosition == SETTINGS_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -247,4 +269,9 @@ public class MainFragment extends ActionBarActivity implements AdapterCallback {
     public MainPagerAdapter getAdapter() {
     	return mPagerAdapter;
     }
+
+	@Override
+	public void updateAdapterInstanceVariables() {
+		// Not needed here, hence not implemented
+	}
 }
