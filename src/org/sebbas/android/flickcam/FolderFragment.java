@@ -284,7 +284,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
     
     private File getSelectedFile() {
-    	ArrayList<String> imagePathsFromSelectedFolder = getImagePathsAt(mSelectedItemsList.get(0));
+    	ArrayList<String> imagePathsFromSelectedFolder = getImagePathsAt(mSelectedItemsList.get(0)); // Use get 0 since there is onyl one element in the list
     	File folder =  new File(imagePathsFromSelectedFolder.get(0)).getParentFile();
     	return folder;
     }
@@ -307,6 +307,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                  public void onClick(DialogInterface dialog, int id) {
                 	 File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
                 	 selectedFile.renameTo(updatedFile);
+                	 manageSelectedItemsList(mSelectedItemsList.get(0));
+                	 reloadAdapterContent(mHiddenFoldersMode);
                  }
              })
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
