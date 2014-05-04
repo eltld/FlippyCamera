@@ -18,11 +18,43 @@
     
     
     <!-- Action mode -->
-    <string name="discard_image">Discard Image</string>
+    <string name="discard_image">Delete Image</string>
     <string name="share_image">Share Image</string>
+    <string name="discard_folder">Delete Folder</string>
+    <string name="edit_folder">Edit Folder</string>
+    <string name="select_all">Select All</string>
+    
+    <!-- Alert Dialogs -->
+    <string name="rename_folder">Rename Folder</string>
     
     <string name="description_zoom_touch_close">Zoomed Image</string>
     <string name="camera">Camera</string>
     <string name="folder_preview">Folder Preview</string>
+    
+    <!-- Preference Fragment -->
+    <string name="inline_preferences">Settings</string>
+    <string name="title_checkbox_preference">Show hidden</string>
+    <string name="summary_checkbox_preference">Hide hidden</string>
+    <string name="dialog_based_preferences">Loading gallery</string>
+    <string name="title_edittext_preference">Settings</string>
+    <string name="summary_edittext_preference">Show hidden</string>
+    <string name="dialog_title_edittext_preference">Hide hidden</string>
+    <string name="title_list_preference">Loading gallery</string>
+    <string name="summary_list_preference">Settings</string>
+    <array name="entries_list_preference">Show hidden</array>
+    <array name="entryvalues_list_preference">Hide hidden</array>
+    <string name="dialog_title_list_preference">Loading gallery</string>
+    <string name="launch_preferences">Settings</string>
+    <string name="title_screen_preference">Show hidden</string>
+    <string name="summary_screen_preference">Hide hidden</string>
+    <string name="title_next_screen_toggle_preference">Loading gallery</string>
+    <string name="summary_next_screen_toggle_preference">Settings</string>
+    <string name="title_intent_preference">Show hidden</string>
+    <string name="summary_intent_preference">Hide hidden</string>
+    <string name="preference_attributes">Loading gallery</string>
+    <string name="title_parent_preference">Settings</string>
+    <string name="summary_parent_preference">Show hidden</string>
+    <string name="title_child_preference">Hide hidden</string>
+    <string name="summary_child_preference">Loading gallery</string>
     
 </resources>

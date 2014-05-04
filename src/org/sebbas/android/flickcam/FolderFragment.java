@@ -1,5 +1,6 @@
 package org.sebbas.android.flickcam;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
@@ -8,7 +9,9 @@ import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -27,12 +30,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 
 public class FolderFragment extends Fragment implements AdapterCallback {
 
-    public static final String TAG = "gallery_fragment";
+    public static final String TAG = "folder_fragment";
     private static final String SELECT_FOLDERS = "Select folders";
     private volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
     
@@ -47,6 +51,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
     private boolean mHiddenFoldersMode;
+    private GalleryFragment mGalleryFragment;
     
     // Static factory method that returns a new fragment instance to the client
     public static FolderFragment newInstance(boolean hiddenFolders) {
@@ -87,7 +92,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
-	private void setupGridView() {
+    private void setupGridView() {
         initializeGridLayout();
         setGridViewAdapter(mHiddenFoldersMode);
         setGridViewClickListener();
@@ -103,10 +108,10 @@ public class FolderFragment extends Fragment implements AdapterCallback {
             
                 // Only enlarge the image if we are not in action mode
                 if (mActionMode == null) {
-                	FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
+                    FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
                     FragmentTransaction transaction = manager.beginTransaction();
-                    Fragment galleryFragment = GalleryFragment.newInstance((ArrayList<String>) mAdapter.getImagePaths().get(position));
-                    transaction.replace(R.id.folder_layout, galleryFragment);
+                    mGalleryFragment = GalleryFragment.newInstance(getImagePathsAt(position));
+                    transaction.replace(R.id.folder_layout, mGalleryFragment);
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.addToBackStack("gallery_fragment");
                     transaction.commit();
@@ -140,6 +145,10 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         
     }
     
+    private ArrayList<String> getImagePathsAt(int position) {
+    	return (ArrayList<String>) mAdapter.getImagePaths().get(position);
+    }
+    
     private void manageSelectedItemsList(int itemPosition) {
         // If the item was already added then the item is in selected state. We remove the item since the item is not selected now
         if (mSelectedItemsList.contains(itemPosition)) {
@@ -157,6 +166,19 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         if (mSelectedItemsList.size() == 0) {
             finishActionMode();
         }
+    }
+    
+    private void selectAll() {
+        if (mSelectedItemsList.size() == mAdapter.getCount()) {
+            mSelectedItemsList.clear();
+        } else {
+            mSelectedItemsList.clear();
+            for (int i = 0; i < mAdapter.getCount(); i++) {
+                mSelectedItemsList.add(i);
+            }
+        }    
+        refreshAdapter();
+        mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mAdapter.getCount());
     }
 
     private void setGridViewAdapter(boolean hiddenFolders) {
@@ -197,7 +219,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.actionmode, menu);
+            inflater.inflate(R.menu.actionmode_folders, menu);
             mode.setTitle(SELECT_FOLDERS);
             return true;
         }
@@ -213,11 +235,17 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         @Override
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
-                case R.id.discard_image:
+                case R.id.select_all:
+                    selectAll(); // Select / deselect all items
+                    return true;
+                case R.id.discard_folder:
                     MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 0);
                     deleter.execute();
                     reloadAdapterContent(mHiddenFoldersMode);
                     mode.finish(); // Action picked, so close the CAB
+                    return true;
+                case R.id.edit_folder:
+                	startEditFolderName();
                     return true;
                 default:
                     return false;
@@ -227,7 +255,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mSelectedItemsList.clear();
+            mSelectedItemsList.clear(); // Clear list since nothing is supposed to be selected at this point
+            refreshAdapter(); // Refresh the adapter so that the pending borders get reset
             mActionMode = null;
         }
     };
@@ -245,7 +274,52 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
     
     public void finishActionMode() {
-        mActionMode.finish();
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
+        // Also finish the action mode of the possible child fragment
+        if (mGalleryFragment != null) {
+            mGalleryFragment.finishActionMode();
+        }
+    }
+    
+    private File getSelectedFile() {
+    	ArrayList<String> imagePathsFromSelectedFolder = getImagePathsAt(mSelectedItemsList.get(0));
+    	File folder =  new File(imagePathsFromSelectedFolder.get(0)).getParentFile();
+    	return folder;
+    }
+    
+    private void startEditFolderName() {
+        LayoutInflater li = LayoutInflater.from(mContext);
+        View promptsView = li.inflate(R.layout.alert_edit_folder, null);
+
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+
+        // Set view of alert dialog to our view from xml
+        alertDialogBuilder.setView(promptsView);
+        final File selectedFile = getSelectedFile();
+        
+        final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
+        userInput.setText(selectedFile.getName());
+        alertDialogBuilder
+            .setCancelable(false)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int id) {
+                	 File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
+                	 selectedFile.renameTo(updatedFile);
+                 }
+             })
+            .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int id) {
+                     dialog.cancel();
+                 }
+             });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
     }
 
     @Override
@@ -258,9 +332,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         mAdapter.loadAdapterContent(hiddenFolders);
     }
 
-	@Override
-	public void updateAdapterInstanceVariables() {
-		// TODO Auto-generated method stub
-		
-	}
+    @Override
+    public void updateAdapterInstanceVariables() {
+        // TODO Auto-generated method stub
+    }
 }

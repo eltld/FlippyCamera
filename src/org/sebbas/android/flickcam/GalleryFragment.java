@@ -182,7 +182,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         
         // Show the number of selected items in the subtitle of the action mode
         mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mAdapter.getCount());
-        
+        Log.d(TAG, "selected items are: " + mSelectedItemsList);
         // Remove action mode bar if no image is selected
         if (mSelectedItemsList.size() == 0) {
             finishActionMode();
@@ -441,7 +441,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         public boolean onCreateActionMode(ActionMode mode, Menu menu) {
             // Inflate a menu resource providing context menu items
             MenuInflater inflater = mode.getMenuInflater();
-            inflater.inflate(R.menu.actionmode, menu);
+            inflater.inflate(R.menu.actionmode_images, menu);
             mode.setTitle(SELECT_IMAGES);
             return true;
         }
@@ -460,6 +460,9 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
                 case R.id.discard_image:
                     MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 1);
                     deleter.execute();
+                    
+                    updateImagePaths();
+                    
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 default:
@@ -470,17 +473,26 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         // Called when the user exits the action mode
         @Override
         public void onDestroyActionMode(ActionMode mode) {
-            mSelectedItemsList.clear();
+            mSelectedItemsList.clear(); // Clear list since nothing is supposed to be selected at this point
+            refreshAdapter(); // Refresh the adapter so that the pending borders get reset
             mActionMode = null;
         }
     };
+    
+    private void updateImagePaths() {
+    	for (int i = 0; i < mImagePaths.size(); i++) {
+    		mImagePaths.remove(i);
+    	}
+    }
     
     public ActionMode getActionMode() {
         return mActionMode;
     }
     
     public void finishActionMode() {
-        mActionMode.finish();
+    	if (mActionMode != null) {
+    		mActionMode.finish();
+    	}
     }
     
     public ArrayList<Integer> getSelectedItemsList() {

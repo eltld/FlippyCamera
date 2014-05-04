@@ -1,0 +1,23 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:flickcamera="http://schemas.android.com/apk/res-auto">
+    
+    <item
+        android:id="@+id/edit_folder"
+        android:orderInCategory="100"
+        android:icon="@drawable/ic_action_edit"
+        flickcamera:showAsAction="ifRoom"
+        android:title="@string/edit_folder"/>
+    
+    <item 
+        android:id="@+id/select_all"
+        android:icon="@drawable/ic_action_select_all"
+        flickcamera:showAsAction="always"
+        android:title="@string/select_all"/>
+    
+    <item 
+        android:id="@+id/discard_folder"
+        android:icon="@drawable/ic_action_discard"
+        flickcamera:showAsAction="always"
+        android:title="@string/discard_folder"/>
+
+</menu>

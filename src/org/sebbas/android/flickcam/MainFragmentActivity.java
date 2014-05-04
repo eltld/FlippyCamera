@@ -64,7 +64,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         mSettingsFragment = SettingsFragment.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
         mFolderFragment = FolderFragment.newInstance(mHideFolders);
-        //mGalleryRootFragment = GalleryRootFragment.newInstance(mHideFolders);
         
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(mSettingsFragment);
@@ -215,9 +214,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.hide();
-            if (mFolderFragment.getActionMode() != null) {
-                mFolderFragment.finishActionMode();
-            }
+            mFolderFragment.finishActionMode(); // Also handles finish action mode of any child fragments
+            
         } else if (mPosition == GALLERY_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);

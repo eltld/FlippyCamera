@@ -16,6 +16,10 @@ public final class R {
         public static final int abc_slide_out_bottom=0x7f040004;
         public static final int abc_slide_out_top=0x7f040005;
     }
+    public static final class array {
+        public static final int entries_list_preference=0x7f0c0000;
+        public static final int entryvalues_list_preference=0x7f0c0001;
+    }
     public static final class attr {
         /**  Custom divider drawable to use for elements in the action bar. 
          <p>Must be a reference to another resource, in the form "<code>@[+][<i>package</i>:]<i>type</i>:<i>name</i></code>"
@@ -1042,25 +1046,27 @@ containing a value of this type.
         public static final int ic_action_accept=0x7f02005d;
         public static final int ic_action_camera=0x7f02005e;
         public static final int ic_action_discard=0x7f02005f;
-        public static final int ic_action_flash_off=0x7f020060;
-        public static final int ic_action_flash_on=0x7f020061;
-        public static final int ic_action_overflow=0x7f020062;
-        public static final int ic_action_picture=0x7f020063;
-        public static final int ic_action_settings=0x7f020064;
-        public static final int ic_action_share=0x7f020065;
-        public static final int ic_action_switch_camera=0x7f020066;
-        public static final int ic_action_video=0x7f020067;
-        public static final int ic_button_selector=0x7f020068;
-        public static final int ic_launcher=0x7f020069;
-        public static final int icon_flickcamera=0x7f02006a;
-        public static final int image_border=0x7f02006b;
-        public static final int shadow_black=0x7f02006c;
-        public static final int shutter_button=0x7f02006d;
-        public static final int shutter_button_pressed=0x7f02006e;
-        public static final int splash_screen_bg=0x7f02006f;
-        public static final int square_image_selector=0x7f020070;
-        public static final int wallpaper1=0x7f020071;
-        public static final int wallpaper2=0x7f020072;
+        public static final int ic_action_edit=0x7f020060;
+        public static final int ic_action_flash_off=0x7f020061;
+        public static final int ic_action_flash_on=0x7f020062;
+        public static final int ic_action_overflow=0x7f020063;
+        public static final int ic_action_picture=0x7f020064;
+        public static final int ic_action_select_all=0x7f020065;
+        public static final int ic_action_settings=0x7f020066;
+        public static final int ic_action_share=0x7f020067;
+        public static final int ic_action_switch_camera=0x7f020068;
+        public static final int ic_action_video=0x7f020069;
+        public static final int ic_button_selector=0x7f02006a;
+        public static final int ic_launcher=0x7f02006b;
+        public static final int icon_flickcamera=0x7f02006c;
+        public static final int image_border=0x7f02006d;
+        public static final int shadow_black=0x7f02006e;
+        public static final int shutter_button=0x7f02006f;
+        public static final int shutter_button_pressed=0x7f020070;
+        public static final int splash_screen_bg=0x7f020071;
+        public static final int square_image_selector=0x7f020072;
+        public static final int wallpaper1=0x7f020073;
+        public static final int wallpaper2=0x7f020074;
     }
     public static final class id {
         public static final int action_bar=0x7f05001c;
@@ -1074,58 +1080,62 @@ containing a value of this type.
         public static final int action_menu_divider=0x7f050016;
         public static final int action_menu_presenter=0x7f050017;
         public static final int action_mode_close_button=0x7f050024;
-        public static final int action_settings=0x7f05005d;
+        public static final int action_settings=0x7f050063;
         public static final int activity_chooser_view_content=0x7f050025;
         public static final int always=0x7f05000b;
         public static final int beginning=0x7f050011;
-        public static final int btnClose=0x7f050056;
-        public static final int camera_icon=0x7f05005c;
-        public static final int camera_preview_layout=0x7f05003c;
-        public static final int camera_view_flipper=0x7f05003e;
-        public static final int cascadeLayout1=0x7f050046;
+        public static final int btnClose=0x7f050059;
+        public static final int camera_icon=0x7f050062;
+        public static final int camera_preview_layout=0x7f05003f;
+        public static final int camera_view_flipper=0x7f050041;
+        public static final int cascadeLayout1=0x7f050049;
         public static final int checkbox=0x7f05002d;
         public static final int collapseActionView=0x7f05000d;
-        public static final int container=0x7f050050;
-        public static final int control_mask=0x7f05003f;
+        public static final int container=0x7f050053;
+        public static final int control_mask=0x7f050042;
         public static final int default_activity_button=0x7f050028;
         public static final int dialog=0x7f05000e;
         public static final int disableHome=0x7f050008;
-        public static final int discard_image=0x7f05005a;
-        public static final int draw_insets_framelayout=0x7f05004f;
+        public static final int discard_folder=0x7f05005e;
+        public static final int discard_image=0x7f050060;
+        public static final int draw_insets_framelayout=0x7f050052;
         public static final int dropdown=0x7f05000f;
+        public static final int editTextDialogUserInput=0x7f05003e;
+        public static final int edit_folder=0x7f05005c;
         public static final int edit_query=0x7f050030;
         public static final int end=0x7f050013;
         public static final int expand_activities_button=0x7f050026;
-        public static final int expanded_image=0x7f050052;
+        public static final int expanded_image=0x7f050055;
         public static final int expanded_menu=0x7f05002c;
-        public static final int folder_grid_view=0x7f05004e;
-        public static final int folder_image_1=0x7f05004a;
-        public static final int folder_image_2=0x7f050049;
-        public static final int folder_image_3=0x7f050048;
-        public static final int folder_image_4=0x7f050047;
-        public static final int folder_layout=0x7f05004d;
-        public static final int folder_name=0x7f05004b;
-        public static final int folder_size=0x7f05004c;
-        public static final int goto_gallery=0x7f050044;
-        public static final int grid_view=0x7f050051;
-        public static final int hide_hidden=0x7f05005f;
+        public static final int folder_grid_view=0x7f050051;
+        public static final int folder_image_1=0x7f05004d;
+        public static final int folder_image_2=0x7f05004c;
+        public static final int folder_image_3=0x7f05004b;
+        public static final int folder_image_4=0x7f05004a;
+        public static final int folder_layout=0x7f050050;
+        public static final int folder_name=0x7f05004e;
+        public static final int folder_size=0x7f05004f;
+        public static final int goto_gallery=0x7f050047;
+        public static final int grid_view=0x7f050054;
+        public static final int hide_hidden=0x7f050065;
         public static final int home=0x7f050014;
         public static final int homeAsUp=0x7f050005;
         public static final int icon=0x7f05002a;
         public static final int ifRoom=0x7f05000a;
         public static final int image=0x7f050027;
-        public static final int imgDisplay=0x7f050055;
+        public static final int imgDisplay=0x7f050058;
+        public static final int layout_root=0x7f05003c;
         public static final int listMode=0x7f050001;
         public static final int list_item=0x7f050029;
-        public static final int loading_image_spinner=0x7f050053;
+        public static final int loading_image_spinner=0x7f050056;
         public static final int middle=0x7f050012;
-        public static final int navigationbar_filler_view=0x7f050045;
+        public static final int navigationbar_filler_view=0x7f050048;
         public static final int never=0x7f050009;
         public static final int none=0x7f050010;
         public static final int normal=0x7f050000;
-        public static final int pager=0x7f050054;
-        public static final int preview_mask=0x7f05003d;
-        public static final int progressBar1=0x7f050058;
+        public static final int pager=0x7f050057;
+        public static final int preview_mask=0x7f050040;
+        public static final int progressBar1=0x7f05005b;
         public static final int progress_circular=0x7f050018;
         public static final int progress_horizontal=0x7f050019;
         public static final int radio=0x7f05002f;
@@ -1139,21 +1149,23 @@ containing a value of this type.
         public static final int search_plate=0x7f050036;
         public static final int search_src_text=0x7f050037;
         public static final int search_voice_btn=0x7f05003b;
-        public static final int settings_button=0x7f050042;
-        public static final int share_image=0x7f050059;
+        public static final int select_all=0x7f05005d;
+        public static final int settings_button=0x7f050045;
+        public static final int share_image=0x7f05005f;
         public static final int shortcut=0x7f05002e;
         public static final int showCustom=0x7f050007;
         public static final int showHome=0x7f050004;
         public static final int showTitle=0x7f050006;
-        public static final int show_hidden=0x7f05005e;
-        public static final int shutter_button=0x7f050043;
-        public static final int spinner_icon=0x7f05005b;
-        public static final int splash_icon=0x7f050057;
+        public static final int show_hidden=0x7f050064;
+        public static final int shutter_button=0x7f050046;
+        public static final int spinner_icon=0x7f050061;
+        public static final int splash_icon=0x7f05005a;
         public static final int split_action_bar=0x7f05001e;
         public static final int submit_area=0x7f050039;
-        public static final int switch_camera=0x7f050041;
-        public static final int switch_flash=0x7f050040;
+        public static final int switch_camera=0x7f050044;
+        public static final int switch_flash=0x7f050043;
         public static final int tabMode=0x7f050002;
+        public static final int textView1=0x7f05003d;
         public static final int title=0x7f05002b;
         public static final int top_action_bar=0x7f050020;
         public static final int up=0x7f050021;
@@ -1211,20 +1223,23 @@ containing a value of this type.
         public static final int abc_search_dropdown_item_icons_2line=0x7f030015;
         public static final int abc_search_view=0x7f030016;
         public static final int actionbar_indeterminate_progress=0x7f030017;
-        public static final int camera_layout_with_navigationbar=0x7f030018;
-        public static final int camera_layout_without_navigationbar=0x7f030019;
-        public static final int folder_view=0x7f03001a;
-        public static final int gallery_folders=0x7f03001b;
-        public static final int gallery_grid_view=0x7f03001c;
-        public static final int image_fullscreen_view=0x7f03001d;
-        public static final int layout_fullscreen_image=0x7f03001e;
-        public static final int splash_screen=0x7f03001f;
-        public static final int support_simple_spinner_dropdown_item=0x7f030020;
-        public static final int viewpager_layout=0x7f030021;
+        public static final int alert_edit_folder=0x7f030018;
+        public static final int camera_layout_with_navigationbar=0x7f030019;
+        public static final int camera_layout_without_navigationbar=0x7f03001a;
+        public static final int folder_view=0x7f03001b;
+        public static final int gallery_folders=0x7f03001c;
+        public static final int gallery_grid_view=0x7f03001d;
+        public static final int image_fullscreen_view=0x7f03001e;
+        public static final int layout_fullscreen_image=0x7f03001f;
+        public static final int preference_layout=0x7f030020;
+        public static final int splash_screen=0x7f030021;
+        public static final int support_simple_spinner_dropdown_item=0x7f030022;
+        public static final int viewpager_layout=0x7f030023;
     }
     public static final class menu {
-        public static final int actionmode=0x7f0c0000;
-        public static final int main=0x7f0c0001;
+        public static final int actionmode_folders=0x7f0d0000;
+        public static final int actionmode_images=0x7f0d0001;
+        public static final int main=0x7f0d0002;
     }
     public static final class string {
         /**  Content description for the action bar "home" affordance. [CHAR LIMIT=NONE] 
@@ -1271,23 +1286,53 @@ containing a value of this type.
          */
         public static final int action_settings=0x7f0a000e;
         public static final int app_name=0x7f0a000d;
-        public static final int camera=0x7f0a001a;
-        public static final int description_zoom_touch_close=0x7f0a0019;
+        public static final int camera=0x7f0a001e;
+        public static final int description_zoom_touch_close=0x7f0a001d;
+        public static final int dialog_based_preferences=0x7f0a0023;
+        public static final int dialog_title_edittext_preference=0x7f0a0026;
+        public static final int dialog_title_list_preference=0x7f0a0029;
+        public static final int discard_folder=0x7f0a0019;
         /**  Action mode 
          */
         public static final int discard_image=0x7f0a0017;
-        public static final int folder_preview=0x7f0a001b;
+        public static final int edit_folder=0x7f0a001a;
+        public static final int folder_preview=0x7f0a001f;
         public static final int goto_gallery=0x7f0a0015;
         public static final int goto_settings=0x7f0a0016;
         public static final int hide_hidden=0x7f0a0010;
+        /**  Preference Fragment 
+         */
+        public static final int inline_preferences=0x7f0a0020;
+        public static final int launch_preferences=0x7f0a002a;
+        public static final int preference_attributes=0x7f0a0031;
+        /**  Alert Dialogs 
+         */
+        public static final int rename_folder=0x7f0a001c;
+        public static final int select_all=0x7f0a001b;
         public static final int share_image=0x7f0a0018;
         public static final int show_hidden=0x7f0a000f;
         /**  Camera UI 
          */
         public static final int shutter_button=0x7f0a0012;
         public static final int spinner=0x7f0a0011;
+        public static final int summary_checkbox_preference=0x7f0a0022;
+        public static final int summary_child_preference=0x7f0a0035;
+        public static final int summary_edittext_preference=0x7f0a0025;
+        public static final int summary_intent_preference=0x7f0a0030;
+        public static final int summary_list_preference=0x7f0a0028;
+        public static final int summary_next_screen_toggle_preference=0x7f0a002e;
+        public static final int summary_parent_preference=0x7f0a0033;
+        public static final int summary_screen_preference=0x7f0a002c;
         public static final int switch_camera=0x7f0a0013;
         public static final int switch_flash=0x7f0a0014;
+        public static final int title_checkbox_preference=0x7f0a0021;
+        public static final int title_child_preference=0x7f0a0034;
+        public static final int title_edittext_preference=0x7f0a0024;
+        public static final int title_intent_preference=0x7f0a002f;
+        public static final int title_list_preference=0x7f0a0027;
+        public static final int title_next_screen_toggle_preference=0x7f0a002d;
+        public static final int title_parent_preference=0x7f0a0032;
+        public static final int title_screen_preference=0x7f0a002b;
     }
     public static final class style {
         public static final int FlickCamera=0x7f0b0083;

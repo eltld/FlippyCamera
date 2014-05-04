@@ -40,11 +40,10 @@ import android.widget.ViewFlipper;
 public class CameraFragmentUI extends Fragment implements CameraUICommunicator, ShakeDetector.Listener {
 
     // Private constants
-    protected static final int GALLERY_FRAGMENT_NUMBER = 2;
+    private static final int GALLERY_FRAGMENT_NUMBER = 2;
+    private static final int SETTINGS_FRAGMENT_NUMBER = 0;
     private static final int FLIP_PREVIEW_ANIMATION_DURATION = 300;
-    private static final String CAMERA_MODE = "Camera Mode";
-    private static final String VIDEO_MODE = "Video Mode";
-    protected static final String TAG = "camera_fragment";
+    private static final String TAG = "camera_fragment";
     
     // Instance variables for the fragment
     private Context mContext;
@@ -56,7 +55,6 @@ public class CameraFragmentUI extends Fragment implements CameraUICommunicator, 
 
     // Instance variables for the camera
     private boolean mFlashEnabled;
-    private boolean mVideoEnabled;
     
     // Instance variables for the UI
     private View mRootView;
@@ -258,14 +256,6 @@ public class CameraFragmentUI extends Fragment implements CameraUICommunicator, 
         }
     }
     
-    private void setModeIcon() {
-        if (mVideoEnabled) {
-            mSettingsButton.setImageResource(R.drawable.ic_action_camera);
-        } else {
-            mSettingsButton.setImageResource(R.drawable.ic_action_video);
-        }
-    }
-    
     private void reorganizeUI() {
         mControlLayout.bringToFront();
         mControlLayout.invalidate();
@@ -370,14 +360,7 @@ public class CameraFragmentUI extends Fragment implements CameraUICommunicator, 
 
             @Override
             public void onClick(View v) {
-                mVideoEnabled = !mVideoEnabled;
-                if (mVideoEnabled) {
-                    makeUIMessage(VIDEO_MODE);
-                } else {
-                    makeUIMessage(CAMERA_MODE);
-                }
-                
-                setModeIcon();
+                mViewPager.setCurrentItem(SETTINGS_FRAGMENT_NUMBER);
             }
           
         };

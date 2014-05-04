@@ -9,11 +9,14 @@ import org.sebbas.android.adapter.GridViewImageAdapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.util.Log;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
 
+	private static final String TAG = "media_deleter_thread";
+	
     private int successfulDeleteFolder;
     private int unsuccessfulDeleteFolder;
     private int successfulDeleteImage;
@@ -26,6 +29,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     public MediaDeleterThread(Context context, ArrayList<Integer> selectedItemsList, BaseAdapter adapter, int deleteModeId) {
         mContext = context;
         mSelectedItemsList = selectedItemsList;
+        Log.d(TAG, "list is: " + mSelectedItemsList);
         mAdapter = adapter;
         mDeleteModeId = deleteModeId;
         successfulDeleteFolder = 0;
@@ -77,9 +81,8 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     }
     
 
-
-
 	private void deleteSelectedImages() {
+		Log.d(TAG, "Selected items are " + mSelectedItemsList);
         for (int imagePosition : mSelectedItemsList) {
             File imageToDelete = new File(((GridViewImageAdapter) mAdapter).getImagePaths().get(imagePosition));
             boolean deleteSuccess = imageToDelete.delete();
