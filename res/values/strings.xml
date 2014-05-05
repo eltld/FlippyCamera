@@ -26,6 +26,8 @@
     
     <!-- Alert Dialogs -->
     <string name="rename_folder">Rename Folder</string>
+    <string name="could_not_rename_folder">Could not rename folder</string>
+    <string name="folder_is_existing">A folder with the given name is already exisiting in this directory</string>
     
     <string name="description_zoom_touch_close">Zoomed Image</string>
     <string name="camera">Camera</string>

@@ -27,6 +27,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -117,7 +118,9 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                     transaction.commit();
                 } else {
                     // Keep track of which items are selected. Then notify the adapter
-                    manageSelectedItemsList(position); 
+                    manageSelectedItemsList(position);
+                    // Show and hide certain action mode items
+                    manageActionModeItems();
                     
                 }
             }
@@ -145,6 +148,16 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         
     }
     
+    private void manageActionModeItems() {
+    	 // Show and hide the edit item depending on how many items are currently selected
+        MenuItem editItem = mActionMode.getMenu().findItem(R.id.edit_folder);
+        if (mSelectedItemsList.size() > 1) {
+        	editItem.setVisible(false);
+        } else {
+        	editItem.setVisible(true);
+        }
+    }
+    
     private ArrayList<String> getImagePathsAt(int position) {
     	return (ArrayList<String>) mAdapter.getImagePaths().get(position);
     }
@@ -166,6 +179,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         if (mSelectedItemsList.size() == 0) {
             finishActionMode();
         }
+        
     }
     
     private void selectAll() {
@@ -179,6 +193,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         }    
         refreshAdapter();
         mActionMode.setSubtitle(mSelectedItemsList.size() + "/" + mAdapter.getCount());
+        manageActionModeItems();
     }
 
     private void setGridViewAdapter(boolean hiddenFolders) {
@@ -302,18 +317,45 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         final EditText userInput = (EditText) promptsView.findViewById(R.id.editTextDialogUserInput);
         userInput.setText(selectedFile.getName());
         alertDialogBuilder
+            .setTitle(R.string.rename_folder)
             .setCancelable(false)
             .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int id) {
-                	 File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
-                	 selectedFile.renameTo(updatedFile);
-                	 manageSelectedItemsList(mSelectedItemsList.get(0));
-                	 reloadAdapterContent(mHiddenFoldersMode);
+                     File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
+                     boolean renameSuccess = selectedFile.renameTo(updatedFile);
+                     if (renameSuccess) {
+                    	 manageSelectedItemsList(mSelectedItemsList.get(0));
+                         reloadAdapterContent(mHiddenFoldersMode);
+                     } else {
+                    	 startRenameErrorAlert();
+                     }
+                     
                  }
              })
             .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                  public void onClick(DialogInterface dialog, int id) {
                      dialog.cancel();
+                 }
+             });
+
+        // create alert dialog
+        AlertDialog alertDialog = alertDialogBuilder.create();
+
+        // show it
+        alertDialog.show();
+    }
+    
+    private void startRenameErrorAlert() {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mContext);
+        
+        alertDialogBuilder
+            .setTitle(R.string.could_not_rename_folder)
+            .setMessage(R.string.folder_is_existing)
+            .setCancelable(false)
+            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                 public void onClick(DialogInterface dialog, int id) {
+                     dialog.cancel();
+                     startEditFolderName();
                  }
              });
 
