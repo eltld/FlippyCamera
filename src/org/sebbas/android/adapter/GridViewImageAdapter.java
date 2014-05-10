@@ -4,18 +4,14 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.sebbas.android.flickcam.GalleryFragment;
-import org.sebbas.android.flickcam.MainFragmentActivity;
 import org.sebbas.android.flickcam.R;
 import org.sebbas.android.views.SquaredImageView;
 
 import com.squareup.picasso.Picasso;
  
-import android.app.Activity;
 import android.content.Context;
-import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -24,12 +20,10 @@ public class GridViewImageAdapter extends BaseAdapter {
  
     private Context mContext;
     public ArrayList<String> mImagePaths = new ArrayList<String>();
-    private MainFragmentActivity mMainFragment;
     private GalleryFragment mGalleryFragment;
  
     public GridViewImageAdapter(GalleryFragment galleryFragment, ArrayList<String> filePaths) {
         mContext = galleryFragment.getActivity();
-        mMainFragment = (MainFragmentActivity) galleryFragment.getActivity();
         mGalleryFragment = galleryFragment;
         mImagePaths = filePaths;
     }

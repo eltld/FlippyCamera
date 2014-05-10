@@ -2,6 +2,7 @@ package org.sebbas.android.flickcam;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
@@ -14,6 +15,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Rect;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -35,7 +37,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
 
-public class FolderFragment extends Fragment implements AdapterCallback {
+public class FolderFragment extends Fragment implements AdapterCallback<List <String>> {
 
     public static final String TAG = "folder_fragment";
     private static final String SELECT_FOLDERS = "Select folders";
@@ -51,16 +53,11 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     private FrameLayout mFrameLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
-    private boolean mHiddenFoldersMode;
     private GalleryFragment mGalleryFragment;
     
     // Static factory method that returns a new fragment instance to the client
-    public static FolderFragment newInstance(boolean hiddenFolders) {
+    public static FolderFragment newInstance() {
         FolderFragment folderFragment = new FolderFragment();
-        
-        Bundle args = new Bundle();
-        args.putBoolean("hiddenFolders", hiddenFolders);
-        folderFragment.setArguments(args);
         
         return folderFragment;
     }
@@ -70,7 +67,6 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
         mMainFragment = (MainFragmentActivity) this.getActivity();
-        mHiddenFoldersMode = this.getArguments().getBoolean("hiddenFolders");
     }
 
     @Override
@@ -95,7 +91,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
 
     private void setupGridView() {
         initializeGridLayout();
-        setGridViewAdapter(mHiddenFoldersMode);
+        setGridViewAdapter(getHiddenFoldersMode());
         setGridViewClickListener();
     }
 
@@ -111,16 +107,17 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                 if (mActionMode == null) {
                     FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
                     FragmentTransaction transaction = manager.beginTransaction();
-                    mGalleryFragment = GalleryFragment.newInstance(getImagePathsAt(position));
+                    mGalleryFragment = GalleryFragment.newInstance(position);
                     transaction.replace(R.id.folder_layout, mGalleryFragment);
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.addToBackStack("gallery_fragment");
                     transaction.commit();
                 } else {
-                    // Keep track of which items are selected. Then notify the adapter
-                    manageSelectedItemsList(position);
                     // Show and hide certain action mode items
                     manageActionModeItems();
+                    // Keep track of which items are selected. Then notify the adapter
+                    manageSelectedItemsList(position);
+                    
                     
                 }
             }
@@ -150,16 +147,19 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     
     private void manageActionModeItems() {
     	 // Show and hide the edit item depending on how many items are currently selected
-        MenuItem editItem = mActionMode.getMenu().findItem(R.id.edit_folder);
-        if (mSelectedItemsList.size() > 1) {
-        	editItem.setVisible(false);
-        } else {
-        	editItem.setVisible(true);
-        }
+    	if (mActionMode != null) {
+    	    MenuItem editItem = mActionMode.getMenu().findItem(R.id.edit_folder);
+            if (mSelectedItemsList.size() > 1) {
+            	editItem.setVisible(false);
+            } else {
+            	editItem.setVisible(true);
+            }
+    	}
+        
     }
     
     private ArrayList<String> getImagePathsAt(int position) {
-    	return (ArrayList<String>) mAdapter.getImagePaths().get(position);
+    	return (ArrayList<String>) mMainFragment.getImagePaths().get(position);
     }
     
     private void manageSelectedItemsList(int itemPosition) {
@@ -254,9 +254,9 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                     selectAll(); // Select / deselect all items
                     return true;
                 case R.id.discard_folder:
-                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 0);
+                    MediaDeleterThread deleter = new MediaDeleterThread(
+                            mContext, new ArrayList<Integer>(mSelectedItemsList), FolderFragment.this, 0, 0);
                     deleter.execute();
-                    reloadAdapterContent(mHiddenFoldersMode);
                     mode.finish(); // Action picked, so close the CAB
                     return true;
                 case R.id.edit_folder:
@@ -284,8 +284,12 @@ public class FolderFragment extends Fragment implements AdapterCallback {
         return mSelectedItemsList;
     }
     
-    public boolean getHiddenFoldersMode() {
-        return mHiddenFoldersMode;
+    private boolean getHiddenFoldersMode() {
+        return mMainFragment.getHiddenFoldersMode();
+    }
+    
+    private void setHiddenFoldersMode(boolean mode) {
+    	mMainFragment.setHiddenFoldersMode(mode);
     }
     
     public void finishActionMode() {
@@ -299,7 +303,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
     
     private File getSelectedFile() {
-    	ArrayList<String> imagePathsFromSelectedFolder = getImagePathsAt(mSelectedItemsList.get(0)); // Use get 0 since there is onyl one element in the list
+    	ArrayList<String> imagePathsFromSelectedFolder = getImagePathsAt(mSelectedItemsList.get(0)); // Use get 0 since there is only one element in the list
     	File folder =  new File(imagePathsFromSelectedFolder.get(0)).getParentFile();
     	return folder;
     }
@@ -324,8 +328,8 @@ public class FolderFragment extends Fragment implements AdapterCallback {
                      File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
                      boolean renameSuccess = selectedFile.renameTo(updatedFile);
                      if (renameSuccess) {
-                    	 manageSelectedItemsList(mSelectedItemsList.get(0));
-                         reloadAdapterContent(mHiddenFoldersMode);
+                    	 //manageSelectedItemsList(mSelectedItemsList.get(0));
+                         //reloadAdapterContent(getHiddenFoldersMode());
                      } else {
                     	 startRenameErrorAlert();
                      }
@@ -372,12 +376,7 @@ public class FolderFragment extends Fragment implements AdapterCallback {
     }
 
     @Override
-    public void reloadAdapterContent(boolean hiddenFolders) {
-        mAdapter.loadAdapterContent(hiddenFolders);
-    }
-
-    @Override
-    public void updateAdapterInstanceVariables() {
-        // TODO Auto-generated method stub
+    public void updateAdapterContent(ArrayList<List <String>> imagePaths) {
+    	mAdapter.updateImagePaths(imagePaths);
     }
 }

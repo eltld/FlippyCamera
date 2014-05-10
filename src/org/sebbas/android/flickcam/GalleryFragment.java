@@ -45,7 +45,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 
-public class GalleryFragment extends Fragment implements AdapterCallback {
+public class GalleryFragment extends Fragment implements AdapterCallback<String> {
 
     public static final String TAG = "gallery_fragment";
     private static final String SELECT_IMAGES = "Select images";
@@ -68,13 +68,14 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
     private Animator mCurrentAnimator;
     private int mShortAnimationDuration;
     private ActionMode mActionMode;
+    private int mFolderPosition;
     
     // Static factory method that returns a new fragment instance to the client
-    public static GalleryFragment newInstance(ArrayList<String> imagePaths) {
+    public static GalleryFragment newInstance(int position) {
         GalleryFragment galleryFragment = new GalleryFragment();
         
         Bundle args = new Bundle();
-        args.putStringArrayList("imagePaths", imagePaths);
+        args.putInt("folderPosition", position);
         galleryFragment.setArguments(args);
         
         return galleryFragment;
@@ -86,7 +87,9 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         mContext = this.getActivity();
         mShortAnimationDuration = getResources().getInteger(android.R.integer.config_shortAnimTime);
         mMainFragment = (MainFragmentActivity) this.getActivity();
-        mImagePaths = this.getArguments().getStringArrayList("imagePaths");
+        
+        mFolderPosition = this.getArguments().getInt("folderPosition");
+        mImagePaths = (ArrayList<String>) mMainFragment.getImagePaths().get(mFolderPosition);
     }
 
     @Override
@@ -102,7 +105,6 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         // Turn on the "up" back navigation option
         mMainFragment.getSupportActionBar().setHomeButtonEnabled(true);
         mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        
         
         setupGridView();
         return mFrameLayout;
@@ -209,7 +211,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         mGridView.setStretchMode(GridView.NO_STRETCH);
         mGridView.setHorizontalSpacing((int) padding);
         mGridView.setVerticalSpacing((int) padding);
-        mGridView.setPadding((int) padding, 0, (int) padding, 0);
+        mGridView.setPadding((int) padding, 150, (int) padding, 150);
         
         mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
             @Override
@@ -458,10 +460,9 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
         public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.discard_image:
-                    MediaDeleterThread deleter = new MediaDeleterThread(mContext, new ArrayList<Integer>(mSelectedItemsList), mAdapter, 1);
+                    MediaDeleterThread deleter = new MediaDeleterThread(
+                            mContext, new ArrayList<Integer>(mSelectedItemsList), GalleryFragment.this, mFolderPosition, 1);
                     deleter.execute();
-                    
-                    updateImagePaths();
                     
                     mode.finish(); // Action picked, so close the CAB
                     return true;
@@ -478,12 +479,6 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
             mActionMode = null;
         }
     };
-    
-    private void updateImagePaths() {
-    	for (int i = 0; i < mImagePaths.size(); i++) {
-    		mImagePaths.remove(i);
-    	}
-    }
     
     public ActionMode getActionMode() {
         return mActionMode;
@@ -505,12 +500,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback {
     }
 
     @Override
-    public void reloadAdapterContent(boolean hiddenFolders) {
-        // Not needed in this Fragment
-    }
-
-    @Override
-    public void updateAdapterInstanceVariables() {
-        mAdapter.updateImagePaths(mImagePaths);
+    public void updateAdapterContent(ArrayList<String> imagePaths) {
+        mAdapter.updateImagePaths(imagePaths);
     }
 }

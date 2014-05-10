@@ -2,6 +2,7 @@ package org.sebbas.android.flickcam;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
@@ -9,28 +10,40 @@ import org.sebbas.android.adapter.GridViewImageAdapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.widget.BaseAdapter;
 import android.widget.Toast;
 
-public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
+public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
 
-	private static final String TAG = "media_deleter_thread";
-	
+    private static final String TAG = "media_deleter_thread";
+    
     private int successfulDeleteFolder;
     private int unsuccessfulDeleteFolder;
     private int successfulDeleteImage;
     private int unsuccessfulDeleteImage;
     private Context mContext;
     private ArrayList<Integer> mSelectedItemsList;
-    private BaseAdapter mAdapter;
+    private Fragment mFragment;
+    private MainFragmentActivity mMainFragment;
     private int mDeleteModeId; // 0 -> delete folders; 1 -> delete image only
+    private int mFolderPosition;
     
-    public MediaDeleterThread(Context context, ArrayList<Integer> selectedItemsList, BaseAdapter adapter, int deleteModeId) {
+    public MediaDeleterThread(Context context, ArrayList<Integer> selectedItemsList, Fragment fragment, int folderPosition, int deleteModeId) {
         mContext = context;
+        mMainFragment = (MainFragmentActivity) fragment.getActivity();
         mSelectedItemsList = selectedItemsList;
-        Log.d(TAG, "list is: " + mSelectedItemsList);
-        mAdapter = adapter;
+        
+        // We have to sort the selected items list (makes it in ascending order) and then reverse the list so that we get a list of the selected 
+        //items in descending order. This is important when deleting the images later. If this is not done, bad things (like IndexOutOfBounds 
+        //exceptions) can occur.
+        Collections.sort(mSelectedItemsList);
+        Collections.reverse(mSelectedItemsList);
+        
+        mFragment = fragment;
+        mFolderPosition = folderPosition;
+        
         mDeleteModeId = deleteModeId;
         successfulDeleteFolder = 0;
         unsuccessfulDeleteFolder = 0;
@@ -39,31 +52,46 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
     }
     
     @Override
-    protected Void doInBackground(Void... params) {
+    protected Object doInBackground(Void... params) {
         // Check what type of media we are going to delete 
         if (mDeleteModeId == 0) {
-            deleteSelectedFolders();
+            return deleteSelectedFolders();
         } else if (mDeleteModeId == 1) {
-            deleteSelectedImages();
+            ArrayList<String> currentImagePaths = (ArrayList<String>) mMainFragment.getImagePaths().get(mFolderPosition);
+            if (currentImagePaths.size() == mSelectedItemsList.size()) {
+                mSelectedItemsList.clear();
+                mSelectedItemsList.add(mFolderPosition);
+                return deleteSelectedFolders();
+            } else {
+                return deleteSelectedImages();
+            }
         }
         return null;
     }
     
     @Override
-    protected void onPostExecute(Void result) {
+    protected void onPostExecute(Object result) {
         super.onPostExecute(result);
+        ArrayList<List <String>> newFolders = (ArrayList<List <String>>) result;
+        mMainFragment.updateImagePaths(newFolders); // Update the "root" image paths 
         if (mDeleteModeId == 0) {
-            toastDeletedFolders();
+            toastDeletedItems();
+            ((FolderFragment) mFragment).updateAdapterContent(newFolders);
+            ((FolderFragment) mFragment).refreshAdapter();
         } else if (mDeleteModeId == 1) {
             toastDeletedImages();
+            ((GalleryFragment) mFragment).updateAdapterContent((ArrayList<String>) newFolders.get(mFolderPosition));
+            ((GalleryFragment) mFragment).refreshAdapter();
         }
     }
 
-    private void deleteSelectedFolders() {
+    private ArrayList<List <String>> deleteSelectedFolders() {
+    	ArrayList<List <String>> currentFolders = mMainFragment.getImagePaths();
+    	
         for (int folderPosition : mSelectedItemsList) {
-            File folderToDelete = new File(((FolderViewImageAdapter) mAdapter).getImagePaths().get(folderPosition).get(0)).getParentFile();
-            List<String> imagePathsFromFolder = ((FolderViewImageAdapter) mAdapter).getImagePaths().get(folderPosition);
-            for (int i = 0; i < imagePathsFromFolder.size(); i++) {
+            File folderToDelete = new File(currentFolders.get(folderPosition).get(0)).getParentFile();
+            List<String> imagePathsFromFolder = currentFolders.get(folderPosition);
+            for (int i = 0; i < imagePathsFromFolder.size(); i++) { // Delete all images in folder
                 boolean deleteSuccess = new File(imagePathsFromFolder.get(i)).delete();
                 if (deleteSuccess) {
                     successfulDeleteImage++;
@@ -75,26 +103,33 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
                 unsuccessfulDeleteFolder++;
             } else {
                 successfulDeleteFolder++;
-                folderToDelete.delete(); // Delete the empty directory
+                currentFolders.remove(folderPosition);
+                folderToDelete.delete(); // Delete the empty folder
             }
         }
+        return currentFolders;
     }
     
 
-	private void deleteSelectedImages() {
-		Log.d(TAG, "Selected items are " + mSelectedItemsList);
+    private ArrayList<List <String>> deleteSelectedImages() {
+    	ArrayList<List <String>> currentFolders = mMainFragment.getImagePaths();
+        
         for (int imagePosition : mSelectedItemsList) {
-            File imageToDelete = new File(((GridViewImageAdapter) mAdapter).getImagePaths().get(imagePosition));
+        	Log.d(TAG, "position is " + imagePosition);
+        	Log.d(TAG, "current folders " + currentFolders.get(mFolderPosition).size());
+            File imageToDelete = new File(currentFolders.get(mFolderPosition).get(imagePosition));
             boolean deleteSuccess = imageToDelete.delete();
             if (deleteSuccess) {
                 successfulDeleteImage++;
+                currentFolders.get(mFolderPosition).remove(imagePosition); // Since deletion was successful, remove the deleted image from the list
             } else {
                 unsuccessfulDeleteImage++;
             }
         }
+        return currentFolders;
     }
     
-    private void toastDeletedFolders() {
+    private void toastDeletedItems() {
         String messageNumberImages;
         String messageSuccess;
         String messageFail;
@@ -113,7 +148,9 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
         }
         
         // Finally show the constructed strings in a toast
-        Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
+        if (successfulDeleteFolder != 0) {
+            Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
+        }
         if (unsuccessfulDeleteFolder != 0) {
             Toast.makeText(mContext, messageFail, Toast.LENGTH_LONG).show();
         }
@@ -132,7 +169,9 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Void> {
         }
         
         // Finally show the constructed strings in a toast
-        Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
+        if (successfulDeleteImage != 0) {
+            Toast.makeText(mContext, messageSuccess, Toast.LENGTH_LONG).show();
+        }
         if (unsuccessfulDeleteImage != 0) {
             Toast.makeText(mContext, messageFail, Toast.LENGTH_LONG).show();
         }

@@ -1,7 +1,8 @@
 package org.sebbas.android.interfaces;
 
-public interface AdapterCallback {
+import java.util.ArrayList;
+
+public interface AdapterCallback<T> {
     public void refreshAdapter();
-    public void updateAdapterInstanceVariables();
-    public void reloadAdapterContent(boolean hiddenFolders);
+    public void updateAdapterContent(ArrayList<T> list);
 }

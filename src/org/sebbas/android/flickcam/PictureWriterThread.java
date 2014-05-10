@@ -86,9 +86,8 @@ public class PictureWriterThread extends Thread {
                         mCameraUICommunicator.alertCameraThread(FAILED_TO_SAVE_PICTURE);
                         Log.d(TAG, "Saving Image Failed!");
                     } finally {
-                        // We have to refresh the grid view UI to make the new photo show up
-                        //mMainFragment.reloadFolderGallery();
-                        mMainFragment.getAdapter().notifyDataSetChanged();
+                        // We have to rescan the device to update the folders and then update the gallery UI
+                        mMainFragment.reloadFolderPaths();
                     }
                 }
             }

@@ -4,7 +4,7 @@
     xmlns:flickcam="http://schemas.android.com/apk/res/org.sebbas.android.flickcam"
     
     android:id="@+id/container"
-    android:background="@android:color/black"
+    android:background="@color/app_background"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"

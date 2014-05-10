@@ -8,7 +8,6 @@ import org.sebbas.android.flickcam.MainFragmentActivity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentStatePagerAdapter;
 
 public class MainPagerAdapter extends FragmentStatePagerAdapter {
@@ -24,7 +23,6 @@ public class MainPagerAdapter extends FragmentStatePagerAdapter {
     
     @Override
     public Fragment getItem(int position) {
-    	System.out.println("get item ");
         return mFragments.get(position);
     }
 
@@ -35,11 +33,14 @@ public class MainPagerAdapter extends FragmentStatePagerAdapter {
     
     @Override
     public int getItemPosition(Object object) {
-    	System.out.println("get item position");
+    	System.out.println("Entered");
         if (object instanceof GalleryFragment) {
+        	System.out.println("Entered gallery");
+        	((GalleryFragment) object).refreshAdapter();
         }
         if (object instanceof FolderFragment) {
-        	mMainFragment.reloadFolderGallery();
+        	System.out.println("Entered folder");
+        	((FolderFragment) object).refreshAdapter();
         }
         return super.getItemPosition(object);
     }

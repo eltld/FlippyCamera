@@ -25,7 +25,6 @@ public class FolderViewImageAdapter extends BaseAdapter {
  
     private Context mContext;
     private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
-    private Utils mUtils;
     private MainFragmentActivity mMainFragment;
     private FolderFragment mFolderFragment;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
@@ -34,11 +33,6 @@ public class FolderViewImageAdapter extends BaseAdapter {
         mContext = folderFragment.getActivity();
         mMainFragment = (MainFragmentActivity) folderFragment.getActivity();
         mFolderFragment = folderFragment;
-        mUtils = new Utils(mContext);
-        
-        // Start loading the image paths
-        ImagePathLoader loader = new ImagePathLoader();
-        loader.execute(alsoHiddenImages);
     }
  
     @Override
@@ -54,10 +48,6 @@ public class FolderViewImageAdapter extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-    
-    public ArrayList<List<String>> getImagePaths() {
-        return mImagePaths;
     }
  
     @Override
@@ -122,31 +112,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         previewImage.setVisibility(View.GONE);
     }
     
-    public void loadAdapterContent(boolean alsoHiddenImages) {
-        ImagePathLoader loader = new ImagePathLoader();
-        loader.execute(alsoHiddenImages);
-    }
-    
-    private class ImagePathLoader extends AsyncTask<Boolean, Void, Void> {
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            mMainFragment.setSpinnerIconInProgress(true);
-        }
-
-        @Override
-        protected Void doInBackground(Boolean... params) {
-            mImagePaths = mUtils.getImagePaths(params[0]);
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            notifyDataSetChanged();
-            mMainFragment.setSpinnerIconInProgress(false);
-        }
-        
+    public void updateImagePaths(ArrayList<List <String>> imagePaths) {
+        mImagePaths = imagePaths;
     }
 }

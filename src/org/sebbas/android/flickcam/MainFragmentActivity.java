@@ -1,11 +1,14 @@
 package org.sebbas.android.flickcam;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
+import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
 
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -20,7 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback {
+public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback<String>{
 
     private static final String TAG = "main_fragment";
     private static final int SETTINGS_FRAGMENT_NUMBER = 0;
@@ -35,6 +38,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private int mPosition;
     private ActionBar mActionBar;
     private ViewPager mViewPager;
+    private ArrayList<List <String>> mImagePaths;
+    private Utils mUtils;
     
     // Fragments
     private SettingsFragment mSettingsFragment;
@@ -46,7 +51,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private MenuItem hideHidden;
     private MenuItem spinnerIcon;
     private Menu mMenu;
-    private boolean mHideFolders = true;
+    private boolean mHiddenFolders = true;
     
     private boolean mIsRefreshing;
 
@@ -58,12 +63,17 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         restoreSharedPreferences();
         
         mFragmentManager = getSupportFragmentManager();
+        mUtils = new Utils(this);
         mActionBar = getSupportActionBar();
         mActionBar.hide(); // Immediately hide ActionBar for startup
         
+        // Asynchronously load the image paths
+        ImagePathLoader loader = new ImagePathLoader();
+        loader.execute();
+        
         mSettingsFragment = SettingsFragment.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
-        mFolderFragment = FolderFragment.newInstance(mHideFolders);
+        mFolderFragment = FolderFragment.newInstance();
         
         ArrayList<Fragment> fragmentList = new ArrayList<Fragment>();
         fragmentList.add(mSettingsFragment);
@@ -125,9 +135,9 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
                 return true;
             case R.id.show_hidden:
             case R.id.hide_hidden:
-                mHideFolders = !mHideFolders;
+                mHiddenFolders = !mHiddenFolders;
                 setMenuItemVisibility();
-                mFolderFragment.reloadAdapterContent(mHideFolders);
+                reloadFolderPaths();
                 return true;
                 
             default: 
@@ -151,19 +161,25 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     
     @Override
     public boolean onSupportNavigateUp() {
-        //This method is called when the up button is pressed. Just the pop back stack.
-        getSupportFragmentManager().popBackStackImmediate();
-        handleHomeUpNavigation();
+    	handleNavigationBack();
+    	handleHomeUpNavigation();
         return true;
     }
 
     @Override
 	public void onBackPressed() {
 		super.onBackPressed();
-		//This method is called when the up button is pressed. Just the pop back stack.
-        getSupportFragmentManager().popBackStackImmediate();
-        handleHomeUpNavigation();
+		handleNavigationBack();
+		handleHomeUpNavigation();
 	}
+    
+    private void handleNavigationBack() {
+    	// Make sure the underlying fragments adapter is up to date
+    	mFolderFragment.updateAdapterContent(mImagePaths);
+    	mFolderFragment.refreshAdapter();
+        //This method is called when the up button is pressed. Just the pop back stack.
+        getSupportFragmentManager().popBackStackImmediate();
+    }
     
     private void handleHomeUpNavigation() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
@@ -184,7 +200,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private void restoreSharedPreferences() {
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-        mHideFolders = settings.getBoolean("hideFolderMode", false);
+        mHiddenFolders = settings.getBoolean("hideFolderMode", false);
         //mPosition = settings.getInt("viewpager_position", CAMERA_FRAGMENT_NUMBER);
     }
     
@@ -193,7 +209,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         SharedPreferences.Editor editor = settings.edit();
         
         // Save the hide folder mode
-        editor.putBoolean("hideFolderMode", mHideFolders);
+        editor.putBoolean("hideFolderMode", mHiddenFolders);
         
         // Save the current viewpager position
         //editor.putInt("viewpager_position", mPosition);
@@ -203,8 +219,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     }
     
     private void setMenuItemVisibility() {
-        showHidden.setVisible(!mHideFolders);
-        hideHidden.setVisible(mHideFolders);
+        showHidden.setVisible(!mHiddenFolders);
+        hideHidden.setVisible(mHiddenFolders);
     }
     
     
@@ -243,33 +259,66 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     }
     
     // Allows other threads to request the folderfragment to reload
-    public void reloadFolderGallery() {
+    public void reloadFolderPaths() {
         this.runOnUiThread(new Runnable() {
 
             @Override
             public void run() {
-                mFolderFragment.reloadAdapterContent(mHideFolders);
+            	ImagePathLoader loader = new ImagePathLoader();
+                loader.execute();
             }
             
         });
     }
-    
-    @Override
-    public void refreshAdapter() {
-        mPagerAdapter.notifyDataSetChanged();
+	
+	public boolean getHiddenFoldersMode() {
+		return mHiddenFolders;
+	}
+	
+	public void setHiddenFoldersMode(boolean mode) {
+		mHiddenFolders = mode;
+	}
+	
+	public void updateImagePaths(ArrayList<List <String>> imagePaths) {
+        mImagePaths = imagePaths;
     }
+    
+    public ArrayList<List <String>> getImagePaths() {
+    	return mImagePaths;
+    }
+    
+    private class ImagePathLoader extends AsyncTask<Void, Void, Void> {
 
-    @Override
-    public void reloadAdapterContent(boolean hiddenFolders) {
-        // Not needed here, hence not implemented
-    }
-    
-    public MainPagerAdapter getAdapter() {
-    	return mPagerAdapter;
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            setSpinnerIconInProgress(true);
+        }
+
+        @Override
+        protected Void doInBackground(Void... params) {
+            mImagePaths = mUtils.getImagePaths(getHiddenFoldersMode());
+            mFolderFragment.updateAdapterContent(mImagePaths);
+            
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            mFolderFragment.refreshAdapter();
+            setSpinnerIconInProgress(false);
+        }
+        
     }
 
 	@Override
-	public void updateAdapterInstanceVariables() {
-		// Not needed here, hence not implemented
+	public void refreshAdapter() {
+		mPagerAdapter.notifyDataSetChanged();
+	}
+
+	@Override
+	public void updateAdapterContent(ArrayList<String> list) {
+		// Not needed here hence not implemented
 	}
 }
