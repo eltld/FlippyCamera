@@ -86,11 +86,11 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
     }
 
     private ArrayList<List <String>> deleteSelectedFolders() {
-    	ArrayList<List <String>> currentFolders = mMainFragment.getImagePaths();
+    	ArrayList<List <String>> currentFolders = new ArrayList<List <String>>(mMainFragment.getImagePaths());
     	
         for (int folderPosition : mSelectedItemsList) {
-            File folderToDelete = new File(currentFolders.get(folderPosition).get(0)).getParentFile();
-            List<String> imagePathsFromFolder = currentFolders.get(folderPosition);
+            File folderToDelete = new File(mMainFragment.getImagePaths().get(folderPosition).get(0)).getParentFile();
+            List<String> imagePathsFromFolder = mMainFragment.getImagePaths().get(folderPosition);
             for (int i = 0; i < imagePathsFromFolder.size(); i++) { // Delete all images in folder
                 boolean deleteSuccess = new File(imagePathsFromFolder.get(i)).delete();
                 if (deleteSuccess) {
@@ -112,12 +112,12 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
     
 
     private ArrayList<List <String>> deleteSelectedImages() {
-    	ArrayList<List <String>> currentFolders = mMainFragment.getImagePaths();
+    	ArrayList<List <String>> currentFolders = new ArrayList<List<String>>(mMainFragment.getImagePaths());
         
         for (int imagePosition : mSelectedItemsList) {
         	Log.d(TAG, "position is " + imagePosition);
         	Log.d(TAG, "current folders " + currentFolders.get(mFolderPosition).size());
-            File imageToDelete = new File(currentFolders.get(mFolderPosition).get(imagePosition));
+            File imageToDelete = new File(mMainFragment.getImagePaths().get(mFolderPosition).get(imagePosition));
             boolean deleteSuccess = imageToDelete.delete();
             if (deleteSuccess) {
                 successfulDeleteImage++;

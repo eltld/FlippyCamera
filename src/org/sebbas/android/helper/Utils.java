@@ -150,4 +150,12 @@ public class Utils {
         }
         return false;
     }
+    
+    /*public <T> List<T> cloneList(List<T> list) {
+    	List<T> cloneList = new ArrayList<T>(list.size());
+    	for (T item : list) {
+    		cloneList.add();
+    	}
+    	return cloneList;
+    }*/
 }

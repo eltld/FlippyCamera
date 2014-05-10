@@ -13,12 +13,10 @@ import android.support.v4.app.FragmentStatePagerAdapter;
 public class MainPagerAdapter extends FragmentStatePagerAdapter {
 
     private List<Fragment> mFragments;
-    private MainFragmentActivity mMainFragment;
     
     public MainPagerAdapter(MainFragmentActivity mainFragment, FragmentManager fragmentManager, List<Fragment> fragments) {
         super(fragmentManager);
         mFragments = fragments;
-        mMainFragment = mainFragment;
     }
     
     @Override

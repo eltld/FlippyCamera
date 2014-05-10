@@ -2,6 +2,7 @@ package org.sebbas.android.flickcam;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
@@ -492,6 +493,14 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     
     public ArrayList<Integer> getSelectedItemsList() {
         return mSelectedItemsList;
+    }
+    
+    public int getFolderPosition() {
+    	return mFolderPosition;
+    }
+    
+    public GridView getGridView() {
+    	return mGridView;
     }
 
     @Override

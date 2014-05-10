@@ -12,6 +12,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -45,6 +46,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private SettingsFragment mSettingsFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
+    private GalleryFragment mGalleryragment;
     
     // Overflow items
     private MenuItem showHidden;
@@ -201,7 +203,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         // Restore preferences
         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
         mHiddenFolders = settings.getBoolean("hideFolderMode", false);
-        //mPosition = settings.getInt("viewpager_position", CAMERA_FRAGMENT_NUMBER);
     }
     
     private void saveSharePreferences() {
@@ -211,9 +212,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         // Save the hide folder mode
         editor.putBoolean("hideFolderMode", mHiddenFolders);
         
-        // Save the current viewpager position
-        //editor.putInt("viewpager_position", mPosition);
-
         // Commit the edits!
         editor.commit();
     }
@@ -237,7 +235,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.show();
             mActionBar.setTitle(APP_TITLE);
-           
+            refreshGalleryUI();
         } else if (mPosition == SETTINGS_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
@@ -287,8 +285,16 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     	return mImagePaths;
     }
     
+    // Every time we swipe over to the still opened gallery fragment we refresh it (since there might be a new image)
+    private void refreshGalleryUI() {
+    	GalleryFragment galleryFragment = mFolderFragment.getGalleryFragment();
+        if(galleryFragment != null) galleryFragment.refreshAdapter();
+    }
+    
     private class ImagePathLoader extends AsyncTask<Void, Void, Void> {
 
+    	private GalleryFragment galleryFragment;
+    	
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -300,6 +306,12 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             mImagePaths = mUtils.getImagePaths(getHiddenFoldersMode());
             mFolderFragment.updateAdapterContent(mImagePaths);
             
+            GalleryFragment galleryFragment = mFolderFragment.getGalleryFragment();
+        	if (galleryFragment != null) {
+        		int folderPosition = galleryFragment.getFolderPosition();
+        		
+        		galleryFragment.updateAdapterContent((ArrayList<String>) mImagePaths.get(folderPosition));
+        	}
             return null;
         }
 

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.sebbas.android.helper.DeviceInfo;
+import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.interfaces.CameraUICommunicator;
 
 import android.content.Context;
@@ -29,6 +30,10 @@ public class PictureWriterThread extends Thread {
     private CameraUICommunicator mCameraUICommunicator;
     private Context mContext;
     private MainFragmentActivity mMainFragment;
+    
+    public PictureWriterThread() {
+    	
+    }
     
     public PictureWriterThread(Context context, CameraUICommunicator cameraThreadListener) {
         mContext = context;

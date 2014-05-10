@@ -15,7 +15,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.graphics.Rect;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -29,7 +28,6 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
@@ -113,11 +111,11 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
                     transaction.addToBackStack("gallery_fragment");
                     transaction.commit();
                 } else {
-                    // Show and hide certain action mode items
-                    manageActionModeItems();
+                    
                     // Keep track of which items are selected. Then notify the adapter
                     manageSelectedItemsList(position);
-                    
+                    // Show and hide certain action mode items
+                    manageActionModeItems();
                     
                 }
             }
@@ -149,10 +147,11 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     	 // Show and hide the edit item depending on how many items are currently selected
     	if (mActionMode != null) {
     	    MenuItem editItem = mActionMode.getMenu().findItem(R.id.edit_folder);
-            if (mSelectedItemsList.size() > 1) {
-            	editItem.setVisible(false);
-            } else {
+    	    Log.d(TAG, "list is: " + mSelectedItemsList);
+            if (mSelectedItemsList.size() == 1) {
             	editItem.setVisible(true);
+            } else {
+            	editItem.setVisible(false);
             }
     	}
         
@@ -292,6 +291,10 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     	mMainFragment.setHiddenFoldersMode(mode);
     }
     
+    public GalleryFragment getGalleryFragment() {
+    	return mGalleryFragment;
+    }
+    
     public void finishActionMode() {
         if (mActionMode != null) {
             mActionMode.finish();
@@ -328,8 +331,8 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
                      File updatedFile = new File(selectedFile.getParent() + "/" + userInput.getText().toString());
                      boolean renameSuccess = selectedFile.renameTo(updatedFile);
                      if (renameSuccess) {
-                    	 //manageSelectedItemsList(mSelectedItemsList.get(0));
-                         //reloadAdapterContent(getHiddenFoldersMode());
+                    	 manageSelectedItemsList(mSelectedItemsList.get(0)); // This deselects the edited folder
+                         mMainFragment.reloadFolderPaths(); // Only this makes the new name appear in the UI
                      } else {
                     	 startRenameErrorAlert();
                      }
@@ -369,7 +372,7 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         // show it
         alertDialog.show();
     }
-
+    
     @Override
     public void refreshAdapter() {
         mAdapter.notifyDataSetChanged();
