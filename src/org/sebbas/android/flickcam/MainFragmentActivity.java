@@ -49,8 +49,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private GalleryFragment mGalleryragment;
     
     // Overflow items
-    private MenuItem showHidden;
-    private MenuItem hideHidden;
+    private MenuItem mMenuShowHidden;
+    private MenuItem mMenuHideHidden;
     private MenuItem spinnerIcon;
     private Menu mMenu;
     private boolean mHiddenFolders = true;
@@ -118,8 +118,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main, menu);
-        showHidden = menu.findItem(R.id.show_hidden);
-        hideHidden = menu.findItem(R.id.hide_hidden); 
+        mMenuShowHidden = menu.findItem(R.id.show_hidden);
+        mMenuHideHidden = menu.findItem(R.id.hide_hidden); 
         spinnerIcon = menu.findItem(R.id.spinner_icon);
         mMenu = menu;
         setSpinnerIconInProgress(mIsRefreshing);
@@ -153,6 +153,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         Log.d(TAG, "ON RESUME");
         restoreSharedPreferences(); // Restore the preferences from the previous session
         setActionItems(); // Re-set the action bar (showing or not)
+        setupActionBarTitle();
     }
     
     @Override
@@ -163,8 +164,10 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     
     @Override
     public boolean onSupportNavigateUp() {
+    	super.onSupportNavigateUp();
     	handleNavigationBack();
     	handleHomeUpNavigation();
+    	setupActionBarTitle();
         return true;
     }
 
@@ -173,7 +176,12 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
 		super.onBackPressed();
 		handleNavigationBack();
 		handleHomeUpNavigation();
+		setupActionBarTitle();
 	}
+    
+    private void setupActionBarTitle() {
+    	this.getSupportActionBar().setTitle(R.string.app_name);
+    }
     
     private void handleNavigationBack() {
     	// Make sure the underlying fragments adapter is up to date
@@ -188,10 +196,14 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         	// Turn on the "off" back navigation option
             getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            // Set the app name in the action bar
+            getSupportActionBar().setTitle(R.string.app_name);
         } else {
         	// Turn on the "on" back navigation option
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            // Set the name of the current folder
+            mFolderFragment.getGalleryFragment().setupActionBarTitle();
         }
     }
 
@@ -217,10 +229,9 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     }
     
     private void setMenuItemVisibility() {
-        showHidden.setVisible(!mHiddenFolders);
-        hideHidden.setVisible(mHiddenFolders);
+        mMenuShowHidden.setVisible(!mHiddenFolders);
+        mMenuHideHidden.setVisible(mHiddenFolders);
     }
-    
     
     private void setActionItems() {
     	System.out.println("count is " + getSupportFragmentManager().getBackStackEntryCount());
@@ -234,7 +245,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.show();
-            mActionBar.setTitle(APP_TITLE);
             refreshGalleryUI();
         } else if (mPosition == SETTINGS_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);

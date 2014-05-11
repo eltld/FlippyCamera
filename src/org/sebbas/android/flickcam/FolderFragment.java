@@ -74,7 +74,9 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         mGridView = (GridView) mFrameLayout.findViewById(R.id.folder_grid_view);
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
+        
         setupGridView();
+        
         return mFrameLayout;
     }
     
@@ -85,6 +87,10 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         mMainFragment.getSupportFragmentManager().popBackStack();
         mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
         mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+    }
+    
+    private void setupActionBarTitle() {
+    	mMainFragment.getSupportActionBar().setTitle(R.string.app_name);
     }
 
     private void setupGridView() {

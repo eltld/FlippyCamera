@@ -121,8 +121,8 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
         mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
     
-    private void setupActionBarTitle() {
-    	mMainFragment.getSupportActionBar().setTitle(mUtils.getFolderName(mImagePaths) + "(" + mImagePaths.size() + ")");
+    public void setupActionBarTitle() {
+    	mMainFragment.getSupportActionBar().setTitle(mUtils.getFolderName(mImagePaths) + " (" + mImagePaths.size() + ")");
     }
     
     public void setupGridView() {
