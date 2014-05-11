@@ -48,6 +48,10 @@
             android:name="FullScreenViewActivity"
             android:theme="@style/FlickCamera">
         </activity>
+        <activity 
+            android:name="FullScreenImageSliderActivity"
+            android:theme="@style/FlickCamera">
+        </activity>
     </application>
 
 </manifest>

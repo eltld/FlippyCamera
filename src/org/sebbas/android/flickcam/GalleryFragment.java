@@ -19,6 +19,7 @@ import com.nineoldandroids.view.ViewHelper;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +28,8 @@ import android.graphics.Rect;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.view.ActionMode;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -59,6 +62,8 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     
     private Context mContext;
     private MainFragmentActivity mMainFragment;
+    private FullScreenImageSliderFragment mFullScreenImageSliderFragment;
+    
     private ImageView expandedImageView;
     private FrameLayout mFrameLayout;
     private ProgressBar mLoadingImageSpinner;
@@ -113,6 +118,12 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     }
 
     @Override
+	public void onResume() {
+		super.onResume();
+		setupActionBarTitle();
+	}
+
+	@Override
     public void onPause() {
         super.onPause();
         // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
@@ -141,7 +152,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
             
                 // Only enlarge the image if we are not in action mode
                 if (mActionMode == null) {
-                    if (!mIsLoadingBitmap) {
+                    /*if (!mIsLoadingBitmap) {
                         mIsLoadingBitmap = true;
                         mBitmapLoader = new BitmapLoader();
                         mBitmapLoader.execute(position);
@@ -149,7 +160,16 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
                         mLoadingImageSpinner.setVisibility(View.INVISIBLE);
                         mIsLoadingBitmap = false;
                         mBitmapLoader.cancel(true);
-                    }
+                    }*/
+                	
+                	FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
+                    FragmentTransaction transaction = manager.beginTransaction();
+                    mFullScreenImageSliderFragment = FullScreenImageSliderFragment.newInstance(mImagePaths, position);
+                    transaction.replace(R.id.container, mFullScreenImageSliderFragment);
+                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+                    transaction.addToBackStack("fullscreen_fragment");
+                    transaction.commit();
+                	
                 } else {
                     // Keep track of which items are selected. Then notify the adapter
                     manageSelectedItemsList(position); 
@@ -504,8 +524,8 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     	return mFolderPosition;
     }
     
-    public GridView getGridView() {
-    	return mGridView;
+    public FullScreenImageSliderFragment getFullScreenImageSliderFragment() {
+    	return mFullScreenImageSliderFragment;
     }
 
     @Override

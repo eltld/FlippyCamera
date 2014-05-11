@@ -46,7 +46,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private SettingsFragment mSettingsFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
-    private GalleryFragment mGalleryragment;
     
     // Overflow items
     private MenuItem mMenuShowHidden;
@@ -152,8 +151,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         super.onResume();
         Log.d(TAG, "ON RESUME");
         restoreSharedPreferences(); // Restore the preferences from the previous session
-        setActionItems(); // Re-set the action bar (showing or not)
-        setupActionBarTitle();
+        //setActionItems(); // Re-set the action bar (showing or not)
+        //setupActionBarTitle();
     }
     
     @Override
@@ -167,7 +166,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     	super.onSupportNavigateUp();
     	handleNavigationBack();
     	handleHomeUpNavigation();
-    	setupActionBarTitle();
+    	//setupActionBarTitle();
         return true;
     }
 
@@ -176,7 +175,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
 		super.onBackPressed();
 		handleNavigationBack();
 		handleHomeUpNavigation();
-		setupActionBarTitle();
+		//setupActionBarTitle();
 	}
     
     private void setupActionBarTitle() {
@@ -187,23 +186,31 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     	// Make sure the underlying fragments adapter is up to date
     	mFolderFragment.updateAdapterContent(mImagePaths);
     	mFolderFragment.refreshAdapter();
-        //This method is called when the up button is pressed. Just the pop back stack.
+        //This method is called when the up button is pressed. Just pop the back stack.
+    	System.out.println("before count is " + getSupportFragmentManager().getBackStackEntryCount());
         getSupportFragmentManager().popBackStackImmediate();
+        System.out.println("after count is " + getSupportFragmentManager().getBackStackEntryCount());
     }
     
     private void handleHomeUpNavigation() {
-        if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+        if (getSupportFragmentManager().getBackStackEntryCount() == 0 && mPosition == GALLERY_FRAGMENT_NUMBER) {
         	// Turn on the "off" back navigation option
             getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             // Set the app name in the action bar
             getSupportActionBar().setTitle(R.string.app_name);
-        } else {
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 1 && mPosition == GALLERY_FRAGMENT_NUMBER) {
         	// Turn on the "on" back navigation option
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             // Set the name of the current folder
             mFolderFragment.getGalleryFragment().setupActionBarTitle();
+        } else if (getSupportFragmentManager().getBackStackEntryCount() == 2 && mPosition == GALLERY_FRAGMENT_NUMBER) {
+        	// Turn on the "on" back navigation option
+            getSupportActionBar().setHomeButtonEnabled(true);
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            // Set the name of the current file
+            //mFolderFragment.getGalleryFragment().getFullScreenImageSliderFragment().getImageSlideFragment().setupActionBarTitle();
         }
     }
 
@@ -234,23 +241,25 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     }
     
     private void setActionItems() {
-    	System.out.println("count is " + getSupportFragmentManager().getBackStackEntryCount());
         if (mPosition == CAMERA_FRAGMENT_NUMBER) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.hide();
             mFolderFragment.finishActionMode(); // Also handles finish action mode of any child fragments
-            
         } else if (mPosition == GALLERY_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.show();
+            //mActionBar.setTitle(R.string.app_name);
             refreshGalleryUI();
         } else if (mPosition == SETTINGS_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             mActionBar.show();
             mActionBar.setTitle(SETTINGS_TITLE);
+            
+            // Empty the back stack completely
+            getSupportFragmentManager().popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
         }
     }
     

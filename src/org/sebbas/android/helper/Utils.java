@@ -158,4 +158,8 @@ public class Utils {
     		return AppConstant.DEFAULT_FOLDER_NAME;
     	}
     }
+    
+    public String getFileName(String filePath) {
+    	return (new File(filePath)).getName();
+    }
 }

@@ -71,13 +71,13 @@ public class GridViewImageAdapter extends BaseAdapter {
         }
         
         // Trigger the download of the URL asynchronously into the image view.
-        Picasso.with(mContext) //
+        Picasso.with(mContext)
             .load(new File(url)) 
             .noFade()
             .centerCrop()
-            .placeholder(R.drawable.ic_action_camera) //
-            .error(R.drawable.ic_action_camera) //
-            .fit() //
+            .placeholder(R.drawable.ic_action_camera)
+            .error(R.drawable.ic_action_camera)
+            .fit()
             .into(squaredView);
         return squaredView;
     }
