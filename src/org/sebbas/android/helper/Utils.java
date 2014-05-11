@@ -151,11 +151,11 @@ public class Utils {
         return false;
     }
     
-    /*public <T> List<T> cloneList(List<T> list) {
-    	List<T> cloneList = new ArrayList<T>(list.size());
-    	for (T item : list) {
-    		cloneList.add();
+    public String getFolderName(List<String> imagePaths) {
+    	if (!imagePaths.isEmpty()) {
+    		return (new File(imagePaths.get(0)).getParentFile().getName());
+    	} else {
+    		return AppConstant.DEFAULT_FOLDER_NAME;
     	}
-    	return cloneList;
-    }*/
+    }
 }

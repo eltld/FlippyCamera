@@ -23,16 +23,19 @@ import android.widget.TextView;
  
 public class FolderViewImageAdapter extends BaseAdapter {
  
+	private static final String DEFAULT_FOLDER_NAME = "Untitled folder";
     private Context mContext;
     private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
     private MainFragmentActivity mMainFragment;
     private FolderFragment mFolderFragment;
+    private Utils mUtils;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
  
     public FolderViewImageAdapter(FolderFragment folderFragment, boolean alsoHiddenImages) {
         mContext = folderFragment.getActivity();
         mMainFragment = (MainFragmentActivity) folderFragment.getActivity();
         mFolderFragment = folderFragment;
+        mUtils = new Utils(mContext);
     }
  
     @Override
@@ -83,7 +86,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         
         // Setup TextView for folder. Shows the folder name
         TextView folderName = (TextView)folderView.findViewById(R.id.folder_name);
-        folderName.setText((new File(imagePaths.get(0)).getParentFile().getName()));
+        folderName.setText(mUtils.getFolderName(imagePaths));
         
         // Setup TextView for folder. Shows the folder name
         TextView folderSize = (TextView)folderView.findViewById(R.id.folder_size);

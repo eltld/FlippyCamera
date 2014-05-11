@@ -12,5 +12,6 @@ public class AppConstant {
     public static final int GRID_PADDING = 7; // Gridview image padding (in dp)
     public static final String PHOTO_ALBUM = Environment.DIRECTORY_PICTURES + "/FlickCam"; // SD card image directory
     public static final List<String> FILE_EXTN = Arrays.asList("jpg", "jpeg", "png", "gif"); // supported file formats
+    public static final String DEFAULT_FOLDER_NAME = "Untitled Folder";
 
 }
