@@ -209,8 +209,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         	// Turn on the "on" back navigation option
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-            // Set the name of the current file
-            //mFolderFragment.getGalleryFragment().getFullScreenImageSliderFragment().getImageSlideFragment().setupActionBarTitle();
         }
     }
 

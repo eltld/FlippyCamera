@@ -118,12 +118,12 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     }
 
     @Override
-	public void onResume() {
-		super.onResume();
-		setupActionBarTitle();
-	}
+    public void onResume() {
+        super.onResume();
+        setupActionBarTitle();
+    }
 
-	@Override
+    @Override
     public void onPause() {
         super.onPause();
         // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
@@ -133,7 +133,7 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     }
     
     public void setupActionBarTitle() {
-    	mMainFragment.getSupportActionBar().setTitle(mUtils.getFolderName(mImagePaths) + " (" + mImagePaths.size() + ")");
+        mMainFragment.getSupportActionBar().setTitle(mUtils.getFolderName(mImagePaths) + " (" + mImagePaths.size() + ")");
     }
     
     public void setupGridView() {
@@ -161,15 +161,15 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
                         mIsLoadingBitmap = false;
                         mBitmapLoader.cancel(true);
                     }*/
-                	
-                	FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
+                    
+                    FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
                     FragmentTransaction transaction = manager.beginTransaction();
                     mFullScreenImageSliderFragment = FullScreenImageSliderFragment.newInstance(mImagePaths, position);
                     transaction.replace(R.id.container, mFullScreenImageSliderFragment);
                     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
                     transaction.addToBackStack("fullscreen_fragment");
                     transaction.commit();
-                	
+                    
                 } else {
                     // Keep track of which items are selected. Then notify the adapter
                     manageSelectedItemsList(position); 
@@ -511,9 +511,9 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     }
     
     public void finishActionMode() {
-    	if (mActionMode != null) {
-    		mActionMode.finish();
-    	}
+        if (mActionMode != null) {
+            mActionMode.finish();
+        }
     }
     
     public ArrayList<Integer> getSelectedItemsList() {
@@ -521,11 +521,11 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
     }
     
     public int getFolderPosition() {
-    	return mFolderPosition;
+        return mFolderPosition;
     }
     
     public FullScreenImageSliderFragment getFullScreenImageSliderFragment() {
-    	return mFullScreenImageSliderFragment;
+        return mFullScreenImageSliderFragment;
     }
 
     @Override

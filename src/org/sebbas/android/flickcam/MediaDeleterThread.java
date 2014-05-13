@@ -160,7 +160,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
         String messageSuccess;
         String messageFail;
 
-        if (successfulDeleteFolder == 1) {
+        if (successfulDeleteImage == 1) {
             messageSuccess = "Deleted " + successfulDeleteImage + " image successfully";
             messageFail = "Could not delete " + unsuccessfulDeleteImage + " image";
         } else {
