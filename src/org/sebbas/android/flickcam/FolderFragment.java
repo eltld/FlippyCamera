@@ -81,6 +81,12 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     }
     
     @Override
+	public void onResume() {
+		super.onResume();
+		setupActionBarTitle();
+	}
+
+	@Override
     public void onPause() {
         super.onPause();
         // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
