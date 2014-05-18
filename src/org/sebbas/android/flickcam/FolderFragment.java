@@ -276,7 +276,6 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear(); // Clear list since nothing is supposed to be selected at this point
-            refreshAdapter(); // Refresh the adapter so that the pending borders get reset
             mActionMode = null;
         }
     };

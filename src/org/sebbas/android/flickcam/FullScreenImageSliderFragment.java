@@ -2,21 +2,18 @@ package org.sebbas.android.flickcam;
 
 import java.util.ArrayList;
 
-import android.content.Intent;
+import org.sebbas.android.adapter.ImageSlidePagerAdapter;
+import org.sebbas.android.interfaces.AdapterCallback;
+
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
-public class FullScreenImageSliderFragment extends Fragment {
+public class FullScreenImageSliderFragment extends Fragment implements AdapterCallback<String> {
 
     private ViewPager mPager;
     private ImageSlidePagerAdapter mPagerAdapter;
@@ -24,25 +21,25 @@ public class FullScreenImageSliderFragment extends Fragment {
     private int mFolderPosition;
 
     public static FullScreenImageSliderFragment newInstance(ArrayList<String> imagePaths, int position) {
-    	FullScreenImageSliderFragment fullScreenImageSliderFragment = new FullScreenImageSliderFragment();
-    	
-    	Bundle args = new Bundle();
-    	args.putStringArrayList("imagePaths", imagePaths);
-    	args.putInt("position", position);
-    	fullScreenImageSliderFragment.setArguments(args);
-    	
-    	return fullScreenImageSliderFragment;
+        FullScreenImageSliderFragment fullScreenImageSliderFragment = new FullScreenImageSliderFragment();
+        
+        Bundle args = new Bundle();
+        args.putStringArrayList("imagePaths", imagePaths);
+        args.putInt("position", position);
+        fullScreenImageSliderFragment.setArguments(args);
+        
+        return fullScreenImageSliderFragment;
     }
     
     @Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		mImagePaths = this.getArguments().getStringArrayList("imagePaths");
-		mFolderPosition = this.getArguments().getInt("position");
-	}
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mImagePaths = this.getArguments().getStringArrayList("imagePaths");
+        mFolderPosition = this.getArguments().getInt("position");
+    }
 
-	@Override
-	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LinearLayout rootLayout = (LinearLayout)inflater.inflate(R.layout.image_fullscreen_view, container, false);
         
@@ -54,29 +51,18 @@ public class FullScreenImageSliderFragment extends Fragment {
         
         return rootLayout;
     }
-	
-	public ImageSlideFragment getImageSlideFragment() {
-		return (ImageSlideFragment) mPagerAdapter.getItem(mFolderPosition);
-	}
+    
+    public ImageSlideFragment getImageSlideFragment() {
+        return (ImageSlideFragment) mPagerAdapter.getItem(mFolderPosition);
+    }
 
-	
-    private class ImageSlidePagerAdapter extends FragmentStatePagerAdapter {
-    	
-    	private ArrayList<String> mImagePaths;
-    	
-        public ImageSlidePagerAdapter(FragmentManager fm, ArrayList<String> imagePaths) {
-            super(fm);
-            mImagePaths = imagePaths;
-        }
+    @Override
+    public void refreshAdapter() {
+        mPagerAdapter.notifyDataSetChanged();
+    }
 
-        @Override
-        public Fragment getItem(int position) {
-            return ImageSlideFragment.newInstance(mImagePaths.get(position));
-        }
-
-        @Override
-        public int getCount() {
-            return mImagePaths.size();
-        }
+    @Override
+    public void updateAdapterContent(ArrayList<String> imagePaths) {
+        mPagerAdapter.updateImagePaths(imagePaths);
     }
 }

@@ -15,6 +15,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Toast;
  
 public class GridViewImageAdapter extends BaseAdapter {
  
@@ -81,9 +82,8 @@ public class GridViewImageAdapter extends BaseAdapter {
             .into(squaredView);
         return squaredView;
     }
-    
-    
-    public void updateImagePaths(ArrayList<String> imagePaths) {
+
+	public void updateImagePaths(ArrayList<String> imagePaths) {
         mImagePaths = imagePaths;
     }
 }

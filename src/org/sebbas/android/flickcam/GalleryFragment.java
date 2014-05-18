@@ -501,7 +501,6 @@ public class GalleryFragment extends Fragment implements AdapterCallback<String>
         @Override
         public void onDestroyActionMode(ActionMode mode) {
             mSelectedItemsList.clear(); // Clear list since nothing is supposed to be selected at this point
-            refreshAdapter(); // Refresh the adapter so that the pending borders get reset
             mActionMode = null;
         }
     };

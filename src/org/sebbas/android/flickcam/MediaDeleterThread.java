@@ -5,14 +5,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.sebbas.android.adapter.FolderViewImageAdapter;
-import org.sebbas.android.adapter.GridViewImageAdapter;
 
 import android.content.Context;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.util.Log;
-import android.widget.BaseAdapter;
 import android.widget.Toast;
 
 public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
@@ -72,7 +69,10 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
     @Override
     protected void onPostExecute(Object result) {
         super.onPostExecute(result);
+        
+        ArrayList<List<String>> oldFolders = mMainFragment.getImagePaths();
         ArrayList<List <String>> newFolders = (ArrayList<List <String>>) result;
+        
         mMainFragment.updateImagePaths(newFolders); // Update the "root" image paths 
         if (mDeleteModeId == 0) {
             toastDeletedItems();
@@ -80,8 +80,15 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
             ((FolderFragment) mFragment).refreshAdapter();
         } else if (mDeleteModeId == 1) {
             toastDeletedImages();
-            ((GalleryFragment) mFragment).updateAdapterContent((ArrayList<String>) newFolders.get(mFolderPosition));
-            ((GalleryFragment) mFragment).refreshAdapter();
+            // If there are less folders now (-> newFolders < oldFolders) then an entire folder was deleted and we navigate back to folder view
+            if (oldFolders.size() > newFolders.size()) {
+            	((MainFragmentActivity) mFragment.getActivity()).handleNavigationBack();
+            	((MainFragmentActivity) mFragment.getActivity()).handleHomeUpNavigation();
+            } else {
+            	((GalleryFragment) mFragment).updateAdapterContent((ArrayList<String>) newFolders.get(mFolderPosition));
+                ((GalleryFragment) mFragment).refreshAdapter();
+                ((GalleryFragment) mFragment).setupActionBarTitle();
+            }
         }
     }
 
@@ -139,7 +146,7 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
         } else {
             messageNumberImages = "(" + successfulDeleteImage + " images)";
         }
-        if (successfulDeleteFolder == 1) {
+        if (successfulDeleteFolder == 1 || unsuccessfulDeleteFolder == 1) {
             messageSuccess = "Deleted " + successfulDeleteFolder + " folder " + messageNumberImages + " successfully";
             messageFail = "Could not delete " + unsuccessfulDeleteFolder + " folder";
         } else {

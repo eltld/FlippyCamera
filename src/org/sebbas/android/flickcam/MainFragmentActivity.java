@@ -4,15 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
+import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
+import org.sebbas.android.viewpager.DepthPageTransformer;
+import org.sebbas.android.viewpager.ZoomOutPageTransformer;
 
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -31,7 +33,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private static final int CAMERA_FRAGMENT_NUMBER = 1;
     private static final int GALLERY_FRAGMENT_NUMBER = 2;
     private static final String SETTINGS_TITLE = "Settings";
-    private static final String APP_TITLE = "FlickCam";
     private static final String PREFS_NAME = "FlickCamPrefsFile";
         
     private MainPagerAdapter mPagerAdapter;
@@ -109,7 +110,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             }
             
         });
-        //mViewPager.setPageTransformer(true, new DepthPageTransformer());
+        
+        if (DeviceInfo.supportsSDK(11)) mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());
         mViewPager.setAdapter(mPagerAdapter);
         mViewPager.setCurrentItem(CAMERA_FRAGMENT_NUMBER);
     }
@@ -151,8 +153,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         super.onResume();
         Log.d(TAG, "ON RESUME");
         restoreSharedPreferences(); // Restore the preferences from the previous session
-        //setActionItems(); // Re-set the action bar (showing or not)
-        //setupActionBarTitle();
     }
     
     @Override
@@ -163,56 +163,55 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     
     @Override
     public boolean onSupportNavigateUp() {
-    	super.onSupportNavigateUp();
-    	handleNavigationBack();
-    	handleHomeUpNavigation();
-    	//setupActionBarTitle();
+        super.onSupportNavigateUp();
+        handleNavigationBack();
+        handleHomeUpNavigation();
         return true;
     }
 
     @Override
-	public void onBackPressed() {
-		super.onBackPressed();
-		handleNavigationBack();
-		handleHomeUpNavigation();
-		//setupActionBarTitle();
-	}
-    
-    private void setupActionBarTitle() {
-    	this.getSupportActionBar().setTitle(R.string.app_name);
+    public void onBackPressed() {
+        super.onBackPressed();
+        handleNavigationBack();
+        handleHomeUpNavigation();
+        //setupActionBarTitle();
     }
     
-    private void handleNavigationBack() {
-    	// Make sure the underlying fragments adapter is up to date
-    	mFolderFragment.updateAdapterContent(mImagePaths);
-    	mFolderFragment.refreshAdapter();
+    private void setupActionBarTitle() {
+        this.getSupportActionBar().setTitle(R.string.app_name);
+    }
+    
+    public void handleNavigationBack() {
+        // Make sure the underlying fragments adapter is up to date
+        mFolderFragment.updateAdapterContent(mImagePaths);
+        mFolderFragment.refreshAdapter();
         //This method is called when the up button is pressed. Just pop the back stack.
-    	System.out.println("before count is " + getSupportFragmentManager().getBackStackEntryCount());
+        System.out.println("before count is " + getSupportFragmentManager().getBackStackEntryCount());
         getSupportFragmentManager().popBackStackImmediate();
         System.out.println("after count is " + getSupportFragmentManager().getBackStackEntryCount());
     }
     
-    private void handleHomeUpNavigation() {
+    public void handleHomeUpNavigation() {
         if (getSupportFragmentManager().getBackStackEntryCount() == 0 && mPosition == GALLERY_FRAGMENT_NUMBER) {
-        	// Turn on the "off" back navigation option
+            // Turn on the "off" back navigation option
             getSupportActionBar().setHomeButtonEnabled(false);
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             // Set the app name in the action bar
             getSupportActionBar().setTitle(R.string.app_name);
         } else if (getSupportFragmentManager().getBackStackEntryCount() == 1 && mPosition == GALLERY_FRAGMENT_NUMBER) {
-        	// Turn on the "on" back navigation option
+            // Turn on the "on" back navigation option
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             // Set the name of the current folder
             mFolderFragment.getGalleryFragment().setupActionBarTitle();
         } else if (getSupportFragmentManager().getBackStackEntryCount() == 2 && mPosition == GALLERY_FRAGMENT_NUMBER) {
-        	// Turn on the "on" back navigation option
+            // Turn on the "on" back navigation option
             getSupportActionBar().setHomeButtonEnabled(true);
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
     }
 
-	private int getPageMargin() {
+    private int getPageMargin() {
         return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 20*2, getResources().getDisplayMetrics());
     }
     
@@ -279,39 +278,43 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
 
             @Override
             public void run() {
-            	ImagePathLoader loader = new ImagePathLoader();
+                ImagePathLoader loader = new ImagePathLoader();
                 loader.execute();
             }
             
         });
     }
-	
-	public boolean getHiddenFoldersMode() {
-		return mHiddenFolders;
-	}
-	
-	public void setHiddenFoldersMode(boolean mode) {
-		mHiddenFolders = mode;
-	}
-	
-	public void updateImagePaths(ArrayList<List <String>> imagePaths) {
+    
+    public boolean getHiddenFoldersMode() {
+        return mHiddenFolders;
+    }
+    
+    public void setHiddenFoldersMode(boolean mode) {
+        mHiddenFolders = mode;
+    }
+    
+    public void updateImagePaths(ArrayList<List <String>> imagePaths) {
         mImagePaths = imagePaths;
     }
     
     public ArrayList<List <String>> getImagePaths() {
-    	return mImagePaths;
+        return mImagePaths;
     }
     
     // Every time we swipe over to the still opened gallery fragment we refresh it (since there might be a new image)
     private void refreshGalleryUI() {
-    	GalleryFragment galleryFragment = mFolderFragment.getGalleryFragment();
-        if(galleryFragment != null) galleryFragment.refreshAdapter();
+        GalleryFragment galleryFragment = mFolderFragment.getGalleryFragment();
+        if(galleryFragment != null) {
+            galleryFragment.refreshAdapter();
+            FullScreenImageSliderFragment fullscreenFragment = galleryFragment.getFullScreenImageSliderFragment();
+            if (fullscreenFragment != null) {
+                fullscreenFragment.refreshAdapter();
+            }
+        }
     }
     
     private class ImagePathLoader extends AsyncTask<Void, Void, Void> {
 
-    	private GalleryFragment galleryFragment;
-    	
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
@@ -323,12 +326,19 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             mImagePaths = mUtils.getImagePaths(getHiddenFoldersMode());
             mFolderFragment.updateAdapterContent(mImagePaths);
             
+            // Update the gallery view fragment
             GalleryFragment galleryFragment = mFolderFragment.getGalleryFragment();
-        	if (galleryFragment != null) {
-        		int folderPosition = galleryFragment.getFolderPosition();
-        		
-        		galleryFragment.updateAdapterContent((ArrayList<String>) mImagePaths.get(folderPosition));
-        	}
+            if (galleryFragment != null) {
+                int folderPosition = galleryFragment.getFolderPosition();
+                
+                galleryFragment.updateAdapterContent((ArrayList<String>) mImagePaths.get(folderPosition));
+                
+                // Update the fullscreen view fragment
+                FullScreenImageSliderFragment fullscreenFragment = galleryFragment.getFullScreenImageSliderFragment();
+                if (fullscreenFragment != null) {
+                    fullscreenFragment.updateAdapterContent((ArrayList<String>) mImagePaths.get(folderPosition));
+                }
+            }
             return null;
         }
 
@@ -341,13 +351,13 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         
     }
 
-	@Override
-	public void refreshAdapter() {
-		mPagerAdapter.notifyDataSetChanged();
-	}
+    @Override
+    public void refreshAdapter() {
+        mPagerAdapter.notifyDataSetChanged();
+    }
 
-	@Override
-	public void updateAdapterContent(ArrayList<String> list) {
-		// Not needed here hence not implemented
-	}
+    @Override
+    public void updateAdapterContent(ArrayList<String> list) {
+        // Not needed here hence not implemented
+    }
 }
