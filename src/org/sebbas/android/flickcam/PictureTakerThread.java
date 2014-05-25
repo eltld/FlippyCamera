@@ -6,6 +6,7 @@ import org.sebbas.android.interfaces.CameraUICommunicator;
 
 import android.graphics.ImageFormat;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Handler;
@@ -25,6 +26,7 @@ public class PictureTakerThread extends Thread {
     private PictureCallback mRawCallback;
     private PictureCallback mPostViewCallback;
     private PictureCallback mJpegCallback;
+    private AutoFocusCallback mAutoFocusCallback;
     
     private PictureWriterThread mPictureWriterThread;
     private CameraThread mCameraThread;
@@ -111,6 +113,18 @@ public class PictureTakerThread extends Thread {
         
     }
     
+    public void takeFocusedPicture() {
+    	getHandler().post(new Runnable() {
+
+			@Override
+			public void run() {
+				mCameraIsBusy.set(true);
+				mCamera.autoFocus(getAutoFocusCallBack());
+			}
+    		
+    	});
+    }
+    
     private ShutterCallback getShutterCallback() {
         if (mShutterCallback == null) {
             mShutterCallback = new ShutterCallback() {
@@ -147,6 +161,18 @@ public class PictureTakerThread extends Thread {
             };
         }
         return mJpegCallback;
+    }
+    
+    private AutoFocusCallback getAutoFocusCallBack() {
+        if (mAutoFocusCallback == null) {
+            mAutoFocusCallback = new AutoFocusCallback() {
+                @Override
+                public void onAutoFocus(boolean success, Camera camera) {
+                    camera.takePicture(getShutterCallback(), getRawCallback(), getJpegCallback());
+                }
+            };
+        }
+        return mAutoFocusCallback;
     }
     
     public static boolean cameraIsBusy() {

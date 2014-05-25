@@ -250,6 +250,8 @@ public class CameraThread extends Thread {
                         System.out.println("in parameters size is: " + mPreviewSize.width + " / " + mPreviewSize.height);
                         parameters.setPreviewSize(mPreviewSize.width, mPreviewSize.height);
                     }
+                    parameters.setPictureFormat(ImageFormat.JPEG);
+                    parameters.setJpegQuality(100);
                     
                     // Set the current effect of the camera (the will be visible in the camera preview)
                     if (mCurrentEffect != null) {
@@ -380,7 +382,7 @@ public class CameraThread extends Thread {
             @Override
             public void run() {
                 Log.d(TAG, "Started taking picture");
-                mPictureTakerThread.takePicture();
+                mPictureTakerThread.takeFocusedPicture();
             }
             
         });

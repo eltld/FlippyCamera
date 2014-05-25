@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.adapter.MainPagerAdapter;
+import org.sebbas.android.flickcam.PreferenceListFragment.OnPreferenceAttachedListener;
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
@@ -13,6 +14,7 @@ import org.sebbas.android.viewpager.ZoomOutPageTransformer;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceScreen;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -26,7 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.WindowManager;
 
-public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback<String>{
+public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback<String>, OnPreferenceAttachedListener {
 
     private static final String TAG = "main_fragment";
     private static final int SETTINGS_FRAGMENT_NUMBER = 0;
@@ -45,6 +47,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     
     // Fragments
     private SettingsFragment mSettingsFragment;
+    private PreferenceListFragment mPreferenceListFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
     
@@ -68,10 +71,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         mUtils = new Utils(this);
         mActionBar = getSupportActionBar();
         mActionBar.hide(); // Immediately hide ActionBar for startup
-        
-        // Asynchronously load the image paths
-        ImagePathLoader loader = new ImagePathLoader();
-        loader.execute();
         
         mSettingsFragment = SettingsFragment.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
@@ -360,4 +359,8 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     public void updateAdapterContent(ArrayList<String> list) {
         // Not needed here hence not implemented
     }
+
+	@Override
+	public void onPreferenceAttached(PreferenceScreen root, int xmlId) {
+	}
 }

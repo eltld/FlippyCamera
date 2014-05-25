@@ -76,6 +76,7 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
         
         setupGridView();
+        mMainFragment.reloadFolderPaths(); // Fill the adapter with content
         
         return mFrameLayout;
     }
@@ -391,6 +392,6 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
 
     @Override
     public void updateAdapterContent(ArrayList<List <String>> imagePaths) {
-    	mAdapter.updateImagePaths(imagePaths);
+        mAdapter.updateImagePaths(imagePaths);
     }
 }

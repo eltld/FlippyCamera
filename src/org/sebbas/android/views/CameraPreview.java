@@ -51,7 +51,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         Log.d(TAG, "Surface was Changed");
         mCameraThread.startCameraPreview(this);
-        mCameraThread.setupFrameCallback();
+        //mCameraThread.setupFrameCallback();
     }
 
     @Override

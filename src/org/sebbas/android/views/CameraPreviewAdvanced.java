@@ -1,5 +1,12 @@
 package org.sebbas.android.views;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+import javax.microedition.khronos.egl.EGL10;
+import javax.microedition.khronos.opengles.GL;
+
 import org.sebbas.android.flickcam.CameraThread;
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.PreviewGestureListener;
@@ -7,10 +14,20 @@ import org.sebbas.android.interfaces.ScaleListener;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
+import android.opengl.EGLConfig;
+import android.opengl.EGLContext;
+import android.opengl.EGLDisplay;
+import android.opengl.EGLSurface;
+import android.opengl.GLES30;
+import android.opengl.GLUtils;
 import android.support.v4.view.GestureDetectorCompat;
+import android.support.v7.appcompat.R;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -58,7 +75,7 @@ public class CameraPreviewAdvanced extends TextureView implements
             mCameraThread.setCameraPreviewSize(mScreenWidth, mScreenHeight);
             
             mCameraThread.startCameraPreview();
-            mCameraThread.setupFrameCallback();
+            //mCameraThread.setupFrameCallback();
             mCameraThread.initializeHelperThreads();
         }
     }

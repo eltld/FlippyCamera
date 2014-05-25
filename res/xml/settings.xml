@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ppu="http://schemas.android.com/apk/res-auto" >
+ 
+    <PreferenceCategory android:title="My Settings" >
+        <CheckBoxPreference
+            android:summary="My option 1"
+            android:title="Description of my option 1" />
+         
+        <CheckBoxPreference
+            android:summary="My option 1"
+            android:title="Description of my option 2" />
+    </PreferenceCategory>
+    
+ 
+</PreferenceScreen>
