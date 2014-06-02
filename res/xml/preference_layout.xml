@@ -1,6 +1,6 @@
 <PreferenceScreen
         xmlns:android="http://schemas.android.com/apk/res/android">
-
+        
     <PreferenceCategory
             android:title="@string/inline_preferences">
 
@@ -55,7 +55,7 @@
                 android:summary="@string/summary_intent_preference">
 
             <intent android:action="android.intent.action.VIEW"
-                    android:data="http://www.android.com" />
+                    android:data="http://www.sebbas.org" />
 
         </PreferenceScreen>
 

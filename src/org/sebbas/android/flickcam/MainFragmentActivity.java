@@ -46,7 +46,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private Utils mUtils;
     
     // Fragments
-    private SettingsFragment mSettingsFragment;
+    private SettingsFragmentUI mSettingsFragment;
     private PreferenceListFragment mPreferenceListFragment;
     private CameraFragmentUI mCameraFragment;
     private FolderFragment mFolderFragment;
@@ -72,7 +72,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         mActionBar = getSupportActionBar();
         mActionBar.hide(); // Immediately hide ActionBar for startup
         
-        mSettingsFragment = SettingsFragment.newInstance();
+        mSettingsFragment = SettingsFragmentUI.newInstance();
         mCameraFragment = CameraFragmentUI.newInstance();
         mFolderFragment = FolderFragment.newInstance();
         
