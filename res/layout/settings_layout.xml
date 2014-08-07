@@ -1,29 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout 
-    xmlns:flickcam="http://schemas.android.com/apk/res/org.sebbas.android.flickcam"
+<FrameLayout xmlns:flippycamera="http://schemas.android.com/apk/res/org.sebbas.android.flippycamera"
     xmlns:android="http://schemas.android.com/apk/res/android"
     
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent" 
+    android:id="@+id/folder_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
-    android:id="@+id/folder_layout">
-    
-    <LinearLayout
+    android:background="@android:color/black">
+
+    <RelativeLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
         android:orientation="vertical" >
 
         <!-- Here we will programmatically add the preferencefragment -->
-        
-    </LinearLayout>
-    
+
+    </RelativeLayout>
+
     <org.sebbas.android.views.DrawInsetsFrameLayout
+        android:id="@+id/draw_insets_framelayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/draw_insets_framelayout"
-        flickcam:insetBackground="#90000000" >
+        flippycamera:insetBackground="#900ff000" >
     </org.sebbas.android.views.DrawInsetsFrameLayout>
-    
+
 </FrameLayout>

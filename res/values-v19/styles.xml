@@ -1,5 +1,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="FlickCamera" parent="Theme.AppCompat">
+    <style name="FlippyCamera" parent="Theme.AppCompat">
         <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
         <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
         <item name="android:windowActionBarOverlay">true</item>
@@ -9,6 +9,11 @@
         <item name="android:background">@color/transparent</item>
         <item name="android:windowBackground">@color/app_background</item>
         <item name="android:actionModeBackground">@color/transparent</item>
+        
+        <!-- For API-14 and above the default implementation of the navigation drawer menu is used. Below APU-14 a custom implementation is used. -->
+        <item name="myapp_listPreferredItemHeightSmall">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="myapp_textAppearanceListItemSmall">?android:attr/textAppearanceListItemSmall</item>
+        <item name="myapp_activatedBackgroundIndicator">?android:attr/activatedBackgroundIndicator</item>
     </style>
  
     <style name="TranslucentActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
@@ -27,5 +32,17 @@
     <!-- Actionbar Overflow -->
     <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_action_overflow</item>
+    </style>
+    
+    <!-- Gallery style -->
+    <style name="FlippyCameraGallery" parent="Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
     </style>
 </resources>

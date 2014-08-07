@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:orientationButton="http://schemas.android.com/apk/res/org.sebbas.android.flickcam"
+    xmlns:flippycamera="http://schemas.android.com/apk/res/org.sebbas.android.flippycamera"
     
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -19,6 +19,7 @@
         android:id="@+id/camera_view_flipper"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
+    
     </FrameLayout>
     
     <FrameLayout 
@@ -37,7 +38,7 @@
         android:contentDescription="@string/switch_flash"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_flash_off"
-        orientationButton:animationDuration="300" />
+        flippycamera:animationDuration="300" />
     
     <org.sebbas.android.views.OrientationImageButton
         android:id="@+id/switch_camera"
@@ -48,7 +49,7 @@
         android:contentDescription="@string/switch_camera"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_switch_camera"
-        orientationButton:animationDuration="300" />
+        flippycamera:animationDuration="300" />
     
     <org.sebbas.android.views.OrientationImageButton
         android:id="@+id/settings_button"
@@ -60,7 +61,7 @@
         android:contentDescription="@string/goto_settings"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_settings" 
-        orientationButton:animationDuration="300" />
+        flippycamera:animationDuration="300" />
         
     <ImageButton
         android:id="@+id/shutter_button"
@@ -83,7 +84,7 @@
         android:contentDescription="@string/goto_gallery"
         android:background="@drawable/ic_button_selector"
         android:src="@drawable/ic_action_picture" 
-        orientationButton:animationDuration="300" />
+        flippycamera:animationDuration="300" />
     
     <View
         android:id="@+id/navigationbar_filler_view"
@@ -92,4 +93,5 @@
         android:layout_gravity="bottom"/>
     
     </FrameLayout>
+    
 </FrameLayout>

@@ -1,6 +1,8 @@
 package org.sebbas.android.helper;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -9,14 +11,20 @@ import java.util.Locale;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Point;
+import android.media.ThumbnailUtils;
 import android.os.Environment;
+import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 import android.widget.Toast;
  
 public class Utils {
  
+    private static final String TAG = "utils";
+    
     private Context mContext;
 
     public Utils(Context context) {
@@ -24,7 +32,7 @@ public class Utils {
     }
  
     // Reading file paths from SDCard
-    public ArrayList<String> getFilePaths() {
+    /*public ArrayList<String> getFilePaths() {
         ArrayList<String> filePaths = new ArrayList<String>();
 
         File directory = new File(android.os.Environment.getExternalStorageDirectory()
@@ -65,7 +73,7 @@ public class Utils {
             alert.show();
         }
         return filePaths;
-    }
+    }*/
     
     // Check supported file extensions
     private boolean IsSupportedFile(String filePath) {
@@ -126,7 +134,7 @@ public class Utils {
                     
                 }
                 if (imagePaths.size() != 0) {
-                	Collections.reverse(imagePaths);
+                    Collections.reverse(imagePaths);
                     fileList.add(imagePaths);
                 }
             }
@@ -152,14 +160,62 @@ public class Utils {
     }
     
     public String getFolderName(List<String> imagePaths) {
-    	if (!imagePaths.isEmpty()) {
-    		return (new File(imagePaths.get(0)).getParentFile().getName());
-    	} else {
-    		return AppConstant.DEFAULT_FOLDER_NAME;
-    	}
+        if (!imagePaths.isEmpty()) {
+            return (new File(imagePaths.get(0)).getParentFile().getName());
+        } else {
+            return AppConstant.DEFAULT_FOLDER_NAME;
+        }
     }
     
     public String getFileName(String filePath) {
-    	return (new File(filePath)).getName();
+        return (new File(filePath)).getName();
+    }
+    
+    public ArrayList<List<String>> convertImagePathsToThumbnailPaths(ArrayList<List<String>> realImagePaths) {
+        ArrayList<List<String>> thumbnailPaths = new ArrayList<List<String>>();
+        
+        for (List<String> list : realImagePaths) {
+        	List<String> thumbnailList = new ArrayList<String>();
+            for (String imagePath : list) {
+                
+                File thumbnailsFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), AppConstant.FOLDER_THUMBNAILS);
+                if (thumbnailsFile.mkdirs()) {
+                    Log.d(TAG, "Thumbnails folder created");
+                }
+                
+                String parentFolderName = new File(imagePath).getParentFile().getName();
+                String imageName = new File(imagePath).getName();
+                Log.d(TAG, "File name is: " + parentFolderName);
+                
+                File parentFolderFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES + File.separator + AppConstant.FOLDER_THUMBNAILS), parentFolderName);
+                if (parentFolderFile.mkdir()) {
+                    Log.d(TAG, "Parent folder created");
+                }
+                
+                // Generate thumbnail bitmap
+                Bitmap thumbImageBitmap = ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imagePath), AppConstant.THUMBNAIL_WIDTH, AppConstant.THUMBNAIL_HEIGHT);
+                
+                // Write thumbnail to thumbnail folder
+                FileOutputStream out = null;
+                try {
+                    out = new FileOutputStream(parentFolderFile.getAbsolutePath() + File.separator + imageName);
+                    thumbImageBitmap.compress(Bitmap.CompressFormat.PNG, 90, out);
+                    thumbnailList.add(parentFolderFile.getAbsolutePath() + File.separator + imageName);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    try {
+                        if (out != null) {
+                            out.close();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                
+            }
+            thumbnailPaths.add(thumbnailList);
+        }
+        return thumbnailPaths;
     }
 }

@@ -8,24 +8,24 @@ package android.support.v4.preferencefragment;
 
 public final class R {
 	public static final class dimen {
-		public static final int preference_fragment_padding_bottom = 0x7f060000;
-		public static final int preference_fragment_padding_side = 0x7f060001;
+		public static final int preference_fragment_padding_bottom = 0x7f090015;
+		public static final int preference_fragment_padding_side = 0x7f090016;
 	}
 	public static final class id {
-		public static final int back_button = 0x7f09005a;
-		public static final int button_bar = 0x7f090059;
-		public static final int next_button = 0x7f09005c;
-		public static final int skip_button = 0x7f09005b;
+		public static final int back_button = 0x7f06006e;
+		public static final int button_bar = 0x7f06006d;
+		public static final int next_button = 0x7f060070;
+		public static final int skip_button = 0x7f06006f;
 	}
 	public static final class integer {
-		public static final int preference_fragment_scrollbarStyle = 0x7f070000;
+		public static final int preference_fragment_scrollbarStyle = 0x7f0a0001;
 	}
 	public static final class layout {
-		public static final int preference_list_fragment = 0x7f030021;
+		public static final int preference_list_fragment = 0x7f030023;
 	}
 	public static final class string {
-		public static final int back_button_label = 0x7f080000;
-		public static final int next_button_label = 0x7f080001;
-		public static final int skip_button_label = 0x7f080002;
+		public static final int back_button_label = 0x7f0b000d;
+		public static final int next_button_label = 0x7f0b000e;
+		public static final int skip_button_label = 0x7f0b000f;
 	}
 }

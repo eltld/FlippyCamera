@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">FlickCam</string>
+    <string name="app_name">Flippy Camera</string>
     
     <!-- Actionbar items -->
     <string name="action_settings">Settings</string>
     <string name="show_hidden">Show hidden</string>
     <string name="hide_hidden">Hide hidden</string>
     <string name="spinner">Loading gallery</string>
+    <string name="sort">Sort</string>
+    <string name="rename">Rename</string>
     
     <!-- Camera UI -->
     <string name="shutter_button">Shutter Button</string>
@@ -15,7 +17,6 @@
     <string name="switch_flash">Switch Flash</string>
     <string name="goto_gallery">Go to Gallery</string>
     <string name="goto_settings">Go to Settings</string>
-    
     
     <!-- Action mode -->
     <string name="discard_image">Delete Image</string>
@@ -34,29 +35,83 @@
     <string name="folder_preview">Folder Preview</string>
     
     <!-- Preference Fragment -->
-    <string name="inline_preferences">Settings</string>
-    <string name="title_checkbox_preference">Show hidden</string>
-    <string name="summary_checkbox_preference">Hide hidden</string>
-    <string name="dialog_based_preferences">Loading gallery</string>
+    <string name="camera_settings">Camera</string>
+    <string name="capture_focus">Capture Focus</string>
+    <string name="summary_capture_focus">Focus before capturing an image</string>
+    <string name="picture_format">Picture Format</string>
+    <string name="summary_picture_format"></string>
+    <array name="entries_picture_format">
+        <item>100 Mpx</item>
+        <item>50 Mpx</item>
+    </array>
+    <array name="entryvalues_picture_format">Choose a picture format</array>
+    
+    <string name="gallery_settings">Gallery</string>
+    
     <string name="title_edittext_preference">Settings</string>
     <string name="summary_edittext_preference">Show hidden</string>
     <string name="dialog_title_edittext_preference">Hide hidden</string>
     <string name="title_list_preference">Loading gallery</string>
     <string name="summary_list_preference">Settings</string>
-    <array name="entries_list_preference">Show hidden</array>
-    <array name="entryvalues_list_preference">Hide hidden</array>
-    <string name="dialog_title_list_preference">Loading gallery</string>
-    <string name="launch_preferences">Settings</string>
+    
+    <string name="pick_picture_format">Pick picture format</string>
+    
+    <string name="about">About</string>
     <string name="title_screen_preference">Show hidden</string>
     <string name="summary_screen_preference">Hide hidden</string>
     <string name="title_next_screen_toggle_preference">Loading gallery</string>
     <string name="summary_next_screen_toggle_preference">Settings</string>
-    <string name="title_intent_preference">Show hidden</string>
-    <string name="summary_intent_preference">Hide hidden</string>
+    <string name="author">Author</string>
+    <string name="summary_author">sebbas</string>
+    <string name="blog">Blog</string>
+    <string name="summary_blog">Learn more about the developers</string>
+    <string name="details">Details</string>
+    <string name="summary_details">More about this app</string>
+    <string name="share">Share</string>
+    <string name="summary_share">Let other people know about this app!</string>
+    <string name="version">Version</string>
+    <string name="summary_version">Version 1.x</string>
+    <string name="homepage">http://www.sebbas.org</string>
+    
     <string name="preference_attributes">Loading gallery</string>
     <string name="title_parent_preference">Settings</string>
     <string name="summary_parent_preference">Show hidden</string>
     <string name="title_child_preference">Hide hidden</string>
     <string name="summary_child_preference">Loading gallery</string>
+    
+    <!-- Navigation drawer content -->
+    <string-array name="drawer_left_array">
+        <item>Expert</item>
+        <item>Artistic</item>
+        <item>Basic</item>
+        <item>Minimal</item>
+        <item>Custom</item>
+    </string-array>
+    <string-array name="drawer_right_array">
+        <item>Local</item>
+        <item>Google Drive</item>
+        <item>Picasa</item>
+        <item>Dropbox</item>
+        <item>OneDrive</item>
+        <item>Mega</item>
+    </string-array>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="drawer_icon">Drawer icon</string>
+    
+    <!-- Alert dialog -->
+    <string name="alert_ok">OK</string>
+    <string name="alert_cancel">Cancel</string>
+    
+    <!-- Contextual action bar (CAB) -->
+    <string name="select_images">Select images</string>
+    <string name="select_folders">Select folders</string>
+    
+    <!-- Picture writer -->
+    <string name="no_storage_available">No storage available on this device</string>
+    <string name="failed_to_save_picture">Failed to save picture</string>
+    <string name="is_saving_picture">Saving your picture &#8230;</string>
+    <string name="saved_picture_successfully">Picture saved successfully!</string>
+    
     
 </resources>

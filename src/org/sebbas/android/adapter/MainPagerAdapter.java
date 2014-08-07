@@ -2,9 +2,9 @@ package org.sebbas.android.adapter;
 
 import java.util.List;
 
-import org.sebbas.android.flickcam.FolderFragment;
-import org.sebbas.android.flickcam.GalleryFragment;
-import org.sebbas.android.flickcam.MainFragmentActivity;
+import org.sebbas.android.flippycamera.FolderFragment;
+import org.sebbas.android.flippycamera.GalleryFragment;
+import org.sebbas.android.flippycamera.MainFragmentActivity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

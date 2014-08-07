@@ -1,6 +1,6 @@
 package org.sebbas.android.interfaces;
 
-import org.sebbas.android.flickcam.CameraThread;
+import org.sebbas.android.threads.CameraThread;
 import org.sebbas.android.views.CameraPreviewAdvanced;
 import org.sebbas.android.views.CameraPreview;
 

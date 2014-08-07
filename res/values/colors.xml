@@ -4,4 +4,6 @@
     <color name="app_background">#000000</color>
     <color name="actionbar_text">#FFFFFF</color>
     <color name="transparent">#00000000</color>
+    <color name="image_placeholder">#3D3C3A</color>
+    <color name="image_error">#3D3C3A</color>
 </resources>

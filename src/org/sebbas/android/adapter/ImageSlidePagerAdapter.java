@@ -2,7 +2,7 @@ package org.sebbas.android.adapter;
 
 import java.util.ArrayList;
 
-import org.sebbas.android.flickcam.ImageSlideFragment;
+import org.sebbas.android.flippycamera.ImageSlideFragment;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;

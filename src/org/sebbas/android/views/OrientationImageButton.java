@@ -1,6 +1,6 @@
 package org.sebbas.android.views;
 
-import org.sebbas.android.flickcam.R;
+import org.sebbas.android.flippycamera.R;
 
 import com.nineoldandroids.animation.ObjectAnimator;
 

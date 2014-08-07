@@ -1,5 +1,5 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="FlickCamera" parent="Theme.AppCompat">
+    <style name="FlippyCamera" parent="Theme.AppCompat">
         <item name="actionBarStyle">@style/TranslucentActionBar</item>
         <item name="actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
         <item name="android:windowFullscreen">true</item>

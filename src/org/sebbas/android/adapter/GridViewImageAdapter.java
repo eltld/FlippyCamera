@@ -5,8 +5,8 @@ import static android.widget.ImageView.ScaleType.CENTER_CROP;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.sebbas.android.flickcam.GalleryFragment;
-import org.sebbas.android.flickcam.R;
+import org.sebbas.android.flippycamera.GalleryFragment;
+import org.sebbas.android.flippycamera.R;
 import org.sebbas.android.views.SquaredImageView;
 
 import com.squareup.picasso.Picasso;

@@ -1,8 +1,8 @@
 package org.sebbas.android.views;
 
-import org.sebbas.android.flickcam.CameraThread;
 import org.sebbas.android.helper.DeviceInfo;
 import org.sebbas.android.interfaces.ScaleListener;
+import org.sebbas.android.threads.CameraThread;
 
 import android.content.Context;
 import android.graphics.Color;

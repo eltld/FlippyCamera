@@ -4,16 +4,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.sebbas.android.flickcam.FolderFragment;
-import org.sebbas.android.flickcam.MainFragmentActivity;
-import org.sebbas.android.flickcam.R;
+import org.sebbas.android.flippycamera.FolderFragment;
+import org.sebbas.android.flippycamera.R;
+import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
 
 import com.squareup.picasso.Picasso;
  
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,17 +22,14 @@ import android.widget.TextView;
  
 public class FolderViewImageAdapter extends BaseAdapter {
  
-	private static final String DEFAULT_FOLDER_NAME = "Untitled folder";
     private Context mContext;
     private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
-    private MainFragmentActivity mMainFragment;
     private FolderFragment mFolderFragment;
     private Utils mUtils;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
  
-    public FolderViewImageAdapter(FolderFragment folderFragment, boolean alsoHiddenImages) {
+    public FolderViewImageAdapter(FolderFragment folderFragment) {
         mContext = folderFragment.getActivity();
-        mMainFragment = (MainFragmentActivity) folderFragment.getActivity();
         mFolderFragment = folderFragment;
         mUtils = new Utils(mContext);
     }
@@ -85,12 +81,18 @@ public class FolderViewImageAdapter extends BaseAdapter {
         }
         
         // Setup TextView for folder. Shows the folder name
-        TextView folderName = (TextView)folderView.findViewById(R.id.folder_name);
-        folderName.setText(mUtils.getFolderName(imagePaths));
+        TextView folderNameView = (TextView)folderView.findViewById(R.id.folder_name);
+        String folderName = mUtils.getFolderName(imagePaths);
+        // Only if there is a valid string for the folder name, we set it. Otherwise we use the default name for folders
+        if (folderName.equals("")) {
+            folderNameView.setText(AppConstant.DEFAULT_FOLDER_NAME);
+        } else {
+            folderNameView.setText(folderName);
+        }
         
         // Setup TextView for folder. Shows the folder name
-        TextView folderSize = (TextView)folderView.findViewById(R.id.folder_size);
-        folderSize.setText("" + imagePaths.size());
+        TextView folderSizeView = (TextView)folderView.findViewById(R.id.folder_size);
+        folderSizeView.setText("" + imagePaths.size());
         
         return folderView;
     }
@@ -102,15 +104,14 @@ public class FolderViewImageAdapter extends BaseAdapter {
             .load(new File(imagePath)) 
             .noFade()
             .centerCrop()
-            .placeholder(R.drawable.ic_action_picture)
-            .error(R.drawable.ic_action_picture)
+            .placeholder(R.color.image_placeholder)
+            .error(R.color.image_error)
             .fit() //
             .into(previewImage);
         
     }
     
     private void hideImageView(int viewPosition, View parentView) {
-        // Set the background color of the image view to the same color as the app background -> makes it invisible 
         ImageView previewImage = (ImageView)parentView.findViewById(previewIds[viewPosition]);
         previewImage.setVisibility(View.GONE);
     }

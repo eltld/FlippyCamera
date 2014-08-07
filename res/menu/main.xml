@@ -1,31 +1,38 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" 
-    xmlns:flickcamera="http://schemas.android.com/apk/res-auto">
+    xmlns:flippycamera="http://schemas.android.com/apk/res-auto">
 
     <item 
         android:id="@+id/spinner_icon"
-        flickcamera:showAsAction="always"
+        flippycamera:showAsAction="ifRoom"
+        android:title="@string/spinner"
+        android:visible="false"
         android:enabled="false"/>
     
     <item 
         android:id="@+id/camera_icon"
         android:icon="@drawable/ic_action_camera"
-        flickcamera:showAsAction="always"
+        flippycamera:showAsAction="always"
         android:title="@string/camera"/>
     
     <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_action_overflow"
-        flickcamera:showAsAction="never"
+        flippycamera:showAsAction="never"
         android:title="@string/action_settings"/>
     
     <item
+        android:id="@+id/sort"
+        flippycamera:showAsAction="never"
+        android:title="@string/sort"/>
+    
+    <item
         android:id="@+id/show_hidden"
-        flickcamera:showAsAction="never"
+        flippycamera:showAsAction="never"
         android:title="@string/show_hidden"/>
     
     <item
         android:id="@+id/hide_hidden"
-        flickcamera:showAsAction="never"
+        flippycamera:showAsAction="never"
         android:title="@string/hide_hidden"/>
     
 

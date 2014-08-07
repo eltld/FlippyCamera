@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" 
+    xmlns:flippycamera="http://schemas.android.com/apk/res-auto">
+
+    <item 
+        android:id="@+id/spinner_icon"
+        flippycamera:showAsAction="ifRoom"
+        android:title="@string/spinner"
+        android:visible="false"
+        android:enabled="false"/>
+    
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_action_overflow"
+        flippycamera:showAsAction="never"
+        android:title="@string/action_settings"/>
+    
+    <item
+        android:id="@+id/sort"
+        flippycamera:showAsAction="never"
+        android:title="@string/sort"/>
+    
+    <item
+        android:id="@+id/rename"
+        flippycamera:showAsAction="never"
+        android:title="@string/rename"/>
+
+</menu>

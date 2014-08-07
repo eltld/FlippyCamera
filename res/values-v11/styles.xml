@@ -1,20 +1,34 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <style name="FlickCamera" parent="Theme.AppCompat">
+    <style name="FlippyCamera" parent="Theme.AppCompat">
         <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
         <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
         <item name="android:windowFullscreen">true</item>
         <item name="android:background">@color/transparent</item>
         <item name="android:windowBackground">@color/app_background</item>
         <item name="android:actionModeBackground">@color/transparent</item>
+        
+        <!-- Implementation of attributes needed for the navigation drawer as the default implementation is based on API-14. -->
+        <item name="myapp_listPreferredItemHeightSmall">48dip</item>
+        <item name="myapp_textAppearanceListItemSmall">@style/MyappDrawerMenu</item>
+        <item name="myapp_activatedBackgroundIndicator">@drawable/ab_transparent_action_bar</item>
     </style>
+    
+    <!-- Style for navigation drawer items -->
+    <style name="MyappDrawerMenu">
+          <item name="android:textSize">16sp</item>
+          <item name="android:textStyle">bold</item>
+          <item name="android:textColor">?android:attr/actionMenuTextColor</item>
+      </style>
  
     <!-- ActionBar styles -->
     <style name="TranslucentActionBar" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
         <item name="android:background">@color/actionbar_color</item>
         <item name="android:icon">@drawable/ic_launcher</item>
+        <item name="android:windowActionBarOverlay">true</item>
         <item name="android:titleTextStyle">@style/MyActionBarTitleText</item>
         
         <!-- Support library compatibility -->
+        <item name="windowActionBarOverlay">true</item>
         <item name="background">@color/actionbar_color</item>
         <item name="titleTextStyle">@style/MyActionBarTitleText</item>
     </style>
@@ -28,5 +42,15 @@
     <!-- Actionbar Overflow -->
     <style name="MyActionButtonOverflow" parent="android:style/Widget.Holo.ActionButton.Overflow">
         <item name="android:src">@drawable/ic_action_overflow</item>
+    </style>
+    
+    <!-- Gallery style -->
+    <style name="FlippyCameraGallery" parent="Theme.AppCompat">
+        <item name="android:actionBarStyle">@style/TranslucentActionBar</item>
+        <item name="android:actionOverflowButtonStyle">@style/MyActionButtonOverflow</item>
+        <item name="android:windowActionBarOverlay">true</item>
+        <item name="android:background">@color/transparent</item>
+        <item name="android:windowBackground">@color/app_background</item>
+        <item name="android:actionModeBackground">@color/transparent</item>
     </style>
 </resources>

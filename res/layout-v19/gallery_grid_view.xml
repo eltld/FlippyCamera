@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout 
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:flickcam="http://schemas.android.com/apk/res/org.sebbas.android.flickcam"
+    xmlns:flippycamera="http://schemas.android.com/apk/res/org.sebbas.android.flippycamera"
     
     android:id="@+id/container"
     android:background="@color/app_background"
@@ -47,6 +47,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/draw_insets_framelayout"
-        flickcam:insetBackground="#90000000" />
+        flippycamera:insetBackground="#90000000" />
 
 </FrameLayout>
