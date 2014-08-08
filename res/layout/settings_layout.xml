@@ -6,23 +6,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
-    android:background="@android:color/black">
+    android:scrollbars="none">
 
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/settings_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:scrollbars="none"
         android:orientation="vertical" >
 
         <!-- Here we will programmatically add the preferencefragment -->
 
-    </RelativeLayout>
+    </LinearLayout>
 
     <org.sebbas.android.views.DrawInsetsFrameLayout
         android:id="@+id/draw_insets_framelayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        flippycamera:insetBackground="#900ff000" >
+        flippycamera:insetBackground="#90000000" >
     </org.sebbas.android.views.DrawInsetsFrameLayout>
 
 </FrameLayout>

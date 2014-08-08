@@ -66,6 +66,15 @@
             </intent-filter>
         </activity>
         
+        <activity android:name="org.sebbas.android.flippycamera.SettingsActivity"
+            android:label="Settings"
+            android:enabled="true"
+            android:theme="@style/FlippyCameraGallery">>
+            <intent-filter>
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
+        </activity>
+        
     </application>
 
 </manifest>

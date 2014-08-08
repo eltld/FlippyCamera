@@ -19,14 +19,20 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup.MarginLayoutParams;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
 import android.widget.GridView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 public class GalleryActivity extends ActionBarActivity implements AdapterCallback<String> {
 
@@ -42,6 +48,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private GridView mGridView;
+    private RelativeLayout mGhostView;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
         // Variables for the UI
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) findViewById(R.id.draw_insets_framelayout);
         mGridView = (GridView) findViewById(R.id.grid_view);
+        mGhostView = (RelativeLayout) findViewById(R.id.fragment_container);
         
         this.getSupportActionBar().setHomeButtonEnabled(true);
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -77,16 +85,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_settings:
-                //startActivity(new Intent(this, PreferencesActivity.class));
-                
-                PreferencesFragmentUI preferenceFragment = PreferencesFragmentUI.newInstance();
-                FragmentManager fm  = getSupportFragmentManager();
-                fm.beginTransaction()
-                    .addToBackStack(null)
-                    .add(android.R.id.content, preferenceFragment)
-                    .commit();
-
-                
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             default: 
                 return super.onOptionsItemSelected(item);
@@ -121,7 +120,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     
     private void handleNavigationBack() {
         FragmentManager fm  = getSupportFragmentManager();
-        if (fm.getFragments() == null) {
+        if (fm.getBackStackEntryCount() == 0) {
             startReturnIntent();
         } else {
             fm.popBackStack();
@@ -146,7 +145,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
             @Override
             public void onInsetsChanged(Rect insets) {
                 // Update the padding
-                mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
+            	mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
             }
         });
     }

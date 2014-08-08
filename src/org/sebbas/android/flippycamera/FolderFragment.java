@@ -50,7 +50,6 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     private FrameLayout mFrameLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
-    private GalleryFragment mGalleryFragment;
     
     // Static factory method that returns a new fragment instance to the client
     public static FolderFragment newInstance() {
@@ -318,10 +317,6 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     public void finishActionMode() {
         if (mActionMode != null) {
             mActionMode.finish();
-        }
-        // Also finish the action mode of the possible child fragment
-        if (mGalleryFragment != null) {
-            mGalleryFragment.finishActionMode();
         }
     }
     

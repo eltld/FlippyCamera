@@ -1,33 +1,23 @@
 package org.sebbas.android.flippycamera;
 
-import org.sebbas.android.helper.AppConstant;
-import org.sebbas.android.views.DrawInsetsFrameLayout;
-
-import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Rect;
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.support.annotation.Nullable;
 import android.support.v4.preference.PreferenceFragment;
-import android.util.TypedValue;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
-import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
+import android.widget.ListView;
 
 public class PreferencesFragmentUI extends PreferenceFragment {
 
-	public static final String TAG = "settings_fragment";
+    public static final String TAG = "settings_fragment";
     public static final String SHARED_PREFS_NAME = "settings";
     
-    private RelativeLayout mRelativeLayout;
-    
-    private Context mContext;
-    private MainFragmentActivity mMainFragment;
-    private FrameLayout mFrameLayout;
-    private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
+    private OnCompleteListener mViewCompleteListener;
+    private View mView;
+    private ListView mListView;
     
     // Static factory method that returns a new fragment instance to the client
     public static PreferencesFragmentUI newInstance() {
@@ -35,37 +25,45 @@ public class PreferencesFragmentUI extends PreferenceFragment {
         return sf;
     }
     
-	@Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mContext = this.getActivity();
-        //mMainFragment = (MainFragmentActivity) this.getActivity();
+        addPreferencesFromResource(R.xml.preference_layout);
     }
 
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        mView = super.onCreateView(inflater, container, savedInstanceState);
+        return mView;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Log.d(TAG, "View created");
+        
+        if (mView != null) {
+            mListView= (ListView) view.findViewById(android.R.id.list);
+            mListView.setScrollBarStyle(View.GONE);
+        }
+        
+        mViewCompleteListener.onComplete(mListView);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+    	super.onAttach(activity);
+        try {
+            mViewCompleteListener = (OnCompleteListener) activity;
+            System.out.println("Called");
+        }
+        catch (final ClassCastException e) {
+            throw new ClassCastException(activity.toString() + " must implement OnCompleteListener");
+        }
+    }
     
-    	Resources r = getResources();
-    	final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
-    	
-        mFrameLayout = (FrameLayout) inflater.inflate(R.layout.settings_layout, container, false);
-        mRelativeLayout = (RelativeLayout) mFrameLayout.findViewById(R.id.settings_container);
-        mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
-        
-        //mMainFragment.getSupportActionBar().setHomeButtonEnabled(false);
-        //mMainFragment.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        
-        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
-            @Override
-            public void onInsetsChanged(Rect insets) {
-                // Update the padding
-            	mFrameLayout.setPadding(insets.left, 146, insets.right, 96);
-            }
-        });
-        
-        this.getFragmentManager().beginTransaction().add(mRelativeLayout.getId(), SettingsFragment.newInstance()).commit();
-        ((GalleryActivity) this.getActivity()).getDrawInsetsFrameLayout().bringToFront();
-        
-        return mFrameLayout;
+    public static interface OnCompleteListener {
+        public abstract void onComplete(ListView listView);
     }
     
 }

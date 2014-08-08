@@ -9,7 +9,15 @@
     android:layout_height="match_parent"
     android:descendantFocusability="blocksDescendants"
     android:layout_gravity="center">
+    
 
+    <RelativeLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:paddingTop="96dp"
+        android:layout_height="match_parent"
+        android:orientation="vertical"/>
+    
     <GridView
         android:id="@+id/grid_view"
         android:layout_width="match_parent"
@@ -20,28 +28,7 @@
         android:stretchMode="columnWidth"
         android:animateLayoutChanges="true">
     </GridView>
-
-    <!-- This initially-hidden ImageView will hold the expanded/zoomed version of
-         the images above. Without transformations applied, it takes up the entire
-         screen. To achieve the "zoom" animation, this view's bounds are animated
-         from the bounds of the thumbnail button above, to its final laid-out
-         bounds.
-         -->
-
-    <ImageView
-        android:id="@+id/expanded_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="invisible"
-        android:contentDescription="@string/description_zoom_touch_close" />
     
-    <ProgressBar
-        android:id="@+id/loading_image_spinner"
-        android:layout_gravity="center"
-        style="?android:attr/progressBarStyleLarge"
-        android:visibility="invisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
 
     <org.sebbas.android.views.DrawInsetsFrameLayout
         android:layout_width="match_parent"

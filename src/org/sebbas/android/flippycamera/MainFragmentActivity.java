@@ -178,7 +178,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
                 mViewPager.setCurrentItem(CAMERA_FRAGMENT_NUMBER);
                 return true;
             case R.id.action_settings:
-                startActivity(new Intent(this, PreferencesActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.show_hidden:
             case R.id.hide_hidden:
