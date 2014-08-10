@@ -58,7 +58,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         } else {
             folderView = convertView;
         }
-        folderView.setBackgroundResource(R.drawable.square_image_selector);
+        folderView.setBackgroundResource(R.drawable.gallery_image_selector);
 
         // Get the image URL for the current position.
         List<String> imagePaths = getItem(position);
@@ -67,7 +67,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         boolean isSelected = mFolderFragment.getSelectedItemsList().contains(position);
         if (isSelected) {
             folderView.setSelected(true);
-            folderView.setBackgroundResource(R.drawable.image_border);
+            folderView.setBackgroundResource(R.drawable.gallery_image_border_selected);
         } else {
             folderView.setSelected(false);
         }

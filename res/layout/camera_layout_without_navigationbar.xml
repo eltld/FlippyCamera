@@ -69,7 +69,7 @@
         android:layout_gravity="bottom|center"
         android:contentDescription="@string/shutter_button"
         android:background="@android:color/transparent"
-        android:src="@drawable/btn_shutter" />
+        android:src="@drawable/shutter_button_selector" />
     
     <org.sebbas.android.views.OrientationImageButton
         android:id="@+id/goto_gallery"

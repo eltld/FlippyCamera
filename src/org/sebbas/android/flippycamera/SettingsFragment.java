@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-public class PreferencesFragmentUI extends PreferenceFragment {
+public class SettingsFragment extends PreferenceFragment {
 
     public static final String TAG = "settings_fragment";
     public static final String SHARED_PREFS_NAME = "settings";
@@ -20,8 +20,8 @@ public class PreferencesFragmentUI extends PreferenceFragment {
     private ListView mListView;
     
     // Static factory method that returns a new fragment instance to the client
-    public static PreferencesFragmentUI newInstance() {
-        PreferencesFragmentUI sf = new PreferencesFragmentUI();
+    public static SettingsFragment newInstance() {
+        SettingsFragment sf = new SettingsFragment();
         return sf;
     }
     

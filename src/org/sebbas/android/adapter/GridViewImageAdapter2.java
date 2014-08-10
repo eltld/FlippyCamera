@@ -56,7 +56,7 @@ public class GridViewImageAdapter2 extends BaseAdapter {
         } else {
         	//squaredView = (SquaredImageView) convertView;
         }
-        squaredView.setBackgroundResource(R.drawable.square_image_selector);
+        squaredView.setBackgroundResource(R.drawable.gallery_image_selector);
         
         // Get the image URL for the current position.
         String url = getItem(position);
@@ -65,7 +65,7 @@ public class GridViewImageAdapter2 extends BaseAdapter {
         boolean isSelected = mGalleryActivity.getSelectedItemsList().contains(position);
         if (isSelected) {
             squaredView.setSelected(true);
-            squaredView.setBackgroundResource(R.drawable.image_border);
+            squaredView.setBackgroundResource(R.drawable.gallery_image_border_selected);
         } else {
             squaredView.setSelected(false);
         }

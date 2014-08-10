@@ -12,7 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
-public class SettingsActivity extends ActionBarActivity implements PreferencesFragmentUI.OnCompleteListener {
+public class SettingsActivity extends ActionBarActivity implements SettingsFragment.OnCompleteListener {
 
     private static final String TAG = "settings_activity";
     
@@ -83,7 +83,7 @@ public class SettingsActivity extends ActionBarActivity implements PreferencesFr
     }
     
     private void addPreferenceFragment() {
-    	PreferencesFragmentUI preferencesFragmentUI = PreferencesFragmentUI.newInstance();
+    	SettingsFragment preferencesFragmentUI = SettingsFragment.newInstance();
         FragmentManager fm  = getSupportFragmentManager();
         fm.beginTransaction()
             .add(R.id.settings_container, preferencesFragmentUI)

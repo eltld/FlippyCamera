@@ -14,6 +14,10 @@
         <item name="myapp_listPreferredItemHeightSmall">?android:attr/listPreferredItemHeightSmall</item>
         <item name="myapp_textAppearanceListItemSmall">?android:attr/textAppearanceListItemSmall</item>
         <item name="myapp_activatedBackgroundIndicator">?android:attr/activatedBackgroundIndicator</item>
+        
+        <!-- Custom font -->
+        <item name="android:textViewStyle">@style/RobotoTextViewStyle</item>
+        <item name="android:buttonStyle">@style/RobotoButtonStyle</item>
     </style>
  
     <style name="TranslucentActionBar" parent="android:Widget.Holo.Light.ActionBar.Solid.Inverse">
@@ -44,5 +48,14 @@
         <item name="android:background">@color/transparent</item>
         <item name="android:windowBackground">@color/app_background</item>
         <item name="android:actionModeBackground">@color/transparent</item>
+    </style>
+    
+    <!-- Font style -->
+    <style name="RobotoTextViewStyle" parent="android:Widget.TextView">
+        <item name="android:fontFamily">sans-serif-light</item>
+    </style>
+
+    <style name="RobotoButtonStyle" parent="android:Widget.Holo.Button">
+        <item name="android:fontFamily">sans-serif-light</item>
     </style>
 </resources>

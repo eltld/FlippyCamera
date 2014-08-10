@@ -80,21 +80,42 @@
     <string name="summary_child_preference">Loading gallery</string>
     
     <!-- Navigation drawer content -->
-    <string-array name="drawer_left_array">
+    <string-array name="drawer_right_array">
         <item>Expert</item>
         <item>Artistic</item>
         <item>Basic</item>
         <item>Minimal</item>
         <item>Custom</item>
     </string-array>
-    <string-array name="drawer_right_array">
+    <array name="drawer_right_icons">
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+    </array>
+    <string-array name="drawer_left_array">
         <item>Local</item>
         <item>Google Drive</item>
-        <item>Picasa</item>
         <item>Dropbox</item>
+        <item>Facebook</item>
+        <item>Picasa</item>
+        <item>Flickr</item>
         <item>OneDrive</item>
         <item>Mega</item>
+        <item>Add</item>
     </string-array>
+    <array name="drawer_left_icons">
+        <item>@drawable/ic_action_phone</item>
+        <item>@drawable/google_drive</item>
+        <item>@drawable/dropbox</item>
+        <item>@drawable/facebook</item>
+        <item>@drawable/ic_action_phone</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+        <item>@drawable/ic_action_new</item>
+    </array>
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="drawer_icon">Drawer icon</string>

@@ -14,7 +14,7 @@
     <!-- Left drawer -->
     <LinearLayout
         android:id="@+id/left_drawer_layout"
-        android:layout_width="140dp"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_gravity="left" >
         
@@ -32,7 +32,7 @@
     <!-- Right drawer -->
     <LinearLayout
         android:id="@+id/right_drawer_layout"
-        android:layout_width="140dp"
+        android:layout_width="250dp"
         android:layout_height="match_parent"
         android:layout_gravity="right" >
     
