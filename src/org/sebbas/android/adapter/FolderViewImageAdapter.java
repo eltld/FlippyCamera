@@ -1,13 +1,13 @@
 package org.sebbas.android.adapter;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.flippycamera.FolderFragment;
 import org.sebbas.android.flippycamera.R;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
+import org.sebbas.android.flippycamera.MainActivity;
 
 import com.squareup.picasso.Picasso;
  
@@ -23,7 +23,6 @@ import android.widget.TextView;
 public class FolderViewImageAdapter extends BaseAdapter {
  
     private Context mContext;
-    private ArrayList<List<String>> mImagePaths = new ArrayList<List<String>>();
     private FolderFragment mFolderFragment;
     private Utils mUtils;
     private static final int[] previewIds = {R.id.folder_image_1, R.id.folder_image_2, R.id.folder_image_3, R.id.folder_image_4};
@@ -36,12 +35,12 @@ public class FolderViewImageAdapter extends BaseAdapter {
  
     @Override
     public int getCount() {
-        return mImagePaths.size();
+    	return ((MainActivity) mContext).getImagePaths().size();
     }
  
     @Override
     public List<String> getItem(int position) {
-        return mImagePaths.get(position);
+    	return ((MainActivity) mContext).getImagePaths().get(position);
     }
  
     @Override
@@ -81,7 +80,7 @@ public class FolderViewImageAdapter extends BaseAdapter {
         }
         
         // Setup TextView for folder. Shows the folder name
-        TextView folderNameView = (TextView)folderView.findViewById(R.id.folder_name);
+        TextView folderNameView = (TextView) folderView.findViewById(R.id.folder_name);
         String folderName = mUtils.getFolderName(imagePaths);
         // Only if there is a valid string for the folder name, we set it. Otherwise we use the default name for folders
         if (folderName.equals("")) {
@@ -98,25 +97,19 @@ public class FolderViewImageAdapter extends BaseAdapter {
     }
     
     private void loadImageIntoView(int viewPosition, View parentView, String imagePath) {
-        ImageView previewImage = (ImageView)parentView.findViewById(previewIds[viewPosition]);
+        ImageView previewImage = (ImageView) parentView.findViewById(previewIds[viewPosition]);
         previewImage.setVisibility(View.VISIBLE);
         Picasso.with(mContext)
             .load(new File(imagePath)) 
-            .noFade()
             .centerCrop()
-            .placeholder(R.color.image_placeholder)
+            .placeholder(R.color.app_background)
             .error(R.color.image_error)
             .fit() //
             .into(previewImage);
-        
     }
     
     private void hideImageView(int viewPosition, View parentView) {
         ImageView previewImage = (ImageView)parentView.findViewById(previewIds[viewPosition]);
         previewImage.setVisibility(View.GONE);
-    }
-    
-    public void updateImagePaths(ArrayList<List <String>> imagePaths) {
-        mImagePaths = imagePaths;
     }
 }

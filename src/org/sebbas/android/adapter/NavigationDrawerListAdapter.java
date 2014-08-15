@@ -5,9 +5,6 @@ import java.util.ArrayList;
 import org.sebbas.android.flippycamera.R;
 import org.sebbas.android.views.NavigationDrawerItem;
 
-import com.larvalabs.svgandroid.SVG;
-import com.larvalabs.svgandroid.SVGParser;
- 
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;

@@ -50,24 +50,24 @@
         android:layout_height="wrap_content" 
         android:padding="5dp">
 
-        <TextView
+        <org.sebbas.android.views.RobotoTextView
             android:id="@+id/folder_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxWidth="140dp"
             android:singleLine="true"
             android:text="Folder name"
-            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:textStyle="normal"
             android:textColor="@android:color/white" />
 
-        <TextView
+        <org.sebbas.android.views.RobotoTextView
             android:id="@+id/folder_size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:singleLine="true"
             android:text="Folder Size"
             android:layout_marginLeft="10dp"
-            android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:textStyle="italic"/>
     </LinearLayout>
 
 </LinearLayout>

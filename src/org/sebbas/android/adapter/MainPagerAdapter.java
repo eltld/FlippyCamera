@@ -3,7 +3,7 @@ package org.sebbas.android.adapter;
 import java.util.List;
 
 import org.sebbas.android.flippycamera.FolderFragment;
-import org.sebbas.android.flippycamera.MainFragmentActivity;
+import org.sebbas.android.flippycamera.MainActivity;
 
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -13,7 +13,7 @@ public class MainPagerAdapter extends FragmentStatePagerAdapter {
 
     private List<Fragment> mFragments;
     
-    public MainPagerAdapter(MainFragmentActivity mainFragment, FragmentManager fragmentManager, List<Fragment> fragments) {
+    public MainPagerAdapter(MainActivity mainFragment, FragmentManager fragmentManager, List<Fragment> fragments) {
         super(fragmentManager);
         mFragments = fragments;
     }

@@ -19,7 +19,7 @@ public class ImageSlideFragment extends Fragment {
     private String mImagePath;
     private Context mContext;
     private Utils mUtils;
-    private MainFragmentActivity mMainFragment;
+    private MainActivity mMainFragment;
     
     public static ImageSlideFragment newInstance(String imagePath) {
         ImageSlideFragment imageSlideFragment = new ImageSlideFragment();
@@ -38,7 +38,7 @@ public class ImageSlideFragment extends Fragment {
         mContext = this.getActivity();
         mImagePath = this.getArguments().getString("imagePath");
         mUtils = new Utils(mContext);
-        mMainFragment = (MainFragmentActivity) this.getActivity();
+        mMainFragment = (MainActivity) this.getActivity();
     }
 
     @Override

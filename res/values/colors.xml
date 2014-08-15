@@ -3,7 +3,7 @@
     <!-- Overall app -->
     <color name="actionbar_color">#80000000</color>
     <color name="app_background">#000000</color>
-    <color name="actionbar_text">#FFFFFF</color>
+    <color name="text_color">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     
     <!-- Gallery -->

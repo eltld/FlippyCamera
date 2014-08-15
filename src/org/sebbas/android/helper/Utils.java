@@ -218,4 +218,15 @@ public class Utils {
         }
         return thumbnailPaths;
     }
+    
+    public Bitmap getThumbnailBitmap(String imagePath, int thumWidth, int thumbHeight) {
+        return ThumbnailUtils.extractThumbnail(BitmapFactory.decodeFile(imagePath), thumWidth, thumbHeight);
+    }
+    
+    public String getThumbnailPath(ArrayList<List<String>> realImagePath) {
+    	String thumbnailPath = "";
+    	// TODO
+    	
+    	return thumbnailPath;
+    }
 }

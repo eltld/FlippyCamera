@@ -6,7 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.sebbas.android.flippycamera.FolderFragment;
-import org.sebbas.android.flippycamera.MainFragmentActivity;
+import org.sebbas.android.flippycamera.MainActivity;
 import org.sebbas.android.flippycamera.GalleryActivity;
 
 import android.app.Activity;
@@ -80,8 +80,8 @@ public class MediaDeleterThread extends AsyncTask<Void, Void, Object> {
         // Also: reload the folder fragment since it does not know when the media deleter has finished
         if (mDeleteModeId == 0) {
             toastDeletedItems();
-            ((MainFragmentActivity) mMainActivity).updateImagePaths(newFolders);
-            FolderFragment folderFragment = ((MainFragmentActivity) mMainActivity).getFolderFragment();
+            ((MainActivity) mMainActivity).updateImagePaths(newFolders);
+            FolderFragment folderFragment = ((MainActivity) mMainActivity).getFolderFragment();
             folderFragment.updateAdapterContent(newFolders);
             folderFragment.refreshAdapter();
         } else if (mDeleteModeId == 1) {

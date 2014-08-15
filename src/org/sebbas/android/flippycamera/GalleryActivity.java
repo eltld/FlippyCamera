@@ -3,7 +3,7 @@ package org.sebbas.android.flippycamera;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.sebbas.android.adapter.GridViewImageAdapter2;
+import org.sebbas.android.adapter.GridViewImageAdapter;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
@@ -41,14 +41,13 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     private Utils mUtils;
     private int mFolderPosition;
     private ArrayList<List<String>> mImagePaths;
-    private GridViewImageAdapter2 mAdapter;
+    private GridViewImageAdapter mAdapter;
     private int mColumnWidth;
     private volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
     private ActionMode mActionMode;
     
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private GridView mGridView;
-    private RelativeLayout mGhostView;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -62,7 +61,6 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
         // Variables for the UI
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) findViewById(R.id.draw_insets_framelayout);
         mGridView = (GridView) findViewById(R.id.grid_view);
-        mGhostView = (RelativeLayout) findViewById(R.id.fragment_container);
         
         this.getSupportActionBar().setHomeButtonEnabled(true);
         this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -128,9 +126,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     }
     
     private void initializeGridLayout() {
-        Log.d(TAG, "INITIALIZE GRIDLAYOUT");
-        Resources r = getResources();
-        final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, r.getDisplayMetrics());
+        final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, getResources().getDisplayMetrics());
  
         mColumnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_GALLERYVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_GALLERYVIEW);
  
@@ -153,7 +149,7 @@ public class GalleryActivity extends ActionBarActivity implements AdapterCallbac
     private void setGridViewAdapter() {
         // Gridview adapter
         ArrayList<String> imagePaths = (ArrayList<String>) mImagePaths.get(mFolderPosition);
-        mAdapter = new GridViewImageAdapter2(this, imagePaths);
+        mAdapter = new GridViewImageAdapter(this, imagePaths);
  
         // setting grid view adapter
         mGridView.setAdapter(mAdapter);

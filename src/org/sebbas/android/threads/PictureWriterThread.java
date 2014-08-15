@@ -7,7 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import org.sebbas.android.flippycamera.MainFragmentActivity;
+import org.sebbas.android.flippycamera.MainActivity;
 import org.sebbas.android.flippycamera.R;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.DeviceInfo;
@@ -30,7 +30,7 @@ public class PictureWriterThread extends Thread {
     private Handler mHandler;
     private CameraUICommunicator mCameraUICommunicator;
     private Context mContext;
-    private MainFragmentActivity mMainFragment;
+    private MainActivity mMainFragment;
     
     public PictureWriterThread() {
     	
@@ -38,7 +38,7 @@ public class PictureWriterThread extends Thread {
     
     public PictureWriterThread(Context context, CameraUICommunicator cameraThreadListener) {
         mContext = context;
-        mMainFragment = (MainFragmentActivity) context;
+        mMainFragment = (MainActivity) context;
         mCameraUICommunicator = cameraThreadListener; // For communication with the UI
     }
     

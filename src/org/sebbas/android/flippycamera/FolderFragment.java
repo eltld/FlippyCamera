@@ -5,21 +5,28 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sebbas.android.adapter.FolderViewImageAdapter;
+import org.sebbas.android.adapter.GridViewImageAdapter2;
+import org.sebbas.android.adapter.ImagePagerAdapter;
 import org.sebbas.android.helper.AppConstant;
 import org.sebbas.android.helper.Utils;
 import org.sebbas.android.interfaces.AdapterCallback;
 import org.sebbas.android.threads.MediaDeleterThread;
 import org.sebbas.android.views.DrawInsetsFrameLayout;
 
+import com.nhaarman.listviewanimations.swinginadapters.prepared.AlphaInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.ScaleInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingBottomInAnimationAdapter;
+import com.nhaarman.listviewanimations.swinginadapters.prepared.SwingRightInAnimationAdapter;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.view.ViewPager;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
 import android.util.TypedValue;
@@ -32,6 +39,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AdapterView.OnItemLongClickListener;
+import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.GridView;
@@ -39,17 +47,24 @@ import android.widget.GridView;
 public class FolderFragment extends Fragment implements AdapterCallback<List <String>> {
 
     public static final String TAG = "folder_fragment";
+    public static final int FOLDER_MODE = 0;
+    public static final int GALLERY_MODE = 1;
+    public static final int IMAGE_MODE = 2;
+    
     private volatile ArrayList<Integer> mSelectedItemsList = new ArrayList<Integer>();
     
     private Utils mUtils;
-    private FolderViewImageAdapter mAdapter;
+    private BaseAdapter mAdapter;
     private GridView mGridView;
     
     private Context mContext;
-    private MainFragmentActivity mMainActivity;
+    private MainActivity mMainActivity;
     private FrameLayout mFrameLayout;
     private DrawInsetsFrameLayout mDrawInsetsFrameLayout;
     private ActionMode mActionMode;
+    private int mAdapterMode;
+    private int mFolderPosition;
+    private ViewPager mImageViewPager;
     
     // Static factory method that returns a new fragment instance to the client
     public static FolderFragment newInstance() {
@@ -62,7 +77,7 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mContext = this.getActivity();
-        mMainActivity = (MainFragmentActivity) this.getActivity();
+        mMainActivity = (MainActivity) this.getActivity();
     }
 
     @Override
@@ -70,10 +85,20 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     
         mFrameLayout = (FrameLayout) inflater.inflate(R.layout.gallery_folders, container, false);
         mGridView = (GridView) mFrameLayout.findViewById(R.id.folder_grid_view);
+        mImageViewPager = (ViewPager) mFrameLayout.findViewById(R.id.photoview_pager);
+        
         mUtils = new Utils(this.getActivity());
         mDrawInsetsFrameLayout = (DrawInsetsFrameLayout) mFrameLayout.findViewById(R.id.draw_insets_framelayout);
+        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
+            @Override
+            public void onInsetsChanged(Rect insets) {
+                // Update the padding
+                mGridView.setPadding(insets.left, insets.top, insets.right, insets.bottom);
+            }
+        });
         
         mMainActivity.reloadFolderPaths(); // Fill the adapter with content
+        mAdapterMode = FOLDER_MODE;
         setupGridView();
         return mFrameLayout;
     }
@@ -82,27 +107,67 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
     public void onResume() {
         super.onResume();
         setupActionBarTitle();
-        
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        // The fragment is getting out of focus so we pop it from the stack and reset the up navigation
-        mMainActivity.getSupportFragmentManager().popBackStack();
-        mMainActivity.getSupportActionBar().setHomeButtonEnabled(false);
-        mMainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
     
     private void setupActionBarTitle() {
         mMainActivity.getSupportActionBar().setTitle(R.string.app_name);
     }
+    
+    private void setupViewPager() {
+    	handleVisibility();
+    	mImageViewPager.setAdapter(new ImagePagerAdapter(this, mFolderPosition));
+    }
 
-    public void setupGridView() {
+    private void setupGridView() {
+    	handleVisibility();
         initializeGridLayout();
         setGridViewAdapter();
         setGridViewClickListener();
     }
+    
+    private void handleVisibility() {
+    	if (mAdapterMode == IMAGE_MODE) {
+    		mImageViewPager.setVisibility(View.VISIBLE);
+    		mGridView.setVisibility(View.INVISIBLE);
+    	} else {
+    		mImageViewPager.setVisibility(View.INVISIBLE);
+    		mGridView.setVisibility(View.VISIBLE);
+    	}
+    }
+    
+    private void initializeGridLayout() {
+        final int columnWidth;
+        final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, getResources().getDisplayMetrics());
+        
+        if (mAdapterMode == FOLDER_MODE) {
+            columnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_FOLDERVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
+            mGridView.setColumnWidth(columnWidth);
+            mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
+        } else if (mAdapterMode == GALLERY_MODE) {
+            columnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_GALLERYVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_GALLERYVIEW);
+            mGridView.setColumnWidth(columnWidth);
+            mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS_GALLERYVIEW);
+        } else if (mAdapterMode == IMAGE_MODE) {
+            // TODO
+        }
+        
+        mGridView.setStretchMode(GridView.NO_STRETCH);
+        mGridView.setHorizontalSpacing((int) padding);
+        mGridView.setVerticalSpacing((int) padding);
+        
+    }
+    
+    private void setGridViewAdapter() {
+        if (mAdapterMode == FOLDER_MODE) {
+        	mAdapter = new FolderViewImageAdapter(this);
+        } else if (mAdapterMode == GALLERY_MODE) {
+            mAdapter = new GridViewImageAdapter2(this, mFolderPosition);
+        } else if (mAdapterMode == IMAGE_MODE) {
+            // TODO
+        }
+        mGridView.setAdapter(mAdapter);
+    }
+    
 
     private void setGridViewClickListener() {
     
@@ -114,18 +179,14 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
             
                 // Only enlarge the image if we are not in action mode
                 if (mActionMode == null) {
-                    /*FragmentManager manager = mMainFragment.getSupportFragmentManager(); 
-                    FragmentTransaction transaction = manager.beginTransaction();
-                    mGalleryFragment = GalleryFragment.newInstance(position);
-                    transaction.replace(R.id.folder_layout, mGalleryFragment);
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-                    transaction.addToBackStack("gallery_fragment");
-                    transaction.commit();*/
                     
-                    Intent startGalleryIntent = new Intent(mContext, GalleryActivity.class);
+                    /*Intent startGalleryIntent = new Intent(mContext, GalleryActivity.class);
                     startGalleryIntent.putExtra("folderPosition", position);
                     startGalleryIntent.putExtra("imagePaths", getImagePaths());
-                    startActivityForResult(startGalleryIntent, 1);
+                    startActivityForResult(startGalleryIntent, 1);*/
+                    
+                    navigateForward(position);
+                    
                 } else {
                     
                     // Keep track of which items are selected. Then notify the adapter
@@ -228,34 +289,6 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         manageActionModeItems();
     }
 
-    private void setGridViewAdapter() {
-        // Grid View adapter
-        if (mAdapter == null) mAdapter = new FolderViewImageAdapter(this);
- 
-        // Setting grid view adapter
-        mGridView.setAdapter(mAdapter);
-    }
-    
-    private void initializeGridLayout() {
-        final float padding = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, AppConstant.GRID_PADDING, getResources().getDisplayMetrics());
-        final int columnWidth = (int) ((mUtils.getScreenWidth() - ((AppConstant.NUM_OF_COLUMNS_FOLDERVIEW + 1) * padding)) / AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
-
-        mGridView.setNumColumns(AppConstant.NUM_OF_COLUMNS_FOLDERVIEW);
-        mGridView.setColumnWidth(columnWidth);
-        mGridView.setStretchMode(GridView.NO_STRETCH);
-        mGridView.setHorizontalSpacing((int) padding);
-        mGridView.setVerticalSpacing((int) padding);
-        mGridView.setPadding((int) padding, 0, (int) padding, 0);
-        
-        mDrawInsetsFrameLayout.setOnInsetsCallback(new DrawInsetsFrameLayout.OnInsetsCallback() {
-            @Override
-            public void onInsetsChanged(Rect insets) {
-                // Update the padding
-                Log.d(TAG, "top: " + insets.top + " , bottom: " + insets.bottom); 
-                mGridView.setPadding((int) padding, insets.top, (int) padding, insets.bottom);
-            }
-        });
-    }
     
     private ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
     
@@ -388,6 +421,33 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
         alertDialog.show();
     }
     
+    void navigateBack() {
+        mAdapterMode--;
+        if (mAdapterMode == IMAGE_MODE) {
+        	setupViewPager();
+        } else {
+        	setupGridView();
+        }
+        mMainActivity.setActionBarArrowDependingOnAdapterMode();
+    }
+    
+    private void navigateForward(int itemPosition) {
+        mAdapterMode++;
+        
+        if (mAdapterMode == IMAGE_MODE) {
+        	setupViewPager();
+        } else {
+        	mFolderPosition = itemPosition;
+        	setupGridView();
+        }
+       
+        mMainActivity.setActionBarArrowDependingOnAdapterMode();
+    }
+    
+    public int getAdapterMode() {
+        return mAdapterMode;
+    }
+    
     @Override
     public void refreshAdapter() {
         mAdapter.notifyDataSetChanged();
@@ -395,7 +455,14 @@ public class FolderFragment extends Fragment implements AdapterCallback<List <St
 
     @Override
     public void updateAdapterContent(ArrayList<List <String>> imagePaths) {
-        mAdapter.updateImagePaths(imagePaths);
+        /*if (mAdapterMode == FOLDER_MODE) {
+            ((FolderViewImageAdapter) mAdapter).updateImagePaths(imagePaths);
+        } else if (mAdapterMode == GALLERY_MODE) {
+            ((GridViewImageAdapter2) mAdapter).updateImagePaths((ArrayList<String>) imagePaths.get(mFolderPosition));
+        } else if (mAdapterMode == IMAGE_MODE) {
+            // TODO
+        }*/
+        
     }
 
     @Override

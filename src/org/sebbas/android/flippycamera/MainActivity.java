@@ -11,6 +11,8 @@ import org.sebbas.android.viewpager.DepthPageTransformer;
 import org.sebbas.android.viewpager.ZoomOutPageTransformer;
 import org.sebbas.android.views.NavigationDrawerItem;
 
+import uk.co.senab.photoview.PhotoViewAttacher;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
@@ -38,7 +40,7 @@ import android.widget.ArrayAdapter;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 
-public class MainFragmentActivity extends ActionBarActivity implements AdapterCallback<String> {
+public class MainActivity extends ActionBarActivity implements AdapterCallback<String> {
 
     private static final String TAG = "main_fragment";
     private static final int CAMERA_FRAGMENT_NUMBER = 1;
@@ -50,7 +52,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private int mPosition;
     private ActionBar mActionBar;
     private ViewPager mViewPager;
-    private ArrayList<List <String>> mImagePaths;
+    private ArrayList<List <String>> mImagePaths = new ArrayList<List <String>>();
     private Utils mUtils;
     
     // Fragments
@@ -88,7 +90,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private NavigationDrawerListAdapter mNavigationDrawerListAdapterLeft;
     private ArrayList<NavigationDrawerItem> mNavigationDrawerItemsRight;
     private NavigationDrawerListAdapter mNavigationDrawerListAdapterRight;
-
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -191,12 +193,14 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
                 //getSupportActionBar().setTitle(mTitle);
                 // calling onPrepareOptionsMenu() to show action bar icons
                 //invalidateOptionsMenu();
+            	setActionBarArrowDependingOnAdapterMode();
             }
  
             public void onDrawerOpened(View drawerView) {
                 //getSupportActionBar().setTitle(mDrawerTitle);
                 // calling onPrepareOptionsMenu() to hide action bar icons
                 //invalidateOptionsMenu();
+            	mDrawerToggle.setDrawerIndicatorEnabled(true);
             }
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
@@ -207,47 +211,20 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         }
         
         lockDrawerForFragments();
-        
-        
-        /*mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerLeftList = (ListView) findViewById(R.id.left_drawer);
-        mDrawerLeftLayout = (LinearLayout) findViewById(R.id.left_drawer_layout);
-        mDrawerLeftContent = getResources().getStringArray(R.array.drawer_left_array);
-        
-        mDrawerRightList = (ListView) findViewById(R.id.right_drawer);
-        mDrawerRightLayout = (LinearLayout) findViewById(R.id.right_drawer_layout);
-        mDrawerRightContent = getResources().getStringArray(R.array.drawer_right_array);
-        
-        // set up the drawer's list view with items and click listener
-        mDrawerLeftList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mDrawerLeftContent));
-        mDrawerLeftList.setOnItemClickListener(new DrawerItemClickListener());
-        mDrawerRightList.setAdapter(new ArrayAdapter<String>(this, R.layout.drawer_list_item, mDrawerRightContent));
-        mDrawerRightList.setOnItemClickListener(new DrawerItemClickListener());
-        
-        // ActionBarDrawerToggle ties together the the proper interactions
-        // between the sliding drawer and the action bar app icon
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close) {
-
-            @Override
-            public void onDrawerSlide(View drawerView, float slideOffset) {
-                super.onDrawerSlide(drawerView, slideOffset);
-                // TODO --> Animate the items in the navigation drawer
-            }
-        };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        
-        lockDrawerForFragments();
-
-        if (savedInstanceState == null) {
-            selectItem(0);
-        }*/
     }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        mMenuShowHidden = menu.findItem(R.id.show_hidden);
-        mMenuHideHidden = menu.findItem(R.id.hide_hidden); 
+    	if (mFolderFragment.getAdapterMode() == mFolderFragment.FOLDER_MODE) {
+    		getMenuInflater().inflate(R.menu.main, menu);
+            mMenuShowHidden = menu.findItem(R.id.show_hidden);
+            mMenuHideHidden = menu.findItem(R.id.hide_hidden);
+    	} else if (mFolderFragment.getAdapterMode() == mFolderFragment.GALLERY_MODE) {
+    		
+    	} else if (mFolderFragment.getAdapterMode() == mFolderFragment.IMAGE_MODE) {
+    		// TODO
+    	}
+         
         mSpinnerIcon = menu.findItem(R.id.spinner_icon);
         MenuItemCompat.setActionView(mSpinnerIcon, R.layout.actionbar_indeterminate_progress);
         setSpinnerVisibility();
@@ -311,12 +288,13 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     public void onBackPressed() {
         
         if (navigationDrawerIsOpen(true)) {
-        	closeNavigationDrawer(true); // Close the left drawer
-        	
+            closeNavigationDrawer(true); // Close the left drawer
         } else if (navigationDrawerIsOpen(false)) {
-        	closeNavigationDrawer(false); // Close the right drawer
+            closeNavigationDrawer(false); // Close the right drawer
+        } else if (isBackNavigable()) {
+        	mFolderFragment.navigateBack();
         } else {
-        	super.onBackPressed();
+            super.onBackPressed();
         }
     }
 
@@ -324,35 +302,41 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     public boolean onSupportNavigateUp() {
         super.onSupportNavigateUp();
         if (navigationDrawerIsOpen(true)) {
-        	closeNavigationDrawer(true);
+            closeNavigationDrawer(true);
+        } else if (isBackNavigable()) {
+        	mFolderFragment.navigateBack();
         } else {
         	openNavigationDrawer(true);
         }
         return true;
     }
     
+    private boolean isBackNavigable() {
+        return mFolderFragment.getAdapterMode() > mFolderFragment.FOLDER_MODE;
+    }
+    
     private void openNavigationDrawer(boolean openLeftDrawer) {
-    	if (openLeftDrawer) {
-    		mDrawerLayout.openDrawer(mDrawerLeftLayout);
-    	} else {
-    		mDrawerLayout.openDrawer(mDrawerRightLayout);
-    	}
+        if (openLeftDrawer) {
+            mDrawerLayout.openDrawer(mDrawerLeftLayout);
+        } else {
+            mDrawerLayout.openDrawer(mDrawerRightLayout);
+        }
     }
     
     private void closeNavigationDrawer(boolean closeLeftDrawer) {
-    	if (closeLeftDrawer) {
-    		mDrawerLayout.closeDrawer(mDrawerLeftLayout);
-    	} else {
-    		mDrawerLayout.closeDrawer(mDrawerRightLayout);
-    	}
+        if (closeLeftDrawer) {
+            mDrawerLayout.closeDrawer(mDrawerLeftLayout);
+        } else {
+            mDrawerLayout.closeDrawer(mDrawerRightLayout);
+        }
     }
     
     private boolean navigationDrawerIsOpen(boolean leftDrawer) {
-    	if (leftDrawer) {
-    		return mDrawerLayout.isDrawerOpen(mDrawerLeftLayout);
-    	} else {
-    		return mDrawerLayout.isDrawerOpen(mDrawerRightLayout);
-    	}
+        if (leftDrawer) {
+            return mDrawerLayout.isDrawerOpen(mDrawerLeftLayout);
+        } else {
+            return mDrawerLayout.isDrawerOpen(mDrawerRightLayout);
+        }
     }
 
     private int getPageMargin() {
@@ -392,11 +376,11 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
     private void setActionItems() {
         if (mPosition == CAMERA_FRAGMENT_NUMBER) {
             getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            mActionBar.hide();
+            getSupportActionBar().hide();
             mFolderFragment.finishActionMode(); // Also handles finish action mode of any child fragments
         } else if (mPosition == FOLDER_FRAGMENT_NUMBER) {
             getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            mActionBar.show();
+            getSupportActionBar().show();
         } 
     }
     
@@ -421,8 +405,12 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         return mImagePaths;
     }
     
+    public ArrayList<String> getImagePathsAt(int position) {
+        return (ArrayList<String>) mImagePaths.get(position);
+    }
+    
     public FolderFragment getFolderFragment() {
-    	return mFolderFragment;
+        return mFolderFragment;
     }
     
     private class ImagePathLoader extends AsyncTask<Void, Void, Void> {
@@ -431,7 +419,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         protected void onPreExecute() {
             super.onPreExecute();
             mIsRefreshing = true;
-            MainFragmentActivity.this.supportInvalidateOptionsMenu();
+            MainActivity.this.supportInvalidateOptionsMenu();
         }
 
         @Override
@@ -448,7 +436,7 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
             super.onPostExecute(result);
             mFolderFragment.refreshAdapter();
             mIsRefreshing = false;
-            MainFragmentActivity.this.supportInvalidateOptionsMenu();
+            MainActivity.this.supportInvalidateOptionsMenu();
         }
     }
 
@@ -467,26 +455,6 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         mImagePaths = imagePaths;
     }
     
-    /* The click listener for ListView in the navigation drawer */
-    private class DrawerItemClickListener implements ListView.OnItemClickListener {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            selectItem(position);
-        }
-    }
-    
-    private void selectItem(int position) {
-        // Update selected item and title, then close the drawer
-        mDrawerLeftList.setItemChecked(position, true);
-        mDrawerRightList.setItemChecked(position, true);
-        
-        //setTitle(mDrawerLeftContent[position]);
-        //setTitle(mDrawerRightContent[position]);
-        
-        mDrawerLayout.closeDrawer(mDrawerLeftLayout);
-        mDrawerLayout.closeDrawer(mDrawerRightLayout);
-    }
-    
     private void lockDrawerForFragments() {
         if (mPosition == FOLDER_FRAGMENT_NUMBER) {
             mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED, findViewById(R.id.right_drawer_layout));
@@ -497,8 +465,13 @@ public class MainFragmentActivity extends ActionBarActivity implements AdapterCa
         }
     }
     
+     void setActionBarArrowDependingOnAdapterMode() {
+        int modeCount = mFolderFragment.getAdapterMode();
+        mDrawerToggle.setDrawerIndicatorEnabled(modeCount == 0);
+    }
+    
     private class SlideMenuClickListener implements ListView.OnItemClickListener {
-    	
+        
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // display view for selected nav drawer item
